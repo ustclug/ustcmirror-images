@@ -29,3 +29,5 @@ else
         fi
     done
 fi
+
+is_modified "build-test.sh" && . "build-test.sh"
