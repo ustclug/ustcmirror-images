@@ -5,7 +5,7 @@ set -e
 [[ -n $DEBUG ]] && set -x
 
 is_modified() {
-    [[ -n $(git diff HEAD^ HEAD -- "$1") ]]
+    [[ -n $(git diff HEAD^ HEAD -- "$1") || -n $(git diff HEAD^ HEAD -- "build-$1.sh") ]]
 }
 
 docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
@@ -13,7 +13,7 @@ export ORG=ustcmirror
 
 methods=(*sync)
 
-if is_modified "build-base.sh"; then
+if is_modified "base"; then
     . "build-base.sh"
     for MIRROR in "${methods[@]}"; do
         script="build-$MIRROR.sh"
@@ -30,4 +30,4 @@ else
     done
 fi
 
-is_modified "build-test.sh" && . "build-test.sh"
+is_modified "test" && . "build-test.sh"
