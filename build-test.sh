@@ -3,10 +3,10 @@
 tag='ustcmirror/test:latest'
 
 cat << EOF > "test/Dockerfile"
-FROM debian:jessie-slim
+FROM ustcmirror/base:debian
 MAINTAINER Jian Zeng <anonymousknight96 AT gmail.com>
-ENTRYPOINT ["/entry.sh"]
-ADD entry.sh /
+ENTRYPOINT ["/sync.sh"]
+ADD sync.sh /
 EOF
 
 docker build -t "$tag" test
