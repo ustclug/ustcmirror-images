@@ -1,7 +1,20 @@
 #!/bin/bash
 
-sleep 6
+## SET IN ENVIRONMENT VARIABLES
+#BIND_ADDRESS=
+#TO=
 
-env
+#LFTPSYNC_HOST=
+#LFTPSYNC_PATH=
+#LFTPSYNC_EXCLUDE=
+#LFTPSYNC_JOBS=
 
-exit 0
+
+LFTPSYNC_JOBS="${LFTPSYNC_JOBS:-$(getconf _NPROCESSORS_ONLN)}"
+LFTPSYNC_EXCLUDE+=" -X .~tmp~/"
+
+lftp -e "
+set net:socket-bind-ipv4 $BIND_ADDRESS
+open $LFTPSYNC_HOST
+mirror --verbose --skip-noaccess -aec --parallel=$LFTPSYNC_JOBS $LFTPSYNC_EXCLUDE $LFTPSYNC_PATH $TO
+bye"
