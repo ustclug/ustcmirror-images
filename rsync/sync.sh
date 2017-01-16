@@ -1,8 +1,11 @@
 #!/bin/bash
 
+## EXPORTED IN entry.sh
+#TO=
+#LOGDIR=
+
 ## SET IN ENVIRONMENT VARIABLES
 #BIND_ADDRESS=
-#TO=
 
 #RSYNC_USER=
 #RSYNC_HOST=
