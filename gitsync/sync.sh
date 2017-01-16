@@ -15,7 +15,7 @@ GITSYNC_REMOTE="${GITSYNC_REMOTE:-origin}"
 GITSYNC_BRANCH="${GITSYNC_BRANCH:-master:master}"
 GITSYNC_BITMAP="${GITSYNC_BITMAP:-false}"
 
-[[ ! -d $GITSYNC_TO ]] && git clone --bare "$GITSYNC_URL" "$TO"
+[[ ! -d $TO ]] && git clone --bare "$GITSYNC_URL" "$TO"
 
 cd "$GITSYNC_TO" || exit 1
 git fetch "$GITSYNC_REMOTE" "$GITSYNC_BRANCH" -v --progress
