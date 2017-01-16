@@ -8,4 +8,6 @@ if [[ ! -x /sync.sh ]]; then
     exit 1
 fi
 
+export TO=/data LOGDIR=/log
+
 . /sync.sh
