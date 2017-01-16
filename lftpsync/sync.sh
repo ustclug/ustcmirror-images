@@ -1,8 +1,11 @@
 #!/bin/bash
 
+## EXPORTED IN entry.sh
+#TO=
+#LOGDIR=
+
 ## SET IN ENVIRONMENT VARIABLES
 #BIND_ADDRESS=
-#TO=
 
 #LFTPSYNC_HOST=
 #LFTPSYNC_PATH=
@@ -11,7 +14,7 @@
 
 
 LFTPSYNC_JOBS="${LFTPSYNC_JOBS:-$(getconf _NPROCESSORS_ONLN)}"
-LFTPSYNC_EXCLUDE+=" -X .~tmp~/"
+LFTPSYNC_EXCLUDE+=' -X .~tmp~/'
 
 lftp -e "
 set net:socket-bind-ipv4 $BIND_ADDRESS
