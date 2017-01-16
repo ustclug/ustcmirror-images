@@ -2,9 +2,10 @@
 
 set -e
 [[ $DEBUG = [tT]rue ]] && set -x
+LAST="${LAST:-HEAD^}"
 
 is_modified() {
-    [[ -n $(git diff HEAD^ HEAD -- "$1" "build-$1.sh") ]]
+    [[ -n $(git diff "$LAST" HEAD -- "$1" "build-$1.sh") ]]
 }
 
 docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
@@ -19,6 +20,7 @@ if is_modified "base"; then
         export MIRROR
         . "$script"
     done
+    . "build-test.sh"
 else
     for MIRROR in "${methods[@]}"; do
         script="build-$MIRROR.sh"
@@ -27,8 +29,7 @@ else
             . "$script"
         fi
     done
+    is_modified "test" && . "build-test.sh"
 fi
-
-is_modified "test" && . "build-test.sh"
 
 exit 0
