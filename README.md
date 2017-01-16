@@ -2,6 +2,7 @@
 
 - [Introduction](#introduction)
 - [Configuration](#configuration)
+    - [Volumes](#volumes)
     - [Common Configuration Parameters](#common-configuration-parameters)
     - [rsync](#rsync)
     - [lftpsync](#lftpsync)
@@ -13,12 +14,16 @@ Docker images used by `ustcmirror`
 
 # Configuration
 
+### Volumes
+
+* `/data`: The mount point of the repository on the host. `export TO=/data` in `entry.sh`.
+* `/log`: The mount point of the host directory that save logs. `export LOGDIR=/log` in `entry.sh`.
+
 ### Common Configuration Parameters
 
 | Parameter | Description |
 |-----------|-------------|
 | `DEBUG` | Set this to `true` to enable debugging |
-| `TO` | The path to local repository |
 | `BIND_ADDRESS` | The local ip to be bound |
 
 ### rsync
