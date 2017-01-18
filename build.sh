@@ -3,33 +3,45 @@
 set -e
 [[ $DEBUG = [tT]rue ]] && set -x
 LAST="${LAST:-HEAD^}"
+export ORG=ustcmirror
 
 is_modified() {
-    [[ -n $(git diff "$LAST" HEAD -- "$1" "build-$1.sh") ]]
+    [[ -n $(git diff "$LAST" HEAD -- "$1") ]]
+}
+
+build_image() {
+    local image="$1"
+    if [[ -x $image/build.sh ]]; then
+        . "$image/build.sh"
+    else
+        docker build -t "$ORG/$image" "$image"
+        docker push "$ORG/$image"
+    fi
 }
 
 docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
-export ORG=ustcmirror
 
-methods=(*sync)
-
+mirrors=(*sync 'test')
+#########################################
+### Images based on ustcmirror/base
+#########################################
 if is_modified "base"; then
-    . "build-base.sh"
-    for MIRROR in "${methods[@]}"; do
-        script="build-$MIRROR.sh"
-        export MIRROR
-        . "$script"
+    . "base/build.sh"
+    for image in "${mirrors[@]}"; do
+        build_image "$image"
     done
-    . "build-test.sh"
 else
-    for MIRROR in "${methods[@]}"; do
-        script="build-$MIRROR.sh"
-        if is_modified "$MIRROR"; then
-            export MIRROR
-            . "$script"
-        fi
+    for image in "${mirrors[@]}"; do
+        is_modified "$image" && build_image "$image"
     done
-    is_modified "test" && . "build-test.sh"
 fi
+
+############################################
+### Images dosen't based on ustcmirror/base
+############################################
+others=(mongodb)
+for image in "${others[@]}"; do
+    is_modified "$image" && build_image "$image"
+done
 
 exit 0
