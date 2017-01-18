@@ -12,7 +12,7 @@ is_modified() {
 build_image() {
     local image="$1"
     if [[ -x $image/build.sh ]]; then
-        . "$image/build.sh"
+        (cd "$image" && ./build.sh)
     else
         docker build -t "$ORG/$image" "$image"
         docker push "$ORG/$image"
@@ -21,17 +21,17 @@ build_image() {
 
 docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
 
-mirrors=(*sync 'test')
+derived=(*sync 'test')
 #########################################
 ### Images based on ustcmirror/base
 #########################################
 if is_modified "base"; then
-    . "base/build.sh"
-    for image in "${mirrors[@]}"; do
+    build_image base
+    for image in "${derived[@]}"; do
         build_image "$image"
     done
 else
-    for image in "${mirrors[@]}"; do
+    for image in "${derived[@]}"; do
         is_modified "$image" && build_image "$image"
     done
 fi

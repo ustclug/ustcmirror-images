@@ -1,8 +1,9 @@
 #!/bin/bash
 
+set -e
 tag='ustcmirror/base:debian'
 
-cat << EOF > 'Dockerfile'
+cat << EOF > Dockerfile
 FROM debian:jessie-slim
 MAINTAINER Jian Zeng <anonymousknight96 AT gmail.com>
 ADD entry.sh /
@@ -16,7 +17,7 @@ docker push "$tag"
 
 tag='ustcmirror/base:alpine'
 
-cat << EOF > 'Dockerfile'
+cat << EOF > Dockerfile
 FROM alpine:3.5
 MAINTAINER Jian Zeng <anonymousknight96 AT gmail.com>
 ADD entry.sh /
@@ -26,3 +27,5 @@ EOF
 
 docker build -t "$tag" .
 docker push "$tag"
+
+rm Dockerfile
