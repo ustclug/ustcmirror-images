@@ -12,6 +12,4 @@ MONGO_DB="${MONGO_DB:-mirror}"
     done
 ) 2>/dev/null &
 
-wait
-
-exec mongod --auth
+exec mongod
