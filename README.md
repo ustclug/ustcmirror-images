@@ -7,6 +7,8 @@
     - [rsync](#rsync)
     - [lftpsync](#lftpsync)
     - [gitsync](#gitsync)
+- [Other Images](#other-images)
+    - [MongoDB](#mongodb)
 
 # Introduction
 
@@ -23,8 +25,8 @@ Docker images used by `ustcmirror`
 
 | Parameter | Description |
 |-----------|-------------|
-| `DEBUG` | Set this to `true` to enable debugging |
-| `BIND_ADDRESS` | The local ip to be bound |
+| `DEBUG` | Set this to `true` to enable debugging. |
+| `BIND_ADDRESS` | Set the local ip to be bound. |
 
 ### rsync
 
@@ -52,7 +54,17 @@ Docker images used by `ustcmirror`
 
 | Parameter | Description |
 |-----------|-------------|
-| `GITSYNC_URL` | Sets the url of upstream |
-| `GITSYNC_BRANCH` | Defaults to `master:master` |
-| `GITSYNC_REMOTE` | Defaults to `origin` |
-| `GITSYNC_BITMAP` | Enable bitmap index. Defaults to `false` |
+| `GITSYNC_URL` | Sets the url of upstream. |
+| `GITSYNC_BRANCH` | Defaults to `master:master`. |
+| `GITSYNC_REMOTE` | Defaults to `origin`. |
+| `GITSYNC_BITMAP` | Enable bitmap index. Defaults to `false`. |
+
+# Other Images
+
+### MongoDB
+
+| Parameter | Description |
+|-----------|-------------|
+| `MONGO_USER` | Sets the username of the db admin. Defaults to `mirror`. |
+| `MONGO_PASS` | Sets the password. Defaults to `averylongpass`. |
+| `MONGO_DB` | Sets the name of the db. Defaults to `mirror`. |
