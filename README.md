@@ -1,6 +1,7 @@
 # ustcmirror-images
 
 - [Introduction](#introduction)
+- [TODO](#todo)
 - [Configuration](#configuration)
     - [Volumes](#volumes)
     - [Common Configuration Parameters](#common-configuration-parameters)
@@ -12,7 +13,11 @@
 
 # Introduction
 
-Docker images used by `ustcmirror`
+Docker images used by [ustcmirror](https://github.com/ustclug/ustcmirror)
+
+# TODO
+
+* [ ] Support ftpsync
 
 # Configuration
 
