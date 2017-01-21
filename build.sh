@@ -19,7 +19,7 @@ build_image() {
     fi
 }
 
-docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+[[ -z $SKIP_LOGIN ]] && docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
 
 derived=(*sync 'test')
 #########################################
