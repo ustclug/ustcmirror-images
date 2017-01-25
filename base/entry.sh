@@ -3,11 +3,30 @@ log() {
     echo "$@" >&2
 }
 
+killer() {
+    if [[ -n $GITSYNC_URL ]]; then
+        pkill git
+    else
+        kill -- "$1"
+    fi
+    wait "$1"
+}
+
+rotate_log() {
+    [[ $AUTO_ROTATE_LOG = true ]] && savelog -dn -c "$ROTATE_CYCLE" "$LOGFILE"
+}
+
 if [[ ! -x /sync.sh ]]; then
     log '/sync.sh not found'
     exit 1
 fi
 
-export TO=/data LOGDIR=/log
+[[ $DEBUG = true ]] && set -x
 
-. /sync.sh
+export TO=/data LOGDIR=/log
+export LOGFILE="$LOGDIR/result.log"
+/sync.sh &> >(tee -a "$LOGFILE") &
+pid="$!"
+trap 'killer $pid' INT HUP TERM
+trap 'rotate_log $pid' EXIT
+wait "$pid"
