@@ -1,15 +1,5 @@
 services:
   - docker
 language: c
-env:
-  global:
-  - CACHE=$HOME/cache
-before_install:
-  - 'if [[ -f $CACHE/.last ]]; then export LAST=$(cat $CACHE/.last); fi'
 script:
   - ./build.sh
-before_cache:
-  - '[[ $TRAVIS_TEST_RESULT -eq 0 ]] && mkdir -p $CACHE && git rev-parse HEAD > $CACHE/.last'
-cache:
-  directories:
-    - $CACHE
