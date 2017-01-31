@@ -7,13 +7,14 @@ killer() {
     if [[ -n $GITSYNC_URL ]]; then
         pkill git
     else
+        # exec rsync/lftp in /sync.sh
         kill -- "$1"
     fi
     wait "$1"
 }
 
 rotate_log() {
-    [[ $AUTO_ROTATE_LOG = true ]] && savelog -dn -c "$ROTATE_CYCLE" "$LOGFILE"
+    [[ $AUTO_ROTATE_LOG = true ]] && savelog -c "$ROTATE_CYCLE" "$LOGFILE"
 }
 
 if [[ ! -x /sync.sh ]]; then
@@ -28,5 +29,5 @@ export LOGFILE="$LOGDIR/result.log"
 /sync.sh &> >(tee -a "$LOGFILE") &
 pid="$!"
 trap 'killer $pid' INT HUP TERM
-trap 'rotate_log $pid' EXIT
+trap 'rotate_log' EXIT
 wait "$pid"
