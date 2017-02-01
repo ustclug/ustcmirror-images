@@ -1,5 +1,7 @@
 # ustcmirror-images
 
+[![Build Status](https://travis-ci.org/ustclug/ustcmirror-images.svg?branch=master)](https://travis-ci.org/ustclug/ustcmirror-images)
+
 - [Introduction](#introduction)
 - [TODO](#todo)
 - [Configuration](#configuration)
