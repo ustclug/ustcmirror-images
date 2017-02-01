@@ -16,7 +16,7 @@ build_image() {
     if [[ -x $image/build.sh ]]; then
         (cd "$image" && ./build.sh)
     else
-        docker build -t "$ORG/$image" "$image"
+        docker build -t "$ORG/$image" --label ustcmirror.images "$image"
         docker push "$ORG/$image"
     fi
 }

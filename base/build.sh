@@ -10,7 +10,7 @@ RUN echo 'Asia/Shanghai' > /etc/timezone && dpkg-reconfigure -f noninteractive t
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
 EOF
 
-docker build -t "$tag" .
+docker build -t "$tag" --label ustcmirror.images .
 docker push "$tag"
 
 ########################################
@@ -25,7 +25,7 @@ RUN apk update && apk add --update bash tzdata && rm -rf /var/cache/apk/* \
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
 EOF
 
-docker build -t "$tag" .
+docker build -t "$tag" --label ustcmirror.images .
 docker push "$tag"
 
 rm Dockerfile
