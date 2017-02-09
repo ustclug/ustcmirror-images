@@ -17,7 +17,6 @@ build_image() {
         (cd "$image" && ./build.sh)
     else
         docker build -t "$ORG/$image" --label ustcmirror.images "$image"
-        echo "$ORG/$image" >> ~/updated
     fi
 }
 
