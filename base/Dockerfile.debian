@@ -1,0 +1,6 @@
+FROM debian:jessie-slim
+MAINTAINER Jian Zeng <anonymousknight96 AT gmail.com>
+RUN echo 'Asia/Shanghai' > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata
+ADD ["entry.sh", "savelog", "/usr/local/bin/"]
+VOLUME ["/data", "/log"]
+ENTRYPOINT ["entry.sh"]
