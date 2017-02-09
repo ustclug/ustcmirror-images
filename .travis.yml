@@ -3,3 +3,5 @@ services:
 language: c
 script:
   - ./build.sh
+after_success:
+  - ./push.sh
