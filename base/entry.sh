@@ -24,9 +24,15 @@ fi
 
 [[ $DEBUG = true ]] && set -x
 
+[[ -z $OWNER ]] && OWNER='0:0' # root:root
+
+[[ -x /pre-sync.sh ]] && . /pre-sync.sh
+
 export TO=/data LOGDIR=/log
 export LOGFILE="$LOGDIR/result.log"
-/sync.sh &> >(tee -a "$LOGFILE") &
+
+su-exec "$OWNER" /sync.sh &> >(tee -a "$LOGFILE") &
+
 pid="$!"
 trap 'killer $pid' INT HUP TERM
 trap 'rotate_log' EXIT
