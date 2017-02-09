@@ -24,7 +24,7 @@ fi
 
 [[ $DEBUG = true ]] && set -x
 
-[[ -z $OWNER ]] && OWNER='0:0' # root:root
+[[ -z $OWNER ]] && export OWNER='0:0' # root:root
 
 [[ -x /pre-sync.sh ]] && . /pre-sync.sh
 
