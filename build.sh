@@ -17,11 +17,8 @@ build_image() {
         (cd "$image" && ./build.sh)
     else
         docker build -t "$ORG/$image" --label ustcmirror.images "$image"
-        docker push "$ORG/$image"
     fi
 }
-
-[[ -z $SKIP_LOGIN ]] && docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
 
 derived=(*sync 'test')
 #########################################

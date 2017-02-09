@@ -1,7 +1,7 @@
 FROM alpine:3.5
 MAINTAINER Jian Zeng <anonymousknight96 AT gmail.com>
-RUN apk update && apk add --update bash tzdata && rm -rf /var/cache/apk/* \
-    && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
 VOLUME ["/data", "/log"]
 ENTRYPOINT ["entry.sh"]
+RUN set -x && apk add --no-cache bash tzdata su-exec && \
+    ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime

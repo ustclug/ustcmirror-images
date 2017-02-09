@@ -1,11 +1,8 @@
 #!/bin/bash
 
-set -e
-set -x
+set -ex
 
-ls Dockerfile.* | 
-while read DOCKERFILE; do
-    tag="ustcmirror/base:${DOCKERFILE##*.}"
-    docker build -f $DOCKERFILE -t "$tag" --label ustcmirror.images .
-    docker push "$tag"
+for i in Dockerfile.*; do
+    tag="ustcmirror/base:${i##*.}"
+    docker build -f "$i" -t "$tag" --label ustcmirror.images .
 done

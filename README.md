@@ -34,6 +34,7 @@ Docker images used by [ustcmirror](https://github.com/ustclug/ustcmirror)
 |-----------|-------------|
 | `DEBUG` | Set this to `true` to enable debugging. |
 | `BIND_ADDRESS` | Set the local ip to be bound. |
+| `OWNER` | Recommended to specify `$uid:$gid`. Defaults to `0:0`. |
 
 ### rsync
 
