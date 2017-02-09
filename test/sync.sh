@@ -2,7 +2,7 @@
 
 $@
 echo 'Sleep 6s'
-sleep 10
+sleep 6
 echo 'Sleep 5s'
 sleep 5
 env
