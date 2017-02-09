@@ -3,9 +3,5 @@ MAINTAINER Jian Zeng <anonymousknight96 AT gmail.com>
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
 VOLUME ["/data", "/log"]
 ENTRYPOINT ["entry.sh"]
-RUN set -x && apk add --no-cache bash tzdata && \
-    ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
-    apk add --no-cache --virtual .build gcc libc-dev make git && \
-    git clone https://github.com/ncopa/su-exec && \
-    cd /su-exec && make && mv su-exec /usr/local/bin/ && cd / && \
-    rm -rf /su-exec && apk del .build
+RUN set -x && apk add --no-cache bash tzdata su-exec && \
+    ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
