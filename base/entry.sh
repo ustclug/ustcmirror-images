@@ -14,7 +14,7 @@ killer() {
 }
 
 rotate_log() {
-    [[ $AUTO_ROTATE_LOG = true ]] && savelog -c "$ROTATE_CYCLE" "$LOGFILE"
+    [[ $AUTO_ROTATE_LOG = true ]] && su-exec "$OWNER" savelog -c "$ROTATE_CYCLE" "$LOGFILE"
 }
 
 if [[ ! -x /sync.sh ]]; then
@@ -30,6 +30,8 @@ fi
 
 export TO=/data LOGDIR=/log
 export LOGFILE="$LOGDIR/result.log"
+
+su-exec "$OWNER" touch "$LOGFILE"
 
 su-exec "$OWNER" /sync.sh &> >(tee -a "$LOGFILE") &
 
