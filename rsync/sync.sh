@@ -29,4 +29,4 @@ RSYNC_MAXDELETE=${RSYNC_MAXDELETE:-4000}
 RSYNC_OPTIONS=${RSYNC_OPTIONS:-'-4pPrltvHSB8192 --partial-dir=.rsync-partial --timeout 14400 --delay-updates --safe-links --delete-delay --delete-excluded'}
 RSYNC_EXCLUDE+=' --exclude .~tmp~/'
 
-exec rsync $EXCLUDE --bwlimit "$RSYNC_BW" --max-delete "$RSYNC_MAXDELETE" --address "$BIND_ADDRESS" $RSYNC_OPTIONS "$RSYNC_HOST::$RSYNC_PATH" "$TO"
+exec rsync $RSYNC_EXCLUDE --bwlimit "$RSYNC_BW" --max-delete "$RSYNC_MAXDELETE" --address "$BIND_ADDRESS" $RSYNC_OPTIONS "$RSYNC_HOST::$RSYNC_PATH" "$TO"
