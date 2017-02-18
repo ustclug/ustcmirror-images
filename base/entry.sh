@@ -39,3 +39,5 @@ pid="$!"
 trap 'killer $pid' INT HUP TERM
 trap 'rotate_log' EXIT
 wait "$pid"
+
+[[ -x /post-sync.sh ]] && . /post-sync.sh
