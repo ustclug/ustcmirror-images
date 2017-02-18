@@ -1,5 +1,5 @@
 FROM alpine:3.5
-MAINTAINER Jian Zeng <anonymousknight96 AT gmail.com>
+LABEL maintainer "Jian Zeng <anonymousknight96 AT gmail.com>"
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
 VOLUME ["/data", "/log"]
 ENTRYPOINT ["entry.sh"]
