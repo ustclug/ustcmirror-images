@@ -6,7 +6,6 @@
 #LOGFILE=
 
 ## SET IN ENVIRONMENT VARIABLES
-#PREFER_IPV6=
 #BIND_ADDRESS=
 
 #RSYNC_USER=
@@ -34,11 +33,6 @@ OPTS="-pPrltvHS --partial-dir=.rsync-partial --timeout ${RSYNC_TIMEOUT} --safe-l
 
 [[ -n $RSYNC_USER ]] && RSYNC_HOST="$RSYNC_USER@$RSYNC_HOST"
 
-if [[ $PREFER_IPV6 = true ]]; then
-    OPTS+=' --ipv6'
-else
-    OPTS+=' --ipv4'
-fi
 [[ $RSYNC_DELAY_UPDATES = true ]] && OPTS+=' --delay-updates'
 [[ $RSYNC_BLKSIZE -ne 0 ]] && OPTS+=" --block-size ${RSYNC_BLKSIZE}"
 [[ -n $BIND_ADDRESS ]] && OPTS+=" --address $BIND_ADDRESS"
