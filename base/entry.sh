@@ -14,7 +14,7 @@ killer() {
 }
 
 rotate_log() {
-    [[ $AUTO_ROTATE_LOG = true ]] && su-exec "$OWNER" savelog -c "$ROTATE_CYCLE" "$LOGFILE"
+    su-exec "$OWNER" savelog -c "$ROTATE_CYCLE" "$LOGFILE"
 }
 
 if [[ ! -x /sync.sh ]]; then
@@ -31,13 +31,15 @@ fi
 export TO=/data LOGDIR=/log
 export LOGFILE="$LOGDIR/result.log"
 
-su-exec "$OWNER" touch "$LOGFILE"
-
-su-exec "$OWNER" /sync.sh &> >(tee -a "$LOGFILE") &
-
+if [[ $AUTO_ROTATE_LOG = true ]]; then
+    trap 'rotate_log' EXIT
+    su-exec "$OWNER" touch "$LOGFILE"
+    su-exec "$OWNER" /sync.sh &> >(tee -a "$LOGFILE") &
+else
+    su-exec "$OWNER" /sync.sh &
+fi
 pid="$!"
 trap 'killer $pid' INT HUP TERM
-trap 'rotate_log' EXIT
 wait "$pid"
 
 [[ -x /post-sync.sh ]] && . /post-sync.sh
