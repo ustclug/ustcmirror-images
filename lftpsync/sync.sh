@@ -6,13 +6,17 @@
 #LOGFILE=
 
 ## SET IN ENVIRONMENT VARIABLES
-#PREFER_IPV6=
 #BIND_ADDRESS=
 
 #LFTPSYNC_HOST=
 #LFTPSYNC_PATH=
 #LFTPSYNC_EXCLUDE=
 #LFTPSYNC_JOBS=
+
+is_ipv6() {
+    # string contains a colon
+    [[ $1 =~ .*: ]]
+}
 
 set -e
 [[ $DEBUG = true ]] && set -x
@@ -23,7 +27,7 @@ LFTPSYNC_EXCLUDE+=' -X .~tmp~/'
 commands='set cmd:fail-exit true;'
 
 if [[ -n $BIND_ADDRESS ]]; then
-    if [[ $PREFER_IPV6 = true ]]; then
+    if is_ipv6 "$BIND_ADDRESS"; then
         commands+="set net:socket-bind-ipv6 $BIND_ADDRESS;"
     else
         commands+="set net:socket-bind-ipv4 $BIND_ADDRESS;"
