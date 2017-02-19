@@ -33,7 +33,6 @@ Docker images used by [ustcmirror](https://github.com/ustclug/ustcmirror)
 | Parameter | Description |
 |-----------|-------------|
 | `DEBUG` | Set this to `true` to enable debugging. |
-| `PREFER_IPV6` | Set this to `true` to bind IPV6 address. |
 | `BIND_ADDRESS` | Set the local ip to be bound. |
 | `OWNER` | Recommended to specify `$uid:$gid`. Defaults to `0:0`. |
 
