@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 echo "===== SYNC STARTED AT $(date -R) ====="
 echo "> update package info..."
 export HOME=/root
