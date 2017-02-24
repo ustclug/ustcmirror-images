@@ -43,3 +43,5 @@ trap 'killer $pid' INT HUP TERM
 wait "$pid"
 
 [[ -x /post-sync.sh ]] && . /post-sync.sh
+
+exit 0
