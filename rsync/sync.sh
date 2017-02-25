@@ -35,8 +35,13 @@ OPTS="-pPrltvHS --partial-dir=.rsync-partial --timeout ${RSYNC_TIMEOUT} --safe-l
 
 [[ $RSYNC_DELAY_UPDATES = true ]] && OPTS+=' --delay-updates'
 [[ $RSYNC_BLKSIZE -ne 0 ]] && OPTS+=" --block-size ${RSYNC_BLKSIZE}"
-[[ -n $BIND_ADDRESS ]] && OPTS+=" --address $BIND_ADDRESS"
-
 RSYNC_EXCLUDE+=' --exclude .~tmp~/'
+if [[ -n $BIND_ADDRESS ]]; then
+    if [[ $BIND_ADDRESS =~ .*: ]]; then
+        OPTS+=" -6 --address $BIND_ADDRESS"
+    else
+        OPTS+=" -4 --address $BIND_ADDRESS"
+    fi
+fi
 
 exec rsync $RSYNC_EXCLUDE --bwlimit "$RSYNC_BW" --max-delete "$RSYNC_MAXDELETE" $OPTS $RSYNC_EXTRA_OPTS "$RSYNC_HOST::$RSYNC_PATH" "$TO"
