@@ -20,7 +20,7 @@ build_image() {
     fi
 }
 
-derived=(*sync 'homebrew-bottles' 'test')
+derived=(*sync 'homebrew-bottles' 'rubygems' 'test')
 #########################################
 ### Images based on ustcmirror/base
 #########################################
