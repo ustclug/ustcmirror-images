@@ -10,6 +10,7 @@
     - [rsync](#rsync)
     - [lftpsync](#lftpsync)
     - [gitsync](#gitsync)
+    - [pypi](#pypi)
 - [Other Images](#other-images)
     - [MongoDB](#mongodb)
 
@@ -69,6 +70,14 @@ Docker images used by [ustcmirror](https://github.com/ustclug/ustcmirror)
 | `GITSYNC_BRANCH` | Defaults to `master:master`. |
 | `GITSYNC_REMOTE` | Defaults to `origin`. |
 | `GITSYNC_BITMAP` | Enable bitmap index. Defaults to `false`. |
+
+### pypi
+
+| Parameter | Description |
+|-----------|-------------|
+| `BANDERSNATCH_WORKERS` | Defaults to `3`. |
+| `BANDERSNATCH_STOP_ON_ERROR` | Defaults to `true`. |
+| `BANDERSNATCH_TIMEOUT` | Defaults to `20`. |
 
 # Other Images
 
