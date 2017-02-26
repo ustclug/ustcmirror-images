@@ -26,10 +26,10 @@ fi
 
 [[ -z $OWNER ]] && export OWNER='0:0' # root:root
 
-[[ -x /pre-sync.sh ]] && . /pre-sync.sh
-
 export TO=/data LOGDIR=/log
 export LOGFILE="$LOGDIR/result.log"
+
+[[ -x /pre-sync.sh ]] && . /pre-sync.sh
 
 if [[ $AUTO_ROTATE_LOG = true ]]; then
     trap 'rotate_log' EXIT
