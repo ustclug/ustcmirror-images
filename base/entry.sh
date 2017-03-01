@@ -4,17 +4,12 @@ log() {
 }
 
 killer() {
-    if [[ -n $GITSYNC_URL ]]; then
-        pkill git
-    else
-        # exec rsync/lftp in /sync.sh
-        kill -- "$1"
-    fi
+    kill -- "$1"
     wait "$1"
 }
 
 rotate_log() {
-    su-exec "$OWNER" savelog -c "$ROTATE_CYCLE" "$LOGFILE"
+    su-exec "$OWNER" savelog -c "$LOG_ROTATE_CYCLE" "$LOGFILE"
 }
 
 if [[ ! -x /sync.sh ]]; then
@@ -25,13 +20,14 @@ fi
 [[ $DEBUG = true ]] && set -x
 
 [[ -z $OWNER ]] && export OWNER='0:0' # root:root
+[[ -z $LOG_ROTATE_CYCLE ]] && export LOG_ROTATE_CYCLE=0
 
 export TO=/data LOGDIR=/log
 export LOGFILE="$LOGDIR/result.log"
 
 [[ -x /pre-sync.sh ]] && . /pre-sync.sh
 
-if [[ $AUTO_ROTATE_LOG = true ]]; then
+if [[ $LOG_ROTATE_CYCLE -ne 0 ]]; then
     trap 'rotate_log' EXIT
     su-exec "$OWNER" touch "$LOGFILE"
     su-exec "$OWNER" /sync.sh &> >(tee -a "$LOGFILE") &
