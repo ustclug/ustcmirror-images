@@ -10,4 +10,4 @@ cat << EOF > /root/.gem/.mirrorrc
   delete: false
   skiperror: true
 EOF
-gem mirror
+exec gem mirror

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-bandersnatch mirror
+exec bandersnatch mirror
