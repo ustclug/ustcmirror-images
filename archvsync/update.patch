@@ -1,0 +1,70 @@
+diff --git a/bin/ftpsync b/bin/ftpsync
+index e3960fa..0508337 100755
+--- a/bin/ftpsync
++++ b/bin/ftpsync
+@@ -13,6 +13,8 @@ set -E
+ # success fully.
+ set -o pipefail
+ 
++[[ $DEBUG = true ]] && set -x
++
+ # ftpsync script for Debian
+ # Based losely on a number of existing scripts, written by an
+ # unknown number of different people over the years.
+@@ -383,6 +385,7 @@ else
+     # Yay, on a .debian.org host
+     MAILTO=${MAILTO:-"mirrorlogs@debian.org"}
+ fi
++unset MAILTO
+ # Want errors only or every log?
+ ERRORSONLY=${ERRORSONLY:-"true"}
+ # Want full logs, ie. including the rsync one?
+@@ -394,7 +397,7 @@ LOGROTATE=${LOGROTATE:-14}
+ # Our lockfile
+ LOCK=${LOCK:-"${TO}/Archive-Update-in-Progress-${MIRRORNAME}"}
+ # timeout for the lockfile, in case we have bash older than v4 (and no /proc)
+-LOCKTIMEOUT=${LOCKTIMEOUT:-3600}
++LOCKTIMEOUT=${LOCKTIMEOUT:-7200}
+ # sleeping time when an AUIP file is found but is not ours
+ UIPSLEEP=${UIPSLEEP:-1200}
+ # retries whenever an upstream (or possibly stale) AUIP file is found
+@@ -819,39 +822,5 @@ EOF
+     fi
+ fi
+ 
+-if [[ ${HUB} = true ]]; then
+-    # Trigger slave mirrors if we had a push for stage2 or all, or if its mhop
+-    if [[ true = ${SYNCSTAGE2} ]] || [[ true = ${SYNCALL} ]] || [[ true = ${SYNCMHOP} ]]; then
+-        RUNMIRRORARGS=""
+-        if [[ -n ${ARCHIVE} ]]; then
+-            # We tell runmirrors about the archive we are running on.
+-            RUNMIRRORARGS="-a ${ARCHIVE}"
+-        fi
+-        # We also tell runmirrors that we are running it from within ftpsync, so it can change
+-        # the way it works with mhop based on that.
+-        RUNMIRRORARGS="${RUNMIRRORARGS} -f"
+-
+-        if [[ true = ${SYNCSTAGE1} ]]; then
+-            # This is true when we have a mhop sync. A normal multi-stage push sending stage1 will
+-            # not get to this point.
+-            # So if that happens, tell runmirrors we are doing mhop
+-            RUNMIRRORARGS="${RUNMIRRORARGS} -k mhop"
+-        elif [[ true = ${SYNCSTAGE2} ]]; then
+-            RUNMIRRORARGS="${RUNMIRRORARGS} -k stage2"
+-        elif [[ true = ${SYNCALL} ]]; then
+-            RUNMIRRORARGS="${RUNMIRRORARGS} -k all"
+-        fi
+-        log "Trigger slave mirrors using ${RUNMIRRORARGS}"
+-        ${BASEDIR}/bin/runmirrors ${RUNMIRRORARGS}
+-        log "Trigger slave done"
+-
+-        HOOK=(
+-            HOOKNR=5
+-            HOOKSCR=${HOOK5}
+-        )
+-        hook $HOOK
+-    fi
+-fi
+-
+ # All done, lets call cleanup
+ cleanup
