@@ -3,7 +3,6 @@
 [![Build Status](https://travis-ci.org/ustclug/ustcmirror-images.svg?branch=master)](https://travis-ci.org/ustclug/ustcmirror-images)
 
 - [Introduction](#introduction)
-- [TODO](#todo)
 - [Configuration](#configuration)
     - [Volumes](#volumes)
     - [Common Configuration Parameters](#common-configuration-parameters)
@@ -11,16 +10,13 @@
     - [lftpsync](#lftpsync)
     - [gitsync](#gitsync)
     - [pypi](#pypi)
+    - [archvsync](#archvsync)
 - [Other Images](#other-images)
     - [MongoDB](#mongodb)
 
 # Introduction
 
 Docker images used by [ustcmirror](https://github.com/ustclug/ustcmirror)
-
-# TODO
-
-* [ ] Support ftpsync
 
 # Configuration
 
@@ -79,6 +75,12 @@ Docker images used by [ustcmirror](https://github.com/ustclug/ustcmirror)
 | `BANDERSNATCH_WORKERS` | Defaults to `3`. |
 | `BANDERSNATCH_STOP_ON_ERROR` | Defaults to `true`. |
 | `BANDERSNATCH_TIMEOUT` | Defaults to `20`. |
+
+### archvsync
+
+A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
+
+`archvsync` respects the env vars used in `ftpsync`
 
 # Other Images
 
