@@ -1,5 +1,5 @@
 diff --git a/bin/ftpsync b/bin/ftpsync
-index e3960fa..0508337 100755
+index e3960fa..abe0a14 100755
 --- a/bin/ftpsync
 +++ b/bin/ftpsync
 @@ -13,6 +13,8 @@ set -E
@@ -11,15 +11,30 @@ index e3960fa..0508337 100755
  # ftpsync script for Debian
  # Based losely on a number of existing scripts, written by an
  # unknown number of different people over the years.
-@@ -383,6 +385,7 @@ else
-     # Yay, on a .debian.org host
-     MAILTO=${MAILTO:-"mirrorlogs@debian.org"}
- fi
-+unset MAILTO
- # Want errors only or every log?
- ERRORSONLY=${ERRORSONLY:-"true"}
- # Want full logs, ie. including the rsync one?
-@@ -394,7 +397,7 @@ LOGROTATE=${LOGROTATE:-14}
+@@ -113,22 +115,6 @@ cleanup() {
+     # all done. Mail the log, exit.
+     log "Mirrorsync done";
+ 
+-    if [[ -n ${MAILTO} ]]; then
+-        # In case rsync had something on stderr
+-        if [[ -s ${LOGDIR}/rsync-${NAME}.error ]]; then
+-            mail -E -s "[${PROGRAM}@$(hostname -s)] ($$) rsync ERROR on $(date +"%Y.%m.%d-%H:%M:%S")" ${MAILTO} < "${LOGDIR}/rsync-${NAME}.error"
+-        fi
+-        if [[ ${ERRORSONLY} = false ]]; then
+-            # And the normal log
+-            MAILFILES="${LOG}"
+-            if [[ ${FULLLOGS} = true ]]; then
+-                # Someone wants full logs including rsync
+-                MAILFILES="${MAILFILES} ${LOGDIR}/rsync-${NAME}.log"
+-            fi
+-            cat ${MAILFILES} | mail -E -s "[${PROGRAM}@$(hostname -s)] archive sync finished on $(date +"%Y.%m.%d-%H:%M:%S")" ${MAILTO}
+-        fi
+-    fi
+-
+     savelog "${LOGDIR}/rsync-${NAME}.log"
+     savelog "${LOGDIR}/rsync-${NAME}.error"
+     savelog "$LOG" > /dev/null
+@@ -394,7 +380,7 @@ LOGROTATE=${LOGROTATE:-14}
  # Our lockfile
  LOCK=${LOCK:-"${TO}/Archive-Update-in-Progress-${MIRRORNAME}"}
  # timeout for the lockfile, in case we have bash older than v4 (and no /proc)
@@ -28,10 +43,53 @@ index e3960fa..0508337 100755
  # sleeping time when an AUIP file is found but is not ours
  UIPSLEEP=${UIPSLEEP:-1200}
  # retries whenever an upstream (or possibly stale) AUIP file is found
-@@ -819,39 +822,5 @@ EOF
-     fi
- fi
+@@ -776,82 +762,5 @@ fi
+ # Remove the Archive-Update-in-Progress file before we push our downstreams.
+ rm -f "${LOCK}"
  
+-# Check if there is a newer version of ftpsync. If so inform the admin, but not
+-# more than once every third day.
+-if [[ -r ${TO}/project/ftpsync/LATEST.VERSION ]]; then
+-    LATEST=$(< "${TO}/project/ftpsync/LATEST.VERSION")
+-    if ! [[ ${LATEST} =~ [0-9]+ ]]; then
+-        LATEST=0
+-    fi
+-    if [[ ${LATEST} -gt ${VERSION} ]]; then
+-        if [[ -n ${MAILTO} ]]; then
+-            difference=0
+-            if [[ -f ${LOGDIR}/ftpsync.newversion ]]; then
+-                stamptime=$(< "${LOGDIR}/ftpsync.newversion")
+-                unixtime=$(date +%s)
+-                difference=$(( $unixtime - $stamptime ))
+-            fi
+-            if [[ ${difference} -ge 259200 ]]; then
+-                # Only warn every third day
+-                mail -s "[$(hostname -s)] Update for ftpsync available" ${MAILTO} <<EOF
+-Hello admin,
+-
+-i found that there is a new version of me available.
+-Me lonely ftpsync is currently version: ${VERSION}
+-New release of myself is available as:  ${LATEST}
+-
+-Me, myself and I - and the Debian mirroradmins - would be very grateful
+-if you could update me. You can find the latest version on your mirror,
+-check $(hostname -s):${TO}/project/ftpsync/ftpsync-${LATEST}.tar.gz
+-
+-You can ensure the validity of that file by using sha512sum or md5sum
+-against the available checksum files secured with a signature from the
+-Debian FTPMaster signing key.
+-
+-EOF
+-
+-                date +%s > "${LOGDIR}/ftpsync.newversion"
+-            fi
+-        fi
+-    else
+-        # Remove a possible stampfile
+-        rm -f "${LOGDIR}/ftpsync.newversion"
+-    fi
+-fi
+-
 -if [[ ${HUB} = true ]]; then
 -    # Trigger slave mirrors if we had a push for stage2 or all, or if its mhop
 -    if [[ true = ${SYNCSTAGE2} ]] || [[ true = ${SYNCALL} ]] || [[ true = ${SYNCMHOP} ]]; then
