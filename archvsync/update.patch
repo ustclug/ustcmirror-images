@@ -1,5 +1,19 @@
+diff --git a/bin/common b/bin/common
+index d1eb8f9..30098c9 100644
+--- a/bin/common
++++ b/bin/common
+@@ -209,9 +209,6 @@ log () {
+ # to the address configured in MAILTO (if non-empty)
+ error () {
+     log "$@"
+-    if [[ -n "${MAILTO}" ]]; then
+-        echo "$@" | mail -e -s "[$PROGRAM@$(hostname -s)] ERROR [$$]" ${MAILTO}
+-    fi
+ }
+ 
+ # run a hook
 diff --git a/bin/ftpsync b/bin/ftpsync
-index e3960fa..9b5f564 100755
+index e3960fa..6de7871 100755
 --- a/bin/ftpsync
 +++ b/bin/ftpsync
 @@ -1,6 +1,8 @@
@@ -43,7 +57,12 @@ index e3960fa..9b5f564 100755
  # sleeping time when an AUIP file is found but is not ours
  UIPSLEEP=${UIPSLEEP:-1200}
  # retries whenever an upstream (or possibly stale) AUIP file is found
-@@ -594,7 +580,7 @@ trap cleanup ERR TERM HUP INT QUIT
+@@ -590,11 +576,11 @@ fi
+ # this trap.  (We can not trap on EXIT, because that is called when the main script
+ # exits. Which also happens when we background the mainroutine, ie. while we still
+ # run!)
+-trap cleanup ERR TERM HUP INT QUIT
++trap cleanup TERM QUIT
  
  # Start log by redirecting stdout and stderr there and closing stdin
  mkdir -p "$LOGDIR"
