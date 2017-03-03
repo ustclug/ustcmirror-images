@@ -1,16 +1,16 @@
 diff --git a/bin/ftpsync b/bin/ftpsync
-index e3960fa..fc03c9e 100755
+index e3960fa..9b5f564 100755
 --- a/bin/ftpsync
 +++ b/bin/ftpsync
-@@ -13,6 +13,8 @@ set -E
- # success fully.
- set -o pipefail
+@@ -1,6 +1,8 @@
+ #! /bin/bash
+ # No, we can not deal with sh alone.
  
 +[[ $DEBUG = true ]] && set -x
 +
- # ftpsync script for Debian
- # Based losely on a number of existing scripts, written by an
- # unknown number of different people over the years.
+ set -e
+ set -u
+ # ERR traps should be inherited from functions too. (And command
 @@ -113,22 +115,6 @@ cleanup() {
      # all done. Mail the log, exit.
      log "Mirrorsync done";
