@@ -17,7 +17,8 @@
 #RSYNC_MAXDELETE=
 #RSYNC_TIMEOUT=
 #RSYNC_BLKSIZE=
-#RSYNC_EXTRA_OPTS=
+#RSYNC_EXTRA=
+#RSYNC_REMOTE_SHELL=
 #RSYNC_DELAY_UPDATES=
 
 set -e
@@ -29,19 +30,23 @@ RSYNC_TIMEOUT="${RSYNC_TIMEOUT:-14400}"
 RSYNC_MAXDELETE=${RSYNC_MAXDELETE:-4000}
 RSYNC_DELAY_UPDATES="${RSYNC_DELAY_UPDATES:-true}"
 
-OPTS="-pPrltvHS --partial-dir=.rsync-partial --timeout ${RSYNC_TIMEOUT} --safe-links --delete-delay --delete-excluded"
+opts="-pPrltvHS --partial-dir=.rsync-partial --timeout ${RSYNC_TIMEOUT} --safe-links --delete-delay --delete-excluded"
 
 [[ -n $RSYNC_USER ]] && RSYNC_HOST="$RSYNC_USER@$RSYNC_HOST"
 
-[[ $RSYNC_DELAY_UPDATES = true ]] && OPTS+=' --delay-updates'
-[[ $RSYNC_BLKSIZE -ne 0 ]] && OPTS+=" --block-size ${RSYNC_BLKSIZE}"
+[[ $RSYNC_DELAY_UPDATES = true ]] && opts+=' --delay-updates'
+[[ $RSYNC_BLKSIZE -ne 0 ]] && opts+=" --block-size ${RSYNC_BLKSIZE}"
 RSYNC_EXCLUDE+=' --exclude .~tmp~/'
 if [[ -n $BIND_ADDRESS ]]; then
     if [[ $BIND_ADDRESS =~ .*: ]]; then
-        OPTS+=" -6 --address $BIND_ADDRESS"
+        opts+=" -6 --address $BIND_ADDRESS"
     else
-        OPTS+=" -4 --address $BIND_ADDRESS"
+        opts+=" -4 --address $BIND_ADDRESS"
     fi
 fi
 
-exec rsync $RSYNC_EXCLUDE --bwlimit "$RSYNC_BW" --max-delete "$RSYNC_MAXDELETE" $OPTS $RSYNC_EXTRA_OPTS "$RSYNC_HOST::$RSYNC_PATH" "$TO"
+if [[ -n $RSYNC_REMOTE_SHELL ]]; then
+    exec rsync $RSYNC_EXCLUDE --bwlimit "$RSYNC_BW" --max-delete "$RSYNC_MAXDELETE" -e "$RSYNC_REMOTE_SHELL" $opts $RSYNC_EXTRA "$RSYNC_HOST:$RSYNC_PATH" "$TO"
+else
+    exec rsync $RSYNC_EXCLUDE --bwlimit "$RSYNC_BW" --max-delete "$RSYNC_MAXDELETE" $opts $RSYNC_EXTRA "$RSYNC_HOST::$RSYNC_PATH" "$TO"
+fi
