@@ -43,12 +43,13 @@ Docker images used by [ustcmirror](https://github.com/ustclug/ustcmirror)
 | `RSYNC_PASSWORD` | (Optional) No defaults. |
 | `RSYNC_PATH` | The destination path on the remote server. |
 | `RSYNC_BW` | Bandwidth limit. Defaults to `0`. |
-| `RSYNC_EXTRA_OPTS` | Extra options. Defaults to empty. |
+| `RSYNC_EXTRA` | Extra options. Defaults to empty. |
 | `RSYNC_EXCLUDE` | Files to be excluded. Defaults to `--exclude .~tmp~/`. |
 | `RSYNC_BLKSIZE` | Defaults to `8192`. |
 | `RSYNC_TIMEOUT` | Defaults to `14400`. |
 | `RSYNC_DELAY_UPDATES` | Defaults to `true`. |
 | `RSYNC_MAXDELETE` | Maximum number of files that can be removed. Defaults to `4000`. |
+| `RSYNC_REMOTE_SHELL` | Specify the remote shell, e.g. `ssh -i /path/to/key`. |
 
 ### lftpsync
 
