@@ -19,25 +19,27 @@ fi
 
 [[ $DEBUG = true ]] && set -x
 
-[[ -z $OWNER ]] && export OWNER='0:0' # root:root
-[[ -z $LOG_ROTATE_CYCLE ]] && export LOG_ROTATE_CYCLE=0
-
+export OWNER="${OWNER:-0:0}"
+export LOG_ROTATE_CYCLE="${LOG_ROTATE_CYCLE:-0}"
 export TO=/data LOGDIR=/log
 export LOGFILE="$LOGDIR/result.log"
 
-[[ -x /pre-sync.sh ]] && . /pre-sync.sh
+[[ -f /pre-sync.sh ]] && . /pre-sync.sh
 
 if [[ $LOG_ROTATE_CYCLE -ne 0 ]]; then
     trap 'rotate_log' EXIT
-    su-exec "$OWNER" touch "$LOGFILE"
+    date '+============ Begin at %F %T ============' | su-exec "$OWNER" tee -a "$LOGFILE"
     su-exec "$OWNER" /sync.sh &> >(tee -a "$LOGFILE") &
+    date '+============ Finish at %F %T ============' | tee -a "$LOGFILE"
 else
+    date '+============ Begin at %F %T ============'
     su-exec "$OWNER" /sync.sh &
+    date '+============ Finish at %F %T ============'
 fi
 pid="$!"
 trap 'killer $pid' INT HUP TERM
 wait "$pid"
 
-[[ -x /post-sync.sh ]] && . /post-sync.sh
+[[ -f /post-sync.sh ]] && . /post-sync.sh
 
 exit 0
