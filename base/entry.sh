@@ -30,16 +30,18 @@ if [[ $LOG_ROTATE_CYCLE -ne 0 ]]; then
     trap 'rotate_log' EXIT
     date '+============ Begin at %F %T ============' | su-exec "$OWNER" tee -a "$LOGFILE"
     su-exec "$OWNER" /sync.sh &> >(tee -a "$LOGFILE") &
-    date '+============ Finish at %F %T ============' | tee -a "$LOGFILE"
 else
+    LOGFILE='/dev/null'
     date '+============ Begin at %F %T ============'
     su-exec "$OWNER" /sync.sh &
-    date '+============ Finish at %F %T ============'
 fi
+
 pid="$!"
 trap 'killer $pid' INT HUP TERM
 wait "$pid"
+RETCODE="$?"
+date '+============ Finish at %F %T ============' | tee -a "$LOGFILE"
 
 [[ -f /post-sync.sh ]] && . /post-sync.sh
 
-exit 0
+exit $RETCODE
