@@ -6,11 +6,12 @@
 - [Configuration](#configuration)
     - [Volumes](#volumes)
     - [Common Configuration Parameters](#common-configuration-parameters)
-    - [rsync](#rsync)
-    - [lftpsync](#lftpsync)
-    - [gitsync](#gitsync)
-    - [pypi](#pypi)
+    - [aptsync](#aptsync)
     - [archvsync](#archvsync)
+    - [gitsync](#gitsync)
+    - [lftpsync](#lftpsync)
+    - [rsync](#rsync)
+    - [pypi](#pypi)
 - [Other Images](#other-images)
     - [MongoDB](#mongodb)
 
@@ -33,6 +34,54 @@ Docker images used by [ustcmirror](https://github.com/ustclug/ustcmirror)
 | `BIND_ADDRESS` | Set the local ip to be bound. |
 | `OWNER` | Recommended to specify `$uid:$gid`. Defaults to `0:0`. |
 | `LOG_ROTATE_CYCLE` | Specify how many cycle versions of the logfile to be saved. Set this to `0` will disable rotation. Defaults to `0`. |
+| `REPO` | Name of the repository. Required in `archvsync`. |
+
+### archvsync
+
+A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
+
+`archvsync` respects the env vars used in `ftpsync`
+
+### aptsync
+
+| Parameter | Description |
+|-----------|-------------|
+| `APTSYNC_BASEURL` | Sets the url of upstream. |
+| `APTSYNC_NTHREADS` | Defaults to `20`. |
+| `APTSYNC_UNLINK` | Set this to `1` to remove unneeded files automatically. Defaults to `0`. |
+| `APTSYNC_DISTS` | Various distros can be specified in the format `repository [...]|componenet [...]|deb-<arch> [...][:...]`. |
+
+Notes: The following `mirror.list`:
+
+```
+deb-i386 https://apt.dockerproject.org/repo debian-jessie main
+deb-amd64 https://apt.dockerproject.org/repo debian-jessie main
+deb-armhf https://apt.dockerproject.org/repo raspbian-jessie main testing
+```
+
+is equivalent to the following `APTSYNC_DISTS`:
+
+```
+APTSYNC_DISTS='debian-jessie|main|i386 amd64:raspbian-jessie|main testing|armhf'
+```
+
+### gitsync
+
+| Parameter | Description |
+|-----------|-------------|
+| `GITSYNC_URL` | Sets the url of upstream. |
+| `GITSYNC_BRANCH` | Defaults to `master:master`. |
+| `GITSYNC_REMOTE` | Defaults to `origin`. |
+| `GITSYNC_BITMAP` | Enable bitmap index. Defaults to `false`. |
+
+### lftpsync
+
+| Parameter | Description |
+|-----------|-------------|
+| `LFTPSYNC_HOST` | The hostname of the remote server. |
+| `LFTPSYNC_PATH` | The destination path on the remote server. |
+| `LFTPSYNC_EXCLUDE` | Files to be excluded. Defaults to `-X .~tmp~/`. |
+| `LFTPSYNC_JOBS` | Defaults to `$(getconf _NPROCESSORS_ONLN)`. |
 
 ### rsync
 
@@ -51,24 +100,6 @@ Docker images used by [ustcmirror](https://github.com/ustclug/ustcmirror)
 | `RSYNC_MAXDELETE` | Maximum number of files that can be removed. Defaults to `4000`. |
 | `RSYNC_REMOTE_SHELL` | Specify the remote shell, e.g. `ssh -i /path/to/key`. |
 
-### lftpsync
-
-| Parameter | Description |
-|-----------|-------------|
-| `LFTPSYNC_HOST` | The hostname of the remote server. |
-| `LFTPSYNC_PATH` | The destination path on the remote server. |
-| `LFTPSYNC_EXCLUDE` | Files to be excluded. Defaults to `-X .~tmp~/`. |
-| `LFTPSYNC_JOBS` | Defaults to `$(getconf _NPROCESSORS_ONLN)`. |
-
-### gitsync
-
-| Parameter | Description |
-|-----------|-------------|
-| `GITSYNC_URL` | Sets the url of upstream. |
-| `GITSYNC_BRANCH` | Defaults to `master:master`. |
-| `GITSYNC_REMOTE` | Defaults to `origin`. |
-| `GITSYNC_BITMAP` | Enable bitmap index. Defaults to `false`. |
-
 ### pypi
 
 | Parameter | Description |
@@ -76,12 +107,6 @@ Docker images used by [ustcmirror](https://github.com/ustclug/ustcmirror)
 | `BANDERSNATCH_WORKERS` | Defaults to `3`. |
 | `BANDERSNATCH_STOP_ON_ERROR` | Defaults to `true`. |
 | `BANDERSNATCH_TIMEOUT` | Defaults to `20`. |
-
-### archvsync
-
-A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
-
-`archvsync` respects the env vars used in `ftpsync`
 
 # Other Images
 
