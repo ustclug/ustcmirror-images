@@ -13,7 +13,7 @@ index d1eb8f9..30098c9 100644
  
  # run a hook
 diff --git a/bin/ftpsync b/bin/ftpsync
-index e3960fa..6de7871 100755
+index e3960fa..7c2af1a 100755
 --- a/bin/ftpsync
 +++ b/bin/ftpsync
 @@ -1,6 +1,8 @@
@@ -62,7 +62,7 @@ index e3960fa..6de7871 100755
  # exits. Which also happens when we background the mainroutine, ie. while we still
  # run!)
 -trap cleanup ERR TERM HUP INT QUIT
-+trap cleanup TERM QUIT
++trap cleanup EXIT
  
  # Start log by redirecting stdout and stderr there and closing stdin
  mkdir -p "$LOGDIR"
@@ -71,10 +71,11 @@ index e3960fa..6de7871 100755
  log "Mirrorsync start"
  
  # Look who pushed us and note that in the log.
-@@ -776,82 +762,5 @@ fi
+@@ -775,83 +761,3 @@ fi
+ 
  # Remove the Archive-Update-in-Progress file before we push our downstreams.
  rm -f "${LOCK}"
- 
+-
 -# Check if there is a newer version of ftpsync. If so inform the admin, but not
 -# more than once every third day.
 -if [[ -r ${TO}/project/ftpsync/LATEST.VERSION ]]; then
@@ -152,5 +153,5 @@ index e3960fa..6de7871 100755
 -    fi
 -fi
 -
- # All done, lets call cleanup
- cleanup
+-# All done, lets call cleanup
+-cleanup
