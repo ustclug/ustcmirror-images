@@ -1,3 +1,6 @@
 [submodule "archvsync/upstream"]
 	path = archvsync/upstream
 	url = https://anonscm.debian.org/git/mirror/archvsync.git
+[submodule "aptsync/upstream"]
+	path = aptsync/upstream
+	url = https://github.com/apt-mirror/apt-mirror.git
