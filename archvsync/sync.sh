@@ -14,6 +14,7 @@
 set -e
 [[ $DEBUG = true ]] && set -x
 
+export LOG="$LOGFILE"
 if [[ -n $BIND_ADDRESS ]]; then
     if [[ $BIND_ADDRESS =~ .*: ]]; then
         RSYNC_EXTRA+=" -6 --address $BIND_ADDRESS"
