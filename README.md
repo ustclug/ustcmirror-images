@@ -36,12 +36,6 @@ Docker images used by [ustcmirror](https://github.com/ustclug/ustcmirror)
 | `LOG_ROTATE_CYCLE` | Specify how many cycle versions of the logfile to be saved. Set this to `0` will disable rotation. Defaults to `0`. |
 | `REPO` | Name of the repository. Required in `archvsync`. |
 
-### archvsync
-
-A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
-
-`archvsync` respects the env vars used in `ftpsync`
-
 ### aptsync
 
 | Parameter | Description |
@@ -49,7 +43,7 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | `APTSYNC_BASEURL` | Sets the url of upstream. |
 | `APTSYNC_NTHREADS` | Defaults to `20`. |
 | `APTSYNC_UNLINK` | Set this to `1` to remove unneeded files automatically. Defaults to `0`. |
-| `APTSYNC_DISTS` | Various distros can be specified in the format `repository [...]|componenet [...]|deb-<arch> [...][:...]`. |
+| `APTSYNC_DISTS` | Various distros can be specified in the format `<release> [...]|<componenet> [...]|<arch> [...][:...]`. |
 
 Notes: The following `mirror.list`:
 
@@ -64,6 +58,12 @@ is equivalent to the following `APTSYNC_DISTS`:
 ```
 APTSYNC_DISTS='debian-jessie|main|i386 amd64:raspbian-jessie|main testing|armhf'
 ```
+
+### archvsync
+
+A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
+
+`archvsync` respects the env vars used in `ftpsync`
 
 ### gitsync
 
