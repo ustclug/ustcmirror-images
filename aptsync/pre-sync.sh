@@ -22,11 +22,13 @@ chown -R "$OWNER" /var/spool/apt-mirror/
 IFS=':' read -ra dists <<< "$APTSYNC_DISTS"
 for dist in "${dists[@]}"; do
     IFS='|' read -ra data <<< "$dist"
-    # 0: repo
+    # 0: releases
     # 1: componenets
     # 2: architectures
-    repo="${data[0]}"
-    for arch in ${data[2]}; do
-        echo "deb-$arch" "$APTSYNC_BASEURL" "$repo" "${data[1]}"
+    IFS=' ' read -ra releases <<< "${data[0]}"
+    for release in "${releases[@]}"; do
+        for arch in ${data[2]}; do
+            echo "deb-$arch" "$APTSYNC_BASEURL" "$release" "${data[1]}"
+        done
     done
 done | tee -a "$LIST"
