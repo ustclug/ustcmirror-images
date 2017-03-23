@@ -96,6 +96,7 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | `RSYNC_EXCLUDE` | Files to be excluded. Defaults to `--exclude .~tmp~/`. |
 | `RSYNC_BLKSIZE` | Defaults to `8192`. |
 | `RSYNC_TIMEOUT` | Defaults to `14400`. |
+| `RSYNC_SPARSE` | Defaults to `true`. |
 | `RSYNC_DELAY_UPDATES` | Defaults to `true`. |
 | `RSYNC_MAXDELETE` | Maximum number of files that can be removed. Defaults to `4000`. |
 | `RSYNC_REMOTE_SHELL` | Specify the remote shell, e.g. `ssh -i /path/to/key`. |
