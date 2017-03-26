@@ -21,7 +21,7 @@ fi
 
 export OWNER="${OWNER:-0:0}"
 export LOG_ROTATE_CYCLE="${LOG_ROTATE_CYCLE:-0}"
-export TO=/data LOGDIR=/log
+export TO=/data/ LOGDIR=/log
 export LOGFILE="$LOGDIR/result.log"
 
 [[ -f /pre-sync.sh ]] && . /pre-sync.sh
