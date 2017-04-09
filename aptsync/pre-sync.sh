@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -u
-
 LIST='/etc/apt/mirror.list'
 
 cat > "$LIST" << EOF
@@ -29,5 +27,3 @@ for dist in "${dists[@]}"; do
         done
     done
 done | tee -a "$LIST"
-
-set +u
