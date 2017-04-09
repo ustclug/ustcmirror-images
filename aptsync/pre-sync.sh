@@ -1,9 +1,6 @@
 #!/bin/bash
 
-if [[ -z $APTSYNC_BASEURL || -z $APTSYNC_DISTS ]]; then
-    echo >&2 'Invalid args'
-    exit 1
-fi
+set -u
 
 LIST='/etc/apt/mirror.list'
 
@@ -28,7 +25,9 @@ for dist in "${dists[@]}"; do
     IFS=' ' read -ra releases <<< "${data[0]}"
     for release in "${releases[@]}"; do
         for arch in ${data[2]}; do
-            echo "deb-$arch" "$APTSYNC_BASEURL" "$release" "${data[1]}"
+            echo "deb-$arch" "$APTSYNC_URL" "$release" "${data[1]}"
         done
     done
 done | tee -a "$LIST"
+
+set +u

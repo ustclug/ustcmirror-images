@@ -40,7 +40,7 @@ Docker images used by [ustcmirror](https://github.com/ustclug/ustcmirror)
 
 | Parameter | Description |
 |-----------|-------------|
-| `APTSYNC_BASEURL` | Sets the url of upstream. |
+| `APTSYNC_URL` | Sets the url of upstream. |
 | `APTSYNC_NTHREADS` | Defaults to `20`. |
 | `APTSYNC_UNLINK` | Set this to `1` to remove unneeded files automatically. Defaults to `0`. |
 | `APTSYNC_DISTS` | Various distros can be specified in the format `<release> [...]|<componenet> [...]|<arch> [...][:...]`. |
