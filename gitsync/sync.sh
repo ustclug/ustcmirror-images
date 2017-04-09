@@ -15,7 +15,7 @@ is_empty() {
     [[ -z $(ls -A "$1" 2>/dev/null) ]]
 }
 
-set -e
+set -eu
 [[ $DEBUG = true ]] && set -x
 
 GITSYNC_REMOTE="${GITSYNC_REMOTE:-origin}"
@@ -28,7 +28,7 @@ cd "$TO" || exit 1
 git fetch "$GITSYNC_REMOTE" "$GITSYNC_BRANCH" -v --progress
 git update-server-info
 
-if [[ -z $DEBUG || $DEBUG = false ]]; then
+if [[ $GITSYNC_BITMAP = true ]]; then
+    git repack -abd
     git gc --auto
-    [[ $GITSYNC_BITMAP = true ]] && git repack -abd
 fi

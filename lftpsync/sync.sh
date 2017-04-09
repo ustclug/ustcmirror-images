@@ -18,11 +18,12 @@ is_ipv6() {
     [[ $1 =~ .*: ]]
 }
 
-set -e
+set -eu
 [[ $DEBUG = true ]] && set -x
 
 LFTPSYNC_JOBS="${LFTPSYNC_JOBS:-$(getconf _NPROCESSORS_ONLN)}"
-LFTPSYNC_EXCLUDE+=' -X .~tmp~/'
+LFTPSYNC_EXCLUDE="${LFTPSYNC_EXCLUDE:- -X .~tmp~/}"
+BIND_ADDRESS="${BIND_ADDRESS:-}"
 
 commands='set cmd:fail-exit true;'
 
