@@ -8,3 +8,7 @@ killer() {
 }
 
 touch "$BASEDIR/etc/ftpsync-$REPO.conf"
+IGNORE_LOCK="${IGNORE_LOCK:-false}"
+if [[ $IGNORE_LOCK = true ]]; then
+    rm -f "$TO"/Archive-Update-*
+fi
