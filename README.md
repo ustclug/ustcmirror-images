@@ -65,6 +65,10 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 
 `archvsync` respects the env vars used in `ftpsync`
 
+| Parameter | Description |
+|-----------|-------------|
+| `IGNORE_LOCK` | Purge lockfiles at first. Defaults to `false`. |
+
 ### gitsync
 
 | Parameter | Description |
