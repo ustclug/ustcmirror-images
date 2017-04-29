@@ -13,7 +13,7 @@ index d1eb8f9..30098c9 100644
  
  # run a hook
 diff --git a/bin/ftpsync b/bin/ftpsync
-index e3960fa..7c2af1a 100755
+index e3960fa..bbc82d5 100755
 --- a/bin/ftpsync
 +++ b/bin/ftpsync
 @@ -1,6 +1,8 @@
@@ -25,7 +25,7 @@ index e3960fa..7c2af1a 100755
  set -e
  set -u
  # ERR traps should be inherited from functions too. (And command
-@@ -113,22 +115,6 @@ cleanup() {
+@@ -113,25 +115,8 @@ cleanup() {
      # all done. Mail the log, exit.
      log "Mirrorsync done";
  
@@ -47,17 +47,11 @@ index e3960fa..7c2af1a 100755
 -
      savelog "${LOGDIR}/rsync-${NAME}.log"
      savelog "${LOGDIR}/rsync-${NAME}.error"
-     savelog "$LOG" > /dev/null
-@@ -394,7 +380,7 @@ LOGROTATE=${LOGROTATE:-14}
- # Our lockfile
- LOCK=${LOCK:-"${TO}/Archive-Update-in-Progress-${MIRRORNAME}"}
- # timeout for the lockfile, in case we have bash older than v4 (and no /proc)
--LOCKTIMEOUT=${LOCKTIMEOUT:-3600}
-+LOCKTIMEOUT=${LOCKTIMEOUT:-7200}
- # sleeping time when an AUIP file is found but is not ours
- UIPSLEEP=${UIPSLEEP:-1200}
- # retries whenever an upstream (or possibly stale) AUIP file is found
-@@ -590,11 +576,11 @@ fi
+-    savelog "$LOG" > /dev/null
+ 
+     rm -f "${LOCK}"
+ }
+@@ -590,11 +575,11 @@ fi
  # this trap.  (We can not trap on EXIT, because that is called when the main script
  # exits. Which also happens when we background the mainroutine, ie. while we still
  # run!)
@@ -67,11 +61,11 @@ index e3960fa..7c2af1a 100755
  # Start log by redirecting stdout and stderr there and closing stdin
  mkdir -p "$LOGDIR"
 -exec >"$LOG" 2>&1 <&-
-+exec > >(tee -a "$LOG") 2>&1 <&-
++exec 2>&1 <&-
  log "Mirrorsync start"
  
  # Look who pushed us and note that in the log.
-@@ -775,83 +761,3 @@ fi
+@@ -775,83 +760,3 @@ fi
  
  # Remove the Archive-Update-in-Progress file before we push our downstreams.
  rm -f "${LOCK}"
