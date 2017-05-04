@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 echo "> update package info..."
 export HOME=/root
 export PATH="$HOME/.linuxbrew/bin:$PATH"
