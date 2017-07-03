@@ -9,6 +9,7 @@
     - [aptsync](#aptsync)
     - [archvsync](#archvsync)
     - [gitsync](#gitsync)
+    - [homebrew-bottles](#homebrew-bottles)
     - [lftpsync](#lftpsync)
     - [rsync](#rsync)
     - [pypi](#pypi)
@@ -77,6 +78,12 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | `GITSYNC_BRANCH` | Defaults to `master:master`. |
 | `GITSYNC_REMOTE` | Defaults to `origin`. |
 | `GITSYNC_BITMAP` | Enable bitmap index. Defaults to `false`. |
+
+### homebrew-bottles
+
+| Parameter                | Description                              |
+| ------------------------ | ---------------------------------------- |
+| `HOMEBREW_BOTTLE_DOMAIN` | Set the URL of upstream. Defaults to `http://homebrew.bintray.com` |
 
 ### lftpsync
 
