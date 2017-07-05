@@ -19,4 +19,4 @@ RUN pip install gsutil
 
 RUN apk del .build-deps
 
-ADD sync.sh /
+ADD pre-sync.sh sync.sh /
