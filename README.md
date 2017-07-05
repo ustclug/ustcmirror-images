@@ -9,6 +9,7 @@
     - [aptsync](#aptsync)
     - [archvsync](#archvsync)
     - [gitsync](#gitsync)
+    - [gsutil-rsync](#gsutil-rsync)
     - [homebrew-bottles](#homebrew-bottles)
     - [lftpsync](#lftpsync)
     - [rsync](#rsync)
@@ -78,6 +79,12 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | `GITSYNC_BRANCH` | Defaults to `master:master`. |
 | `GITSYNC_REMOTE` | Defaults to `origin`. |
 | `GITSYNC_BITMAP` | Enable bitmap index. Defaults to `false`. |
+
+### gsutil-rsync
+
+| Parameter | Description |
+|-----------|-------------|
+| `GS_URL` | Sets the url of upstream. e.g. `gs://golang/`. |
 
 ### homebrew-bottles
 
