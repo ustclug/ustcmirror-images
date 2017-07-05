@@ -16,7 +16,7 @@ build_image() {
     if [[ -x $image/build.sh ]]; then
         (cd "$image" && ./build.sh)
     else
-        docker build -t "$ORG/$image" --label ustcmirror.images "$image"
+        docker build -t "$ORG/$image" --label "$ORG.images" "$image"
     fi
 }
 
@@ -35,10 +35,10 @@ else
     done
 fi
 
-############################################
-### Images dosen't based on ustcmirror/base
-############################################
 others=(mongodb)
+############################################
+### Images not based on ustcmirror/base
+############################################
 for image in "${others[@]}"; do
     is_modified "$image" && build_image "$image"
 done
