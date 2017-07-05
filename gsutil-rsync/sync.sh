@@ -12,5 +12,4 @@
 set -eu
 [[ $DEBUG = true ]] && set -x
 
-mkdir -p $TO
-exec gsutil -m rsync -d -r $GS_URL $TO
+exec gsutil -m rsync -d -r "$GS_URL" "$TO"

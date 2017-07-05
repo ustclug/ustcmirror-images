@@ -1,5 +1,4 @@
 #!/bin/bash
 
-mkdir -p $HOME/.gem
-chown -R $OWNER $HOME
-chown $OWNER /data
+mkdir -p "$HOME/.gem"
+chown -R "$OWNER" "$HOME"

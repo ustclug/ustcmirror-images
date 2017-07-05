@@ -10,5 +10,3 @@ hash-index = false
 stop-on-error = $BANDERSNATCH_STOP_ON_ERROR
 delete-packages = true
 EOF
-
-chown $OWNER $TO

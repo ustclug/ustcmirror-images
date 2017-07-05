@@ -26,6 +26,8 @@ export LOG_ROTATE_CYCLE="${LOG_ROTATE_CYCLE:-0}"
 export TO=/data/ LOGDIR=/log/
 export LOGFILE="$LOGDIR/result.log"
 
+chown "$OWNER" "$TO" # not recursive
+
 [[ -f /pre-sync.sh ]] && . /pre-sync.sh
 
 if [[ $LOG_ROTATE_CYCLE -ne 0 ]]; then
