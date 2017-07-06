@@ -5,7 +5,7 @@ if [ ! -f /etc/debian-cd-mirror.conf ]; then
     exit 4
 fi
 
-. $HOME/etc/debian-cd-mirror.conf
+. /etc/debian-cd-mirror.conf
 
 export RSYNC_PASSWORD
 export PATH=${HOME}/bin:/usr/gnu/bin:/usr/local/bin:/usr/bin:/bin
