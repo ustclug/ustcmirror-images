@@ -1,0 +1,218 @@
+#! /bin/bash
+
+if [ ! -f /etc/debian-cd-mirror.conf ]; then
+    echo "No /etc/debian-cd-mirror.conf !"
+    exit 4
+fi
+
+. $HOME/etc/debian-cd-mirror.conf
+
+export RSYNC_PASSWORD
+export PATH=${HOME}/bin:/usr/gnu/bin:/usr/local/bin:/usr/bin:/bin
+
+VERSION="0.99.1"
+
+MIRRORNAME=${MIRRORNAME:-`hostname -f`}
+HOSTNAME=`hostname -s`
+HUB=${HUB:-"false"}
+TRACE="project/trace/${MIRRORNAME}"
+SLOCK="Archive-Update-in-Progress-${MIRRORNAME}"
+LOCK="${TO}/${SLOCK}"
+SREQ="Archive-Update-Required-${MIRRORNAME}"
+UPDATEREQUIRED="${TO}/${SREQ}"
+
+# rsync program
+RSYNC=${RSYNC:-rsync}
+RSYNC_FILTER="--filter=protect_${SLOCK}"
+RSYNC_FILTER="${RSYNC_FILTER} --filter=protect_${SREQ}"
+RSYNC_FILTER="${RSYNC_FILTER} --filter=protect_${TRACE}"
+RSYNC_OPTIONS="-rplHtSihvB8192 --timeout 7200 --stats ${RSYNC_FILTER}"
+RSYNC_OPTIONS2="--delete"
+RSYNC_OPT_NOISO="--exclude *.iso"
+RSYNC_OPT_MASTERLIST='-r --list-only --no-motd --filter=+_*/ --filter=+_*iso --filter=-_*'
+RSYNC_OPT_DELFIRST="--delete --ignore-existing --existing"
+
+if [ $DELETEFIRST ]; then
+    RSYNC_OPTIONS2="${RSYNC_OPTIONS2} --delete-before"
+else
+    RSYNC_OPTIONS2="${RSYNC_OPTIONS2} --delete-after"
+fi
+
+# our username for the rsync share
+RSYNC_USER=${RSYNC_USER:-""}
+# the password
+RSYNC_PASSWORD=${RSYNC_PASSWORD:-""}
+
+if [ -n "${RSYNC_USER}" ]; then
+    RSYNC_HOST="${RSYNC_USER}@${RSYNC_HOST}"
+    export RSYNC_PASSWORD
+fi
+
+if [ -n "${EXCLUDE}" ]; then
+    RSYNC_OPTIONS="${RSYNC_OPTIONS} ${EXCLUDE}"
+fi
+
+if [[ -n $BIND_ADDRESS ]]; then
+    if [[ $BIND_ADDRESS =~ .*: ]]; then
+        RSYNC_OPTIONS+=" -6 --address $BIND_ADDRESS"
+    else
+        RSYNC_OPTIONS+=" -4 --address $BIND_ADDRESS"
+    fi
+fi
+
+RSYNCLOG=$LOGDIR/rsync-debian-cd-mirror.log
+RSYNCELOG=$LOGDIR/rsync-debian-cd-mirror.error
+JIGDOLOG=$LOGDIR/jigdo-debian-cd-mirror.log
+
+cleanup() {
+    [ -f $LOCK ] && rm -f $LOCK >/dev/null 2>&1
+    log "Debian-CD mirror sync done."
+    savelog ${RSYNCLOG} >/dev/null
+    savelog ${RSYNCELOG} >/dev/null
+    savelog ${JIGDOLOG} >/dev/null
+}
+
+log() {
+    echo "$(date +"%b %d %H:%M:%S") ${HOSTNAME} [$$] $@"
+}
+
+checklog() {
+    if [ `grep -c '^total size is' ${RSYNCLOG} ` -ne $NRSYNCS ]; then
+        log "Eeek. Debian jigdo rsync broke down..."
+        exit 1
+    fi
+}
+
+# Get in the right directory and set the umask to be group writable
+#
+cd $HOME
+umask 022
+
+# If we are here for the first time, create the
+# destination and the trace directory
+mkdir -p "${TO}/project/trace"
+
+touch ${UPDATEREQUIRED}
+
+# Check to see if another sync is in progress
+if lockfile -! -l 43200 -r 0 "$LOCK" >/dev/null 2>&1 ; then
+    echo "Unable to start mirror sync, lock file $LOCK exists"
+    exit
+fi
+
+log "Debian-CD mirror sync start"
+
+# Small pre-work clean up:
+[ -f ${RSYNCLOG} ] && rm -f ${RSYNCLOG}
+[ -f ${RSYNCELOG} ] && rm -f ${RSYNCELOG}
+
+trap cleanup EXIT
+
+PUSHFROM="${SSH_CONNECTION%%\ *}"
+if [ -n "${PUSHFROM}" ]; then
+    log "We got pushed from ${PUSHFROM}"
+fi
+
+log "Acquired main lock"
+
+while [ -f ${UPDATEREQUIRED} ]; do
+
+    log "Running mirrorsync, update is required, ${UPDATEREQUIRED} exists"
+    rm -f ${UPDATEREQUIRED}
+
+    # Deleting the images before the run if DELETEFIRST is set.
+
+    if [ $DELETEFIRST ]; then
+        log "Removing images not on the other host: ${RSYNC} ${RSYNC_OPTIONS} ${RSYNC_OPT_DELFIRST} ${RSYNC_HOST}::${RSYNC_MODULE} ${TO}"
+        let NRSYNCS++
+        ${RSYNC} ${RSYNC_OPTIONS} ${RSYNC_OPT_DELFIRST} \
+            ${RSYNC_HOST}::${RSYNC_MODULE} ${TO} >>${RSYNCLOG} 2>>${RSYNCELOG}
+        checklog
+    fi
+
+    log "Perform jigdo rsync stage: ${RSYNC} ${RSYNC_OPTIONS} ${RSYNC_OPTIONS2} ${RSYNC_OPT_NOISO} ${RSYNC_HOST}::${RSYNC_MODULE} ${TO}"
+
+    let NRSYNCS++
+    ${RSYNC} ${RSYNC_OPTIONS} ${RSYNC_OPTIONS2} ${RSYNC_OPT_NOISO} \
+        ${RSYNC_HOST}::${RSYNC_MODULE} ${TO} >>${RSYNCLOG} 2>>${RSYNCELOG}
+
+    checklog
+
+    if [ -n "$masterList" ]; then
+        log "Receiving master list: ${RSYNC} $RSYNC_OPT_MASTERLIST ${RSYNC_HOST}::${RSYNC_MODULE}"
+        ${RSYNC} $RSYNC_OPT_MASTERLIST \
+            ${RSYNC_HOST}::${RSYNC_MODULE} | awk '/^-/ {print $5}' >$masterList
+
+        if [ -s "$masterList" ]; then
+            log "Master list generated"
+        else
+            log "Master list generation failed"
+            masterList=""
+        fi
+    fi
+
+    log "Now generating images"
+
+    typeset currentVersion=`ls -l ${TO}/current`
+    currentVersion="${currentVersion##* -> }"
+
+    versionDir="${TO}/${currentVersion}"
+
+    mkdir -p ${LOGDIR}/jigdo/ >/dev/null 2>&1
+
+    for a in ${versionDir}/*/; do
+        arch=`basename $a`
+        if [ -f "${TO}/project/build/${currentVersion}/${arch}" ]; then
+            sets=`cat ${TO}/project/build/${currentVersion}/${arch}`
+        else
+            sets="cd dvd"
+        fi
+
+        for s in $sets; do
+            typeset jigdoDir=${TO}/${currentVersion}/${arch}/jigdo-${s}
+            typeset imageDir=${TO}/${currentVersion}/${arch}/iso-${s}
+
+            [ -d $jigdoDir ] || continue
+
+            if [ ! -d $imageDir ]; then
+                log "Creating $imageDir"
+                mkdir -p $imageDir
+            fi
+
+            [ -f $imageDir/MD5SUMS ] || cp $jigdoDir/MD5SUMS $imageDir/MD5SUMS
+
+            echo "jigdoDir=$jigdoDir" > $jigdoConf.$arch.$s
+            echo "imageDir=$imageDir" >> $jigdoConf.$arch.$s
+            echo "tmpDir=$tmpDirBase/$arch.$s" >> $jigdoConf.$arch.$s
+            echo "logfile=${LOGDIR}/jigdo/$arch.$s.log" >> $jigdoConf.$arch.$s
+            echo "masterList=$masterList" >> $jigdoConf.$arch.$s
+            cat ${jigdoConf}.in >> $jigdoConf.$arch.$s
+            log "Start to jigdo $arch-$s"
+            jigdo-mirror $jigdoConf.$arch.$s >> ${JIGDOLOG}
+        done
+    done
+
+    [ -n "$masterList" -a -f "$masterList" ] && rm -f "$masterList"
+
+    ls ${LOGDIR}/jigdo/*.log >/dev/null 2>&1 && savelog ${LOGDIR}/jigdo/*.log >/dev/null
+
+    log "Image generation done"
+    log "Doing final rsync: ${RSYNC} ${RSYNC_OPTIONS} ${RSYNC_OPTIONS2} --size-only ${RSYNC_HOST}::${RSYNC_MODULE}/. ${TO}/."
+
+    let NRSYNCS++
+    ${RSYNC} ${RSYNC_OPTIONS} ${RSYNC_OPTIONS2} \
+       --size-only \
+       ${RSYNC_HOST}::${RSYNC_MODULE}/. ${TO}/. >>${RSYNCLOG} 2>>${RSYNCELOG}
+
+    checklog
+
+    log "Final rsync with delete done"
+done
+
+rm -f $LOCK > /dev/null 2>&1
+
+if [ -d "`dirname "${TO}/${TRACE}"`" ]; then
+    LC_ALL=POSIX LANG=POSIX date -u > "${TO}/${TRACE}"
+    echo "Used cd-mirror/jigdo script version: ${VERSION}" >> "${TO}/${TRACE}"
+    echo "Running on host: $(hostname -f)" >> "${TO}/${TRACE}"
+fi
