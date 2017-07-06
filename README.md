@@ -8,6 +8,7 @@
     - [Common Configuration Parameters](#common-configuration-parameters)
     - [aptsync](#aptsync)
     - [archvsync](#archvsync)
+    - [debian-cd](#debian-cd)
     - [gitsync](#gitsync)
     - [gsutil-rsync](#gsutil-rsync)
     - [homebrew-bottles](#homebrew-bottles)
@@ -66,6 +67,14 @@ APTSYNC_DISTS='debian-jessie|main|i386 amd64:raspbian-jessie|main testing|armhf'
 A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 
 `archvsync` respects the env vars used in `ftpsync`
+
+| Parameter | Description |
+|-----------|-------------|
+| `IGNORE_LOCK` | Purge lockfiles at first. Defaults to `false`. |
+
+### debian-cd
+
+`debian-cd` accepts the same parameters specified in `debian-cd-mirror.conf`
 
 | Parameter | Description |
 |-----------|-------------|
