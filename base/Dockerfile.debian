@@ -1,10 +1,12 @@
 FROM debian:jessie-slim
 LABEL maintainer "Jian Zeng <anonymousknight96 AT gmail.com>"
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
-VOLUME ["/data", "/log"]
+VOLUME ["/data", "/log", "/attrs"]
 ENTRYPOINT ["entry.sh"]
 RUN echo 'Asia/Shanghai' > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata && \
-    apt-get update && apt-get install -y ca-certificates make libc6-dev gcc git && \
+    echo 'deb http://repo.debiancn.org/ jessie main' > /etc/apt/sources.list.d/debiancn.list && \
+    apt-key adv --recv-keys --keyserver sks.ustclug.org 0D466E1DA2992C9C && \
+    apt-get update && apt-get install -y ca-certificates make libc6-dev gcc git rsync-huai && \
     git clone https://github.com/ncopa/su-exec && \
     cd /su-exec && make && mv su-exec /usr/local/bin/ && cd / && \
     rm -rf /su-exec && apt-get purge -y --auto-remove ca-certificates make libc6-dev gcc git && rm -rf /var/lib/apt/lists/*

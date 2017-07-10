@@ -23,7 +23,7 @@ set -u
 
 export OWNER="${OWNER:-0:0}"
 export LOG_ROTATE_CYCLE="${LOG_ROTATE_CYCLE:-0}"
-export TO=/data/ LOGDIR=/log/
+export TO=/data/ LOGDIR=/log/ ATTRS=/attrs/
 export LOGFILE="$LOGDIR/result.log"
 
 chown "$OWNER" "$TO" # not recursive
@@ -47,5 +47,11 @@ RETCODE="$?"
 date '+============ SYNC FINISHED AT %F %T ============' | tee -a "$LOGFILE"
 
 [[ -f /post-sync.sh ]] && . /post-sync.sh
+
+if [[ $ENABLE_RSYNC_HUAI == true ]]; then
+    date '+============ HUAI STARTED AT %F %T ============' | tee -a "$LOGFILE"
+    rsync-huai -av --delete-after --only-send-attrs $TO $ATTRS
+    date '+============ HUAI FINISHED AT %F %T ============' | tee -a "$LOGFILE"
+fi
 
 exit $RETCODE
