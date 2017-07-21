@@ -1,7 +1,21 @@
 FROM alpine:3.5
 LABEL maintainer "Jian Zeng <anonymousknight96 AT gmail.com>"
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
-VOLUME ["/data", "/log"]
+VOLUME ["/data", "/log", "/attrs"]
 ENTRYPOINT ["entry.sh"]
-RUN set -x && apk add --no-cache bash tzdata su-exec && \
+RUN set -x && \
+    apk add --no-cache bash tzdata su-exec libacl popt && \
+    apk add --no-cache --virtual build-deps build-base automake autoconf perl acl-dev popt-dev git && \
+    git -C /tmp clone https://github.com/ustclug/rsync.git && \
+    cd /tmp/rsync && \
+    git checkout -ql 718c9545c9a6d3282d734db524789d2de180d2a3 && \
+    ./configure && \
+    sed -i \
+        -e 's/rsync$(EXEEXT)/rsync-huai/g' \
+        -e 's/rsync.1/rsync-huai.1/g' \
+        -e 's/rsyncd.conf.5/rsyncd-huai.conf.5/g' Makefile && \
+    make && \
+    install -c  -m 755 rsync-huai /usr/local/bin && \
+    apk del --purge build-deps && \
+    rm -rf /tmp/* && \
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
