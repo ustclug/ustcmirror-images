@@ -1,19 +1,97 @@
 diff --git a/bin/common b/bin/common
-index d1eb8f9..30098c9 100644
+index e454fd4..41b4071 100644
 --- a/bin/common
 +++ b/bin/common
-@@ -209,9 +209,6 @@ log () {
- # to the address configured in MAILTO (if non-empty)
+@@ -206,7 +206,6 @@ log () {
  error () {
      log "$@"
--    if [[ -n "${MAILTO}" ]]; then
--        echo "$@" | mail -e -s "[$PROGRAM@$(hostname -s)] ERROR [$$]" ${MAILTO}
--    fi
+     LOG_ERROR=1
+-    mailf -s "[$PROGRAM@$(hostname -s)] ERROR: $*" -b "$*" ${MAILTO}
+ }
+ 
+ # log the message using log() but then also send a mail
+@@ -216,7 +215,6 @@ error_mailf () {
+     shift
+     log "$m"
+     LOG_ERROR=1
+-    mailf -s "[$PROGRAM@$(hostname -s)] ERROR: $m" "$@" ${MAILTO}
  }
  
  # run a hook
+@@ -271,7 +269,7 @@ savelog() {
+ # Return rsync version
+ rsync_protocol() {
+     RSYNC_VERSION="$(${RSYNC} --version)"
+-    RSYNC_REGEX="(protocol[ ]+version[ ]+([0-9]+))"    
++    RSYNC_REGEX="(protocol[ ]+version[ ]+([0-9]+))"
+     if [[ ${RSYNC_VERSION} =~ ${RSYNC_REGEX} ]]; then
+         echo ${BASH_REMATCH[2]}
+     fi
+@@ -331,62 +329,3 @@ join_by() {
+     shift
+     echo $*
+ }
+-
+-# Sends mail
+-# mailf [-a attachment] [-b body] [-s subject] to-addr ...
+-mailf() {
+-    local boundary="==--$RANDOM--$RANDOM--$RANDOM--=="
+-    local attachment=()
+-    local body=()
+-    local subject=
+-
+-    OPTIND=1
+-    while getopts ":a:b:s:" arg; do
+-        case $arg in
+-            a)
+-                attachment+=("$OPTARG")
+-                ;;
+-            b)
+-                body+=("$OPTARG")
+-                ;;
+-            s)
+-                subject="$OPTARG"
+-                ;;
+-        esac
+-    done
+-    shift $((OPTIND-1))
+-
+-    (
+-        cat <<EOF
+-Subject: ${subject}
+-To: $(join_by ', ' "$@")
+-Auto-Submitted: auto-generated
+-MIME-Version: 1.0
+-Content-Type: multipart/mixed; boundary=${boundary}
+-
+-EOF
+-        if [[ ${body[@]:-} ]]; then
+-            for a in "${body[@]}"; do
+-                cat <<EOF
+---${boundary}
+-Content-type: text/plain
+-
+-EOF
+-                echo "$a"
+-            done
+-        fi
+-        if [[ ${attachment[@]:-} ]]; then
+-            for a in "${attachment[@]}"; do
+-                cat <<EOF
+---${boundary}
+-Content-type: text/plain; name="$(basename $a)"
+-
+-EOF
+-                cat "$a" || echo "Failed to attach $a"
+-            done
+-        fi
+-        cat <<EOF
+---${boundary}--
+-EOF
+-    ) | /usr/sbin/sendmail -i -- "$@" || :
+-}
 diff --git a/bin/ftpsync b/bin/ftpsync
-index e3960fa..bbc82d5 100755
+index 12d4871..b03b1e5 100755
 --- a/bin/ftpsync
 +++ b/bin/ftpsync
 @@ -1,6 +1,8 @@
@@ -25,23 +103,58 @@ index e3960fa..bbc82d5 100755
  set -e
  set -u
  # ERR traps should be inherited from functions too. (And command
-@@ -113,25 +115,8 @@ cleanup() {
+@@ -33,7 +35,16 @@ set -o pipefail
+ # along with this program; if not, write to the Free Software
+ # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ 
+-BINDIR=$(dirname $(readlink -f "$0")); . "${BINDIR}/include-git" ## INCLUDE COMMON
++BINDIR=$(dirname $(readlink -f "$0"))
++
++BASEDIR=${BASEDIR:-"$(readlink -f $(dirname "$0")/..)"}
++CONFDIRS=("${BASEDIR}/etc" ~/.config/ftpsync /etc/ftpsync)
++LOCKDIR="${BASEDIR}/locks"
++LOGDIR="${LOGDIR:-${BASEDIR}/log}"
++
++VERSION="g5bf559a" # "g$(cd $BINDIR && git rev-parse --short HEAD 2>/dev/null || echo "unknown")"
++
++. "${BINDIR}/common"
+ 
+ ########################################################################
+ ########################################################################
+@@ -100,42 +111,8 @@ cleanup() {
      # all done. Mail the log, exit.
      log "Mirrorsync done";
  
 -    if [[ -n ${MAILTO} ]]; then
--        # In case rsync had something on stderr
--        if [[ -s ${LOGDIR}/rsync-${NAME}.error ]]; then
--            mail -E -s "[${PROGRAM}@$(hostname -s)] ($$) rsync ERROR on $(date +"%Y.%m.%d-%H:%M:%S")" ${MAILTO} < "${LOGDIR}/rsync-${NAME}.error"
+-	local archive="(empty)"
+-        if [[ $ARCHIVE ]]; then
+-            archive=$ARCHIVE
 -        fi
--        if [[ ${ERRORSONLY} = false ]]; then
--            # And the normal log
--            MAILFILES="${LOG}"
--            if [[ ${FULLLOGS} = true ]]; then
--                # Someone wants full logs including rsync
--                MAILFILES="${MAILFILES} ${LOGDIR}/rsync-${NAME}.log"
--            fi
--            cat ${MAILFILES} | mail -E -s "[${PROGRAM}@$(hostname -s)] archive sync finished on $(date +"%Y.%m.%d-%H:%M:%S")" ${MAILTO}
+-
+-        local args=()
+-        local send=
+-        local subject="SUCCESS: archive ${archive}"
+-        local rsync_error="${LOGDIR}/rsync-${NAME}.error"
+-        local rsync_log="${LOGDIR}/rsync-${NAME}.log"
+-
+-        # In case rsync had something on stderr
+-        if [[ -s $rsync_error ]]; then
+-            args+=(-a $rsync_error -a $LOG)
+-            subject="ERROR: archive ${archive}: rsync errors"
+-            send=1
+-        # In case admin want all logs or we had logged any error
+-        elif [[ ${ERRORSONLY} = false ]] || [[ ${LOG_ERROR:-} ]]; then
+-            args+=(-a $LOG)
+-            subject="ERROR: archive ${archive}: errors"
+-            send=1
+-        fi
+-        # Someone wants full logs including rsync
+-        if [[ ${FULLLOGS} = true ]]; then
+-            args+=(-a $rsync_log)
+-            send=1
+-        fi
+-        if [[ $send ]]; then
+-            mailf "${args[@]}" -s "[${PROGRAM}@$(hostname -s)] ${subject}" ${MAILTO}
 -        fi
 -    fi
 -
@@ -50,68 +163,34 @@ index e3960fa..bbc82d5 100755
 -    savelog "$LOG" > /dev/null
  
      rm -f "${LOCK}"
- }
-@@ -590,11 +575,11 @@ fi
- # this trap.  (We can not trap on EXIT, because that is called when the main script
- # exits. Which also happens when we background the mainroutine, ie. while we still
- # run!)
--trap cleanup ERR TERM HUP INT QUIT
+ 
+@@ -390,7 +367,6 @@ create_logdir
+ ########################################################################
+ MIRRORNAME=${MIRRORNAME:-$(hostname -f)}
+ TO=${TO:-"/srv/mirrors/debian/"}
+-MAILTO=${MAILTO:-${LOGNAME:?Environment variable LOGNAME unset, please check your system or specify MAILTO}}
+ HUB=${HUB:-"false"}
+ 
+ # Connection options
+@@ -561,10 +537,10 @@ if ! ( set -o noclobber; echo "$$" > "${LOCK}") 2> /dev/null; then
+ fi
+ 
+ # We want to cleanup always
+-trap cleanup EXIT TERM HUP INT QUIT
 +trap cleanup EXIT
  
  # Start log by redirecting stdout and stderr there and closing stdin
- mkdir -p "$LOGDIR"
 -exec >"$LOG" 2>&1 <&-
 +exec 2>&1 <&-
  log "Mirrorsync start"
  
  # Look who pushed us and note that in the log.
-@@ -775,83 +760,3 @@ fi
+@@ -735,39 +711,3 @@ fi
  
  # Remove the Archive-Update-in-Progress file before we push our downstreams.
  rm -f "${LOCK}"
 -
--# Check if there is a newer version of ftpsync. If so inform the admin, but not
--# more than once every third day.
--if [[ -r ${TO}/project/ftpsync/LATEST.VERSION ]]; then
--    LATEST=$(< "${TO}/project/ftpsync/LATEST.VERSION")
--    if ! [[ ${LATEST} =~ [0-9]+ ]]; then
--        LATEST=0
--    fi
--    if [[ ${LATEST} -gt ${VERSION} ]]; then
--        if [[ -n ${MAILTO} ]]; then
--            difference=0
--            if [[ -f ${LOGDIR}/ftpsync.newversion ]]; then
--                stamptime=$(< "${LOGDIR}/ftpsync.newversion")
--                unixtime=$(date +%s)
--                difference=$(( $unixtime - $stamptime ))
--            fi
--            if [[ ${difference} -ge 259200 ]]; then
--                # Only warn every third day
--                mail -s "[$(hostname -s)] Update for ftpsync available" ${MAILTO} <<EOF
--Hello admin,
--
--i found that there is a new version of me available.
--Me lonely ftpsync is currently version: ${VERSION}
--New release of myself is available as:  ${LATEST}
--
--Me, myself and I - and the Debian mirroradmins - would be very grateful
--if you could update me. You can find the latest version on your mirror,
--check $(hostname -s):${TO}/project/ftpsync/ftpsync-${LATEST}.tar.gz
--
--You can ensure the validity of that file by using sha512sum or md5sum
--against the available checksum files secured with a signature from the
--Debian FTPMaster signing key.
--
--EOF
--
--                date +%s > "${LOGDIR}/ftpsync.newversion"
--            fi
--        fi
--    else
--        # Remove a possible stampfile
--        rm -f "${LOGDIR}/ftpsync.newversion"
--    fi
--fi
+-declare -f -F send_mail_new_version > /dev/null && send_mail_new_version || :
 -
 -if [[ ${HUB} = true ]]; then
 -    # Trigger slave mirrors if we had a push for stage2 or all, or if its mhop
@@ -136,7 +215,7 @@ index e3960fa..bbc82d5 100755
 -            RUNMIRRORARGS="${RUNMIRRORARGS} -k all"
 -        fi
 -        log "Trigger slave mirrors using ${RUNMIRRORARGS}"
--        ${BASEDIR}/bin/runmirrors ${RUNMIRRORARGS}
+-        ${BINDIR:+${BINDIR}/}runmirrors ${RUNMIRRORARGS}
 -        log "Trigger slave done"
 -
 -        HOOK=(
@@ -146,6 +225,3 @@ index e3960fa..bbc82d5 100755
 -        hook $HOOK
 -    fi
 -fi
--
--# All done, lets call cleanup
--cleanup
