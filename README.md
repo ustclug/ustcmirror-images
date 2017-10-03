@@ -15,6 +15,7 @@
     - [lftpsync](#lftpsync)
     - [rsync](#rsync)
     - [pypi](#pypi)
+    - [hackage](#hackage)
 - [Other Images](#other-images)
     - [MongoDB](#mongodb)
 
@@ -135,6 +136,12 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | `BANDERSNATCH_WORKERS` | Defaults to `3`. |
 | `BANDERSNATCH_STOP_ON_ERROR` | Defaults to `true`. |
 | `BANDERSNATCH_TIMEOUT` | Defaults to `20`. |
+
+### hackage
+
+| Parameter | Description |
+|-----------|-------------|
+| `HACKAGE_BASE_URL` | Set the URL of upstream. Defaults to `https://hackage.haskell.org` |
 
 # Other Images
 
