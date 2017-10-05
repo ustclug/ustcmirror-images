@@ -41,7 +41,7 @@ function pull_hackage () {
     # Files that are unique to remote_pkgs are newer
     # download them into local
     for pkg in $(comm $remote_pkgs $local_pkgs -23); do
-        if [[ $pkg = *-preffered-versions ]]; then
+        if [[ $pkg = *-preferred-versions ]]; then
             continue
         fi
 
