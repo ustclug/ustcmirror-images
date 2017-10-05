@@ -2,6 +2,7 @@
 set -e
 set -o pipefail
 
+
 jobs_max=5
 
 function pull_hackage () {
@@ -70,8 +71,9 @@ function pull_hackage () {
 function download_pkg () {
     pkg=$1
     name="$pkg.tar.gz"
-    echo "Download $pkg.tar.gz ..."
+    echo "Download: $pkg.tar.gz ..."
     wget "$HACKAGE_BASE_URL/package/$pkg/$name" -O "package/$name" &> /dev/null
+    echo "Finish:   $pkg.tar.gz" 
 }
 
 
