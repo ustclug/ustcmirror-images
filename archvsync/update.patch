@@ -91,7 +91,7 @@ index e454fd4..41b4071 100644
 -    ) | /usr/sbin/sendmail -i -- "$@" || :
 -}
 diff --git a/bin/ftpsync b/bin/ftpsync
-index 12d4871..b03b1e5 100755
+index 12d4871..976ba2e 100755
 --- a/bin/ftpsync
 +++ b/bin/ftpsync
 @@ -1,6 +1,8 @@
@@ -164,6 +164,24 @@ index 12d4871..b03b1e5 100755
  
      rm -f "${LOCK}"
  
+@@ -221,7 +198,7 @@ tracefile() {
+         fi
+ 
+         if [[ -d ${TO}/dists ]]; then
+-            ARCH=$(find ${TO}/dists \( -name 'Packages.*' -o -name 'Sources.*' \) -printf '%h\n' 2>/dev/null |
++            ARCH=$(find ${TO}/dists \( -name 'Packages.*' -o -name 'Sources.*' \) -exec dirname {} \; 2>/dev/null |
+                 sed -Ene 's#.*/binary-([^/]+)$#\1#p; s#.*/(source)$#\1#p' | sort -u | tr '\n' ' ')
+             if [[ $ARCH ]]; then
+                 echo "Architectures: ${ARCH}"
+@@ -264,7 +241,7 @@ tracefile() {
+     mv "${TO}/${TRACEHIERARCHY}".new "${TO}/${TRACEHIERARCHY}"
+     cp "${TO}/${TRACEHIERARCHY}" "${TO}/${TRACEHIERARCHY}.mirror"
+ 
+-    (cd "${TO}/${TRACEDIR}" && ls -1rt $(find . -type f \! -name "_*" -printf "%f\n")) > "${TO}/${TRACELIST}"
++    (cd "${TO}/${TRACEDIR}" && ls -1rt $(find . -type f \! -name "_*" -exec basename {} \;)) > "${TO}/${TRACELIST}"
+ }
+ 
+ arch_imexclude() {
 @@ -390,7 +367,6 @@ create_logdir
  ########################################################################
  MIRRORNAME=${MIRRORNAME:-$(hostname -f)}
