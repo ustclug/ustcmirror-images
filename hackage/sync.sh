@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 set -o pipefail
+[[ $DEBUG = true ]] && set -x
 
 
 jobs_max=5
@@ -24,7 +25,7 @@ function pull_hackage () {
     echo "Build remote package list ..."
     tar -ztf index.tar.gz | awk 'BEGIN{FS="/"}{print($1"-"$2)}' | sort > $remote_pkgs || true
     echo "Remote package list built"
-    
+
     # save local package index to temporary file
     echo "Building local package list ..."
 
@@ -37,7 +38,7 @@ function pull_hackage () {
     else
         touch $local_pkgs
     fi
-    
+
     # Files that are unique to remote_pkgs are newer
     # download them into local
     for pkg in $(comm $remote_pkgs $local_pkgs -23); do
