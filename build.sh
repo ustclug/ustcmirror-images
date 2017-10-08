@@ -35,12 +35,4 @@ else
     done
 fi
 
-others=(mongodb)
-############################################
-### Images not based on ustcmirror/base
-############################################
-for image in "${others[@]}"; do
-    is_modified "$image" && build_image "$image"
-done
-
 exit 0

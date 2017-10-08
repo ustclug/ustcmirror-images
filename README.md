@@ -11,13 +11,11 @@
     - [debian-cd](#debian-cd)
     - [gitsync](#gitsync)
     - [gsutil-rsync](#gsutil-rsync)
+    - [hackage](#hackage)
     - [homebrew-bottles](#homebrew-bottles)
     - [lftpsync](#lftpsync)
     - [rsync](#rsync)
     - [pypi](#pypi)
-    - [hackage](#hackage)
-- [Other Images](#other-images)
-    - [MongoDB](#mongodb)
 
 # Introduction
 
@@ -96,6 +94,12 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 |-----------|-------------|
 | `GS_URL` | Sets the url of upstream. e.g. `gs://golang/`. |
 
+### hackage
+
+| Parameter | Description |
+|-----------|-------------|
+| `HACKAGE_BASE_URL` | Set the URL of upstream. Defaults to `https://hackage.haskell.org` |
+
 ### homebrew-bottles
 
 | Parameter                | Description                              |
@@ -136,19 +140,3 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | `BANDERSNATCH_WORKERS` | Defaults to `3`. |
 | `BANDERSNATCH_STOP_ON_ERROR` | Defaults to `true`. |
 | `BANDERSNATCH_TIMEOUT` | Defaults to `20`. |
-
-### hackage
-
-| Parameter | Description |
-|-----------|-------------|
-| `HACKAGE_BASE_URL` | Set the URL of upstream. Defaults to `https://hackage.haskell.org` |
-
-# Other Images
-
-### MongoDB
-
-| Parameter | Description |
-|-----------|-------------|
-| `MONGO_USER` | Sets the username of the db admin. Defaults to `mirror`. |
-| `MONGO_PASS` | Sets the password. Defaults to `averylongpass`. |
-| `MONGO_DB` | Sets the name of the db. Defaults to `mirror`. |
