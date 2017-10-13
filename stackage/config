@@ -1,0 +1,115 @@
+remote-repo: mirrors.ustc.edu.cn:http://mirrors.ustc.edu.cn/hackage/
+
+
+remote-repo-cache: /root/.cabal/packages
+world-file: /root/.cabal/world
+extra-prog-path: /root/.cabal/bin
+build-summary: /root/.cabal/logs/build.log
+remote-build-reporting: anonymous
+jobs: $ncpus
+
+haddock
+  -- keep-temp-files: False
+  -- hoogle: False
+  -- html: False
+  -- html-location:
+  -- executables: False
+  -- tests: False
+  -- benchmarks: False
+  -- foreign-libraries: False
+  -- all:
+  -- internal: False
+  -- css:
+  -- hyperlink-source: False
+  -- hscolour-css:
+  -- contents-location:
+
+install-dirs user
+  -- prefix: /root/.cabal
+  -- bindir: $prefix/bin
+  -- libdir: $prefix/lib
+  -- libsubdir: $abi/$libname
+  -- dynlibdir: $libdir/$abi
+  -- libexecdir: $prefix/libexec
+  -- libexecsubdir: $abi/$pkgid
+  -- datadir: $prefix/share
+  -- datasubdir: $abi/$pkgid
+  -- docdir: $datadir/doc/$abi/$pkgid
+  -- htmldir: $docdir/html
+  -- haddockdir: $htmldir
+  -- sysconfdir: $prefix/etc
+
+install-dirs global
+  -- prefix: /usr/local
+  -- bindir: $prefix/bin
+  -- libdir: $prefix/lib
+  -- libsubdir: $abi/$libname
+  -- dynlibdir: $libdir/$abi
+  -- libexecdir: $prefix/libexec
+  -- libexecsubdir: $abi/$pkgid
+  -- datadir: $prefix/share
+  -- datasubdir: $abi/$pkgid
+  -- docdir: $datadir/doc/$abi/$pkgid
+  -- htmldir: $docdir/html
+  -- haddockdir: $htmldir
+  -- sysconfdir: $prefix/etc
+
+program-locations
+  -- alex-location:
+  -- ar-location:
+  -- c2hs-location:
+  -- cpphs-location:
+  -- doctest-location:
+  -- gcc-location:
+  -- ghc-location:
+  -- ghc-pkg-location:
+  -- ghcjs-location:
+  -- ghcjs-pkg-location:
+  -- greencard-location:
+  -- haddock-location:
+  -- happy-location:
+  -- haskell-suite-location:
+  -- haskell-suite-pkg-location:
+  -- hmake-location:
+  -- hpc-location:
+  -- hsc2hs-location:
+  -- hscolour-location:
+  -- jhc-location:
+  -- ld-location:
+  -- lhc-location:
+  -- lhc-pkg-location:
+  -- pkg-config-location:
+  -- runghc-location:
+  -- strip-location:
+  -- tar-location:
+  -- uhc-location:
+
+program-default-options
+  -- alex-options:
+  -- ar-options:
+  -- c2hs-options:
+  -- cpphs-options:
+  -- doctest-options:
+  -- gcc-options:
+  -- ghc-options:
+  -- ghc-pkg-options:
+  -- ghcjs-options:
+  -- ghcjs-pkg-options:
+  -- greencard-options:
+  -- haddock-options:
+  -- happy-options:
+  -- haskell-suite-options:
+  -- haskell-suite-pkg-options:
+  -- hmake-options:
+  -- hpc-options:
+  -- hsc2hs-options:
+  -- hscolour-options:
+  -- jhc-options:
+  -- ld-options:
+  -- lhc-options:
+  -- lhc-pkg-options:
+  -- pkg-config-options:
+  -- runghc-options:
+  -- strip-options:
+  -- tar-options:
+  -- uhc-options:
