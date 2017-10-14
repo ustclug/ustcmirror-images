@@ -15,6 +15,7 @@
     - [homebrew-bottles](#homebrew-bottles)
     - [lftpsync](#lftpsync)
     - [rsync](#rsync)
+    - [stackage](#stackage)
     - [pypi](#pypi)
 
 # Introduction
@@ -132,6 +133,13 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | `RSYNC_DELAY_UPDATES` | Defaults to `true`. |
 | `RSYNC_MAXDELETE` | Maximum number of files that can be removed. Defaults to `4000`. |
 | `RSYNC_RSH` | Specify the remote shell, e.g. `ssh -i /path/to/key`. |
+
+### stackage
+
+Stackage doesn't need to specify upstream, but this mirror use cabal to install necessary Haskell packages. Replacing default mirror of cabal with faster one will speed up building process. 
+
+Read the [user guide](https://www.haskell.org/cabal/users-guide/installing-packages.html#repository-specification) before writing preferred mirror to `config` 
+
 
 ### pypi
 
