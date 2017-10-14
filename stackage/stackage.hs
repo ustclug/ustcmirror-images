@@ -11,6 +11,7 @@ import System.Process           (callProcess, readProcessWithExitCode)
 import System.Directory
 import System.Environment       (getEnv)
 import System.FilePath.Posix    (FilePath, (</>))
+import Control.Exception        (catch)
 import Control.Monad            (when, unless)
 import Data.List.Split          (splitOn)
 import Text.Printf              (printf)
@@ -120,7 +121,9 @@ updateChannels  basePath =
 
 stackSetup :: FilePath -> FilePath -> IO ()
 stackSetup bp setupPath = do
-    jr <- decodeFile setupPath :: IO (Maybe StackSetup)
+    jr <- catch (decodeFile setupPath) 
+                (\e -> do putStrLn (prettyPrintParseException e)
+                          return Nothing) :: IO (Maybe StackSetup)
 
     when (isNothing jr) (error "Parse setup yaml failure")
 
@@ -128,7 +131,7 @@ stackSetup bp setupPath = do
 
     let (StackSetup e d m g) = r
 
-    let filesToDownload = M.toList g >>= M.toList . snd >>= \x -> [snd x]
+    let filesToDownload = M.toList g >>= M.toList . snd >>= return . snd
 
     let dlEachGhc (ResourceInfo _ u _ s _) = download u (bp </> "ghc") s False
         in sequence_ $ map dlEachGhc filesToDownload
