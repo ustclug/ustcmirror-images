@@ -20,7 +20,13 @@ build_image() {
     fi
 }
 
-derived=(*sync 'debian-cd' 'homebrew-bottles' 'rubygems' 'pypi' 'test' 'hackage')
+# match all directories
+tmp=(*/)
+# remove splitters
+derived=(${tmp[@]%/})
+# remove base
+derived=(${derived[@]/base})
+
 #########################################
 ### Images based on ustcmirror/base
 #########################################
