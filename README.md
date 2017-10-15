@@ -14,9 +14,10 @@
     - [hackage](#hackage)
     - [homebrew-bottles](#homebrew-bottles)
     - [lftpsync](#lftpsync)
-    - [rsync](#rsync)
-    - [stackage](#stackage)
     - [pypi](#pypi)
+    - [rsync](#rsync)
+    - [rubygems](#rubygems)
+    - [stackage](#stackage)
 
 # Introduction
 
@@ -26,16 +27,16 @@ Docker images used by [ustcmirror](https://github.com/ustclug/ustcmirror)
 
 ### Volumes
 
-* `/data`: The mount point of the repository on the host. `export TO=/data` in `entry.sh`.
-* `/log`: The mount point of the host directory that save logs. `export LOGDIR=/log` in `entry.sh`.
+* `/data`: The mount point of the repository on the host. `export TO=/data/` in the entrypoint.
+* `/log`: The mount point of the host directory that save logs. `export LOGDIR=/log/` in the entrypoint.
 
 ### Common Configuration Parameters
 
 | Parameter | Description |
 |-----------|-------------|
 | `DEBUG` | Set this to `true` to enable debugging. |
-| `BIND_ADDRESS` | Set the local ip to be bound. |
-| `OWNER` | Recommended to specify `$uid:$gid`. Defaults to `0:0`. |
+| `BIND_ADDRESS` | Set the local ip to be bound. Require `--network=host`. |
+| `OWNER` | Set the uid and gid of the process so that the downloaded files wont get messed up. Defaults to `0:0` (aka root:root). |
 | `LOG_ROTATE_CYCLE` | Specify how many cycle versions of the logfile to be saved. Set this to `0` will disable rotation. Defaults to `0`. |
 | `REPO` | Name of the repository. Required in `archvsync`. |
 
@@ -116,6 +117,14 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | `LFTPSYNC_EXCLUDE` | Files to be excluded. Defaults to `-X .~tmp~/`. |
 | `LFTPSYNC_JOBS` | Defaults to `$(getconf _NPROCESSORS_ONLN)`. |
 
+### pypi
+
+| Parameter | Description |
+|-----------|-------------|
+| `BANDERSNATCH_WORKERS` | Defaults to `3`. |
+| `BANDERSNATCH_STOP_ON_ERROR` | Defaults to `true`. |
+| `BANDERSNATCH_TIMEOUT` | Defaults to `20`. |
+
 ### rsync
 
 | Parameter | Description |
@@ -134,17 +143,14 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | `RSYNC_MAXDELETE` | Maximum number of files that can be removed. Defaults to `4000`. |
 | `RSYNC_RSH` | Specify the remote shell, e.g. `ssh -i /path/to/key`. |
 
-### stackage
-
-Stackage doesn't need to specify upstream, but this mirror use cabal to install necessary Haskell packages. Replacing default mirror of cabal with faster one will speed up building process. 
-
-Read the [user guide](https://www.haskell.org/cabal/users-guide/installing-packages.html#repository-specification) before writing preferred mirror to `config` 
-
-
-### pypi
+### rubygems
 
 | Parameter | Description |
 |-----------|-------------|
-| `BANDERSNATCH_WORKERS` | Defaults to `3`. |
-| `BANDERSNATCH_STOP_ON_ERROR` | Defaults to `true`. |
-| `BANDERSNATCH_TIMEOUT` | Defaults to `20`. |
+| `UPSTREAM` | Defaults to `http://rubygems.org`. |
+
+### stackage
+
+Stackage doesn't need to specify upstream, but this mirror use cabal to install necessary Haskell packages. Replacing default mirror of cabal with faster one will speed up building process.
+
+Read the [user guide](https://www.haskell.org/cabal/users-guide/installing-packages.html#repository-specification) before writing preferred mirror to `config`
