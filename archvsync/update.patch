@@ -1,5 +1,5 @@
 diff --git a/bin/common b/bin/common
-index e454fd4..41b4071 100644
+index a6eac7f..09edbc8 100644
 --- a/bin/common
 +++ b/bin/common
 @@ -206,7 +206,6 @@ log () {
@@ -91,7 +91,7 @@ index e454fd4..41b4071 100644
 -    ) | /usr/sbin/sendmail -i -- "$@" || :
 -}
 diff --git a/bin/ftpsync b/bin/ftpsync
-index 12d4871..976ba2e 100755
+index 151b6b6..3ea575a 100755
 --- a/bin/ftpsync
 +++ b/bin/ftpsync
 @@ -1,6 +1,8 @@
@@ -115,45 +115,41 @@ index 12d4871..976ba2e 100755
 +LOCKDIR="${BASEDIR}/locks"
 +LOGDIR="${LOGDIR:-${BASEDIR}/log}"
 +
-+VERSION="g5bf559a" # "g$(cd $BINDIR && git rev-parse --short HEAD 2>/dev/null || echo "unknown")"
++VERSION="g616e661"
 +
 +. "${BINDIR}/common"
  
  ########################################################################
  ########################################################################
-@@ -100,42 +111,8 @@ cleanup() {
+@@ -100,38 +111,8 @@ cleanup() {
      # all done. Mail the log, exit.
      log "Mirrorsync done";
  
 -    if [[ -n ${MAILTO} ]]; then
--	local archive="(empty)"
--        if [[ $ARCHIVE ]]; then
--            archive=$ARCHIVE
--        fi
--
 -        local args=()
 -        local send=
--        local subject="SUCCESS: archive ${archive}"
+-        local subject="SUCCESS"
 -        local rsync_error="${LOGDIR}/rsync-${NAME}.error"
 -        local rsync_log="${LOGDIR}/rsync-${NAME}.log"
 -
 -        # In case rsync had something on stderr
 -        if [[ -s $rsync_error ]]; then
 -            args+=(-a $rsync_error -a $LOG)
--            subject="ERROR: archive ${archive}: rsync errors"
+-            subject="ERROR: rsync errors"
 -            send=1
--        # In case admin want all logs or we had logged any error
--        elif [[ ${ERRORSONLY} = false ]] || [[ ${LOG_ERROR:-} ]]; then
+-        # In case admin want all logs
+-        elif [[ ${ERRORSONLY} = false ]]; then
 -            args+=(-a $LOG)
--            subject="ERROR: archive ${archive}: errors"
--            send=1
--        fi
--        # Someone wants full logs including rsync
--        if [[ ${FULLLOGS} = true ]]; then
--            args+=(-a $rsync_log)
+-            if [[ ${LOG_ERROR:-} ]]; then
+-                subject="ERROR"
+-            fi
 -            send=1
 -        fi
 -        if [[ $send ]]; then
+-            # Someone wants full logs including rsync
+-            if [[ ${FULLLOGS} = true ]]; then
+-                args+=(-a $rsync_log)
+-            fi
 -            mailf "${args[@]}" -s "[${PROGRAM}@$(hostname -s)] ${subject}" ${MAILTO}
 -        fi
 -    fi
@@ -164,7 +160,7 @@ index 12d4871..976ba2e 100755
  
      rm -f "${LOCK}"
  
-@@ -221,7 +198,7 @@ tracefile() {
+@@ -217,7 +198,7 @@ tracefile() {
          fi
  
          if [[ -d ${TO}/dists ]]; then
@@ -173,7 +169,7 @@ index 12d4871..976ba2e 100755
                  sed -Ene 's#.*/binary-([^/]+)$#\1#p; s#.*/(source)$#\1#p' | sort -u | tr '\n' ' ')
              if [[ $ARCH ]]; then
                  echo "Architectures: ${ARCH}"
-@@ -264,7 +241,7 @@ tracefile() {
+@@ -261,7 +242,7 @@ tracefile() {
      mv "${TO}/${TRACEHIERARCHY}".new "${TO}/${TRACEHIERARCHY}"
      cp "${TO}/${TRACEHIERARCHY}" "${TO}/${TRACEHIERARCHY}.mirror"
  
@@ -182,7 +178,7 @@ index 12d4871..976ba2e 100755
  }
  
  arch_imexclude() {
-@@ -390,7 +367,6 @@ create_logdir
+@@ -387,7 +368,6 @@ create_logdir
  ########################################################################
  MIRRORNAME=${MIRRORNAME:-$(hostname -f)}
  TO=${TO:-"/srv/mirrors/debian/"}
@@ -190,7 +186,7 @@ index 12d4871..976ba2e 100755
  HUB=${HUB:-"false"}
  
  # Connection options
-@@ -561,10 +537,10 @@ if ! ( set -o noclobber; echo "$$" > "${LOCK}") 2> /dev/null; then
+@@ -569,10 +549,10 @@ if ! ( set -o noclobber; echo "$$" > "${LOCK}") 2> /dev/null; then
  fi
  
  # We want to cleanup always
@@ -203,7 +199,7 @@ index 12d4871..976ba2e 100755
  log "Mirrorsync start"
  
  # Look who pushed us and note that in the log.
-@@ -735,39 +711,3 @@ fi
+@@ -743,39 +723,3 @@ fi
  
  # Remove the Archive-Update-in-Progress file before we push our downstreams.
  rm -f "${LOCK}"
