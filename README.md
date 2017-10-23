@@ -14,6 +14,7 @@
     - [hackage](#hackage)
     - [homebrew-bottles](#homebrew-bottles)
     - [lftpsync](#lftpsync)
+    - [nodesource](#nodesource)
     - [pypi](#pypi)
     - [rsync](#rsync)
     - [rubygems](#rubygems)
@@ -116,6 +117,10 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | `LFTPSYNC_PATH` | The destination path on the remote server. |
 | `LFTPSYNC_EXCLUDE` | Files to be excluded. Defaults to `-X .~tmp~/`. |
 | `LFTPSYNC_JOBS` | Defaults to `$(getconf _NPROCESSORS_ONLN)`. |
+
+### nodesource
+
+Sync from official site. No parameter needed.
 
 ### pypi
 
