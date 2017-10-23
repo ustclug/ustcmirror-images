@@ -1,4 +1,9 @@
 #!/bin/bash
+
+export SYNC_SCRIPT=${SYNC_SCRIPT:-"/sync.sh"}
+export PRE_SYNC_SCRIPT=${PRE_SYNC_SCRIPT:-"/pre-sync.sh"}
+export POST_SYNC_SCRIPT=${POST_SYNC_SCRIPT:-"/post-sync.sh"}
+
 log() {
     echo "$@" >&2
 }
@@ -12,8 +17,8 @@ rotate_log() {
     su-exec "$OWNER" savelog -c "$LOG_ROTATE_CYCLE" "$LOGFILE"
 }
 
-if [[ ! -x /sync.sh ]]; then
-    log '/sync.sh not found'
+if [[ ! -x $SYNC_SCRIPT ]]; then
+    log "$SYNC_SCRIPT not found"
     exit 1
 fi
 
@@ -28,16 +33,16 @@ export LOGFILE="$LOGDIR/result.log"
 
 chown "$OWNER" "$TO" # not recursive
 
-[[ -f /pre-sync.sh ]] && . /pre-sync.sh
+[[ -f $PRE_SYNC_SCRIPT ]] && . $PRE_SYNC_SCRIPT
 
 if [[ $LOG_ROTATE_CYCLE -ne 0 ]]; then
     trap 'rotate_log' EXIT
     date '+============ SYNC STARTED AT %F %T ============' | su-exec "$OWNER" tee -a "$LOGFILE"
-    su-exec "$OWNER" /sync.sh &> >(tee -a "$LOGFILE") &
+    su-exec "$OWNER" $SYNC_SCRIPT &> >(tee -a "$LOGFILE") &
 else
     LOGFILE='/dev/null'
     date '+============ SYNC STARTED AT %F %T ============'
-    su-exec "$OWNER" /sync.sh &
+    su-exec "$OWNER" $SYNC_SCRIPT &
 fi
 
 pid="$!"
@@ -46,6 +51,6 @@ wait "$pid"
 RETCODE="$?"
 date '+============ SYNC FINISHED AT %F %T ============' | tee -a "$LOGFILE"
 
-[[ -f /post-sync.sh ]] && . /post-sync.sh
+[[ -f $POST_SYNC_SCRIPT ]] && . $POST_SYNC_SCRIPT
 
 exit $RETCODE
