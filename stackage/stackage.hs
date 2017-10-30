@@ -136,15 +136,11 @@ stackSetup bp setupPath = do
     let dlEachGhc (ResourceInfo _ u _ s _) = download u (bp </> "ghc") s False
         in sequence_ $ map dlEachGhc filesToDownload
 
-    let newMsys_ = M.adjust riF "windows32" m
-            where riF (ResourceInfo v u c s e) = (ResourceInfo v (redirect u) c s e)
-                  redirect = ("https://mirrors.ustc.edu.cn/msys2/distrib/i686/" ++) .
-                            last . splitOn "/"
 
-    let newMsys = M.adjust riF "windows64" newMsys_
-            where riF (ResourceInfo v u c s e) = (ResourceInfo v (redirect u) c s e)
-                  redirect = ("https://mirrors.ustc.edu.cn/msys2/distrib/x86_64/" ++) .
-                            last . splitOn "/"
+    let msys2 = M.fromList [
+                        ("windows32", ResourceInfo "20161025" "https://mirrors.ustc.edu.cn/msys2/distrib/i686/msys2-base-i686-20161025.tar.xz" 47526500 "5d17fa53077a93a38a9ac0acb8a03bf6c2fc32ad" (M.fromList [])),
+                        ("windows64", ResourceInfo "20161025" "https://mirrors.ustc.edu.cn/msys2/distrib/x86_64/msys2-base-x86_64-20161025.tar.xz" 47166584 "05fd74a6c61923837dffe22601c9014f422b5460" (M.fromList []))
+                    ]
 
 
     let newGhc = M.map (M.map riF) g
@@ -152,7 +148,7 @@ stackSetup bp setupPath = do
                   redirect = ("https://mirrors.ustc.edu.cn/stackage/ghc/" ++) .
                             last . splitOn "/"
 
-    encodeFile (bp </> "stack-setup.yaml") (StackSetup e d newMsys newGhc)
+    encodeFile (bp </> "stack-setup.yaml") (StackSetup e d msys2 newGhc)
     putStrLn $ printf "Stack setup successfully processed"
 
 
