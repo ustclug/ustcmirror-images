@@ -16,6 +16,7 @@
     - [lftpsync](#lftpsync)
     - [nodesource](#nodesource)
     - [pypi](#pypi)
+    - [rclone](#rclone)
     - [rsync](#rsync)
     - [rubygems](#rubygems)
     - [stackage](#stackage)
@@ -129,6 +130,19 @@ Sync from official site. No parameter needed.
 | `BANDERSNATCH_WORKERS` | Defaults to `3`. |
 | `BANDERSNATCH_STOP_ON_ERROR` | Defaults to `true`. |
 | `BANDERSNATCH_TIMEOUT` | Defaults to `20`. |
+
+### rclone
+
+| Parameter | Description |
+|-----------|-------------|
+| `RCLONE_PATH` | The destination path. Note that the rclone remote has been hard-coded as `remote`. |
+| `RCLONE_EXTRA` | Extra options passed to `rclone sync`. Defaults to empty. |
+| `RCLONE_CONFIG_REMOTE_*` | Set config file options. |
+
+ref:
+
+* [rclone environment variables](https://rclone.org/docs/#environment-variables)
+* [rclone-sync manual](https://rclone.org/commands/rclone_sync/)
 
 ### rsync
 
