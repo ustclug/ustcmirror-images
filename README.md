@@ -137,6 +137,8 @@ Sync from official site. No parameter needed.
 |-----------|-------------|
 | `RCLONE_PATH` | The destination path. Note that the rclone remote has been hard-coded as `remote`. |
 | `RCLONE_EXTRA` | Extra options passed to `rclone sync`. Defaults to empty. |
+| `RCLONE_CHECKERS` | Set the number of checkers. Defaults to `$(getconf _NPROCESSORS_ONLN)`. |
+| `RCLONE_TRANSFERS` | Set the number of file transfers. Defaults to `$(getconf _NPROCESSORS_ONLN)`. |
 | `RCLONE_CONFIG_REMOTE_*` | Set config file options. |
 
 ref:
