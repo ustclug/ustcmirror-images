@@ -23,8 +23,9 @@ if [[ -n $BIND_ADDRESS ]]; then
 fi
 
 if [[ $DEBUG = true ]]; then
-    export RCLONE_VERBOSE=${RCLONE_VERBOSE:-1}
-    env | grep '^RCLONE'
+    export RCLONE_VERBOSE=${RCLONE_VERBOSE:-2}
+    export RCLONE_DUMP_FILTERS=true
+    env | grep '^RCLONE' | sort -t '=' -k 1
     set -x
 fi
 
