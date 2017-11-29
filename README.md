@@ -97,6 +97,7 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | Parameter | Description |
 |-----------|-------------|
 | `GS_URL` | Sets the url of upstream. e.g. `gs://golang/`. |
+| `GS_EXCLUDE` | Files to be excluded. Defaults to empty. |
 
 ### hackage
 
