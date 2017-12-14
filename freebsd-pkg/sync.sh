@@ -3,7 +3,7 @@
 [[ $DEBUG == true ]] && set -x
 
 FBSD_PKG_UPSTREAM=${FBSD_PKG_UPSTREAM:-"http://pkg.freebsd.org"}
-FBSD_PKG_JOBS=${FBSD_PKG_JOBS:-5}
+FBSD_PKG_JOBS=${FBSD_PKG_JOBS:-1}
 FBSD_PLATFORMS=$(mktemp)
 
 export PARALLEL_SHELL=/bin/bash
