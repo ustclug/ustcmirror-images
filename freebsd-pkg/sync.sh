@@ -13,7 +13,7 @@ download_and_check() {
 		[[ -f $local_dir/$repopath ]] && continue
 		curl -m 600 -sSfRL --create-dirs -o $local_dir/$repopath.tmp $remote_url/$repopath
 		if [[ $? -ne 0 ]]; then
-			echo "[WARN] download failed: $remote_url/$repopath"
+			echo "[WARN] download failed $remote_url/$repopath"
 			rm -f $local_dir/$repopath.tmp
 			continue
 		fi
@@ -36,7 +36,7 @@ download_or_fail() {
 			local remote_mtime=$(date --date="$remote_mtime" +%s)
 			local local_mtime=$(stat -c %Y "$local_dir/$repopath")
 			if [[ $local_mtime -eq $remote_mtime ]] ; then
-				echo "[INFO] not modified and skip $remote_url/$repopath"
+				[[ $DEBUG == true ]] && echo "[DEBUG] not modified and skip $remote_url/$repopath"
 				continue
 			fi
 		fi
