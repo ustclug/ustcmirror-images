@@ -34,7 +34,6 @@ download_or_fail() {
 		if [[ -f $local_dir/$repopath ]]; then
 			local remote_mtime=$(curl -sI $remote_url/$repopath | grep -oP '(?<=^Last-Modified: ).+$')
 			local remote_mtime=$(date --date="$remote_mtime" +%s)
-			echo $remote_mtime
 			local local_mtime=$(stat -c %Y "$local_dir/$repopath")
 			if [[ $local_mtime -eq $remote_mtime ]] ; then
 				echo "[INFO] not modified and skip: $local_dir/$repopath"
