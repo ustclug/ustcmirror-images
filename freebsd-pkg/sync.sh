@@ -14,7 +14,7 @@ download_and_check() {
 		curl -m 600 -sSfRL --create-dirs -o $local_dir/$repopath.tmp $remote_url/$repopath
 		if [[ $? -ne 0 ]]; then
 			echo "[WARN] download failed: $remote_url/$repopath"
-			rm $local_dir/$repopath.tmp 2> /dev/null
+			rm -f $local_dir/$repopath.tmp
 			continue
 		fi
 		if echo $sum $local_dir/$repopath.tmp | sha256sum -c --quiet --status ; then
@@ -22,7 +22,7 @@ download_and_check() {
 			echo "[INFO] downloaded $local_dir/$repopath"
 		else
 			echo "[WARN] checksum mismatch: $local_dir/$repopath"
-			rm $local_dir/$repopath.tmp 2> /dev/null
+			rm -f $local_dir/$repopath.tmp
 		fi
 	done
 }
@@ -95,7 +95,7 @@ channel_sync() {
 	sed 's/^/[INFO] remove /g' $removal_list 
 
 	# clean temp file or dir
-	rm $meta $removal_list
+	rm -f $meta $removal_list
 	rm -r $tmpdir
 
 	echo "[INFO] sync finished $baseurl"
