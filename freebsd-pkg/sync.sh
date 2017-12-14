@@ -67,14 +67,14 @@ channel_sync() {
 	# get meta-data
 	export remote_url=$baseurl
 	export local_dir=$tmpdir
-	download_or_fail digests.txz meta.txz packagesite.txz
+	download_or_fail true digests.txz meta.txz packagesite.txz
 	if [[ $? -ne 0 ]]; then
 		echo "[FATAL] download meta-data failed."
 		return 1
 	fi
 
 	# get pkg software
-	download_or_fail Latest/{pkg-devel.txz,pkg.txz,pkg.txz.sig}
+	download_or_fail false Latest/{pkg-devel.txz,pkg.txz,pkg.txz.sig}
 
 	# get packages
 	tar -C $tmpdir -xJf $tmpdir/packagesite.txz packagesite.yaml 
