@@ -19,9 +19,9 @@ download_and_check() {
 		fi
 		if echo $sum $local_dir/$repopath.tmp | sha256sum -c --quiet --status ; then
 			mv $local_dir/$repopath.tmp $local_dir/$repopath
-			echo "[INFO] downloaded $local_dir/$repopath"
+			echo "[INFO] downloaded $remote_url/$repopath"
 		else
-			echo "[WARN] checksum mismatch: $local_dir/$repopath"
+			echo "[WARN] checksum mismatch $remote_url/$repopath"
 			rm -f $local_dir/$repopath.tmp
 		fi
 	done
@@ -36,13 +36,13 @@ download_or_fail() {
 			local remote_mtime=$(date --date="$remote_mtime" +%s)
 			local local_mtime=$(stat -c %Y "$local_dir/$repopath")
 			if [[ $local_mtime -eq $remote_mtime ]] ; then
-				echo "[INFO] not modified and skip: $local_dir/$repopath"
+				echo "[INFO] not modified and skip $remote_url/$repopath"
 				continue
 			fi
 		fi
 		curl -m 600 -sSfRL --create-dirs -o $local_dir/$repopath $remote_url/$repopath
 		if [[ $? -ne 0 ]]; then
-			echo "[WARN] download failed: $remote_url/$repopath"
+			echo "[WARN] download failed $remote_url/$repopath"
 			[[ $fail_to_exit != false ]] && return 1
 		else
 			echo "[INFO] downloaded $remote_url/$repopath"
