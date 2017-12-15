@@ -101,9 +101,6 @@ channel_sync() {
 	echo "[INFO] sync finished $baseurl"
 }
 
-mkdir -p ~/.parallel
-touch ~/.parallel/will-cite
-
 echo "[INFO] getting version list..."
 curl -sSL $FBSD_PKG_UPSTREAM | grep -oP 'FreeBSD:[0-9]+:[a-z0-9]+' | sort -t : -rnk 2 | uniq | tee $FBSD_PLATFORMS
 
