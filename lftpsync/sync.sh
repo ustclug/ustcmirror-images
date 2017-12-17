@@ -21,6 +21,7 @@ is_ipv6() {
 set -eu
 [[ $DEBUG = true ]] && set -x
 
+LFTPSYNC_PATH=${LFTPSYNC_PATH:-}
 LFTPSYNC_JOBS="${LFTPSYNC_JOBS:-$(getconf _NPROCESSORS_ONLN)}"
 LFTPSYNC_EXCLUDE="${LFTPSYNC_EXCLUDE:- -X .~tmp~/}"
 BIND_ADDRESS="${BIND_ADDRESS:-}"
@@ -36,6 +37,12 @@ if [[ -n $BIND_ADDRESS ]]; then
 fi
 
 commands+="open $LFTPSYNC_HOST;"
-commands+="mirror --verbose --use-cache -aec --parallel=$LFTPSYNC_JOBS $LFTPSYNC_EXCLUDE $LFTPSYNC_PATH $TO"
+commands+="mirror --verbose --use-cache -aec --parallel=$LFTPSYNC_JOBS $LFTPSYNC_EXCLUDE"
+
+if [[ -n $LFTPSYNC_PATH ]]; then
+    commands+=" $LFTPSYNC_PATH $TO"
+fi
+
+cd $TO
 
 exec lftp -c "$commands"
