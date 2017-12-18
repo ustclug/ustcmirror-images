@@ -3,7 +3,7 @@
 [[ $DEBUG == true ]] && set -x
 
 FBSD_PORTS_INDEX_UPSTREAM=${FBSD_PORTS_INDEX_UPSTREAM:-"https://github.com/freebsd/freebsd-ports.git"}
-FBSD_PORTS_DISTFILES_UPSTREAM=${FBSD_PORTS_DISTFILES_UPSTREA:-"http://distcache.freebsd.org/ports-distfiles"}
+FBSD_PORTS_DISTFILES_UPSTREAM=${FBSD_PORTS_DISTFILES_UPSTREAM:-"http://distcache.freebsd.org/ports-distfiles"}
 FBSD_PORTS_JOBS=${FBSD_PORTS_JOBS:-1}
 tmpdir=$(mktemp -d)
 meta=$(mktemp)
