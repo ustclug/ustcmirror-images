@@ -10,6 +10,7 @@
     - [archvsync](#archvsync)
     - [debian-cd](#debian-cd)
     - [freebsd-pkg](#freebsd-pkg)
+    - [freebsd-ports](#freebsd-ports)
     - [gitsync](#gitsync)
     - [gsutil-rsync](#gsutil-rsync)
     - [hackage](#hackage)
@@ -90,6 +91,14 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | ------------------- | ---------------------------------------- |
 | `FBSD_PKG_UPSTREAM` | Set the URL of upstream. Defaults to `http://pkg.freebsd.org`. |
 | `FBSD_PKG_JOBS`     | Defaults to `1`.                         |
+
+### freebsd-ports
+
+| Parameter                       | Description                              |
+| ------------------------------- | ---------------------------------------- |
+| `FBSD_PORTS_INDEX_UPSTREAM`     | Set the URL of upstream git index. Defaults to `https://github.com/freebsd/freebsd-ports.git`. |
+| `FBSD_PORTS_DISTFILES_UPSTREAM` | Set the URL of upstream distfiles. Defaults to `http://distcache.freebsd.org/ports-distfiles`. |
+| `FBSD_PORTS_JOBS`               | Defaults to `1`.                         |
 
 ### gitsync
 
