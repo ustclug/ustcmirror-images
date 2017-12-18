@@ -37,12 +37,11 @@ if [[ -n $BIND_ADDRESS ]]; then
 fi
 
 commands+="open $LFTPSYNC_HOST;"
+commands+="lcd $TO;"
 commands+="mirror --verbose --use-cache -aec --parallel=$LFTPSYNC_JOBS $LFTPSYNC_EXCLUDE"
 
 if [[ -n $LFTPSYNC_PATH ]]; then
-    commands+=" $LFTPSYNC_PATH $TO"
+    commands+=" $LFTPSYNC_PATH"
 fi
-
-cd $TO
 
 exec lftp -c "$commands"
