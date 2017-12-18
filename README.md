@@ -89,7 +89,7 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | Parameter           | Description                              |
 | ------------------- | ---------------------------------------- |
 | `FBSD_PKG_UPSTREAM` | Set the URL of upstream. Defaults to `http://pkg.freebsd.org`. |
-| `FBSD_PKG_JOBS`     | Defaults to `5`.                         |
+| `FBSD_PKG_JOBS`     | Defaults to `1`.                         |
 
 ### gitsync
 
