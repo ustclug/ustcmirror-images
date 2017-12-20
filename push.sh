@@ -11,4 +11,4 @@ fi
 
 [[ -z $SKIP_LOGIN ]] && docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
 
-docker images --filter=label=ustcmirror.images --format="{{.Repository}}:{{.Tag}}" | xargs docker push
+docker images --filter=label=ustcmirror.images --format="{{.Repository}}:{{.Tag}}" | xargs -n 1 docker push
