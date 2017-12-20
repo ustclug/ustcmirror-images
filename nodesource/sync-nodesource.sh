@@ -1,17 +1,17 @@
 #!/bin/bash
 
+set -eu
+[[ $DEBUG = true ]] && set -x
+
 BASE=$TO
-export TO=
-export LFTPSYNC_PATH=
 export LFTPSYNC_EXCLUDE="-X db/ -X conf/"
 
 sync_nodesource(){
     local DIST=$1; shift
-    while [[ $# -gt 0 ]]; do
-        local VERSION=$1; shift
-        local DIR=$BASE/$DIST/$VERSION
-        mkdir -p $DIR && cd $DIR || exit 1
+    for VERSION in "$@"; do
+        export TO="$BASE/$DIST/$VERSION"
         export LFTPSYNC_HOST=https://$DIST.nodesource.com/$VERSION/
+        mkdir -p "$TO"
         /sync.sh
     done
 }
