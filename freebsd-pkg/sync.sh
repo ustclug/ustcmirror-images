@@ -5,24 +5,32 @@
 FBSD_PKG_UPSTREAM=${FBSD_PKG_UPSTREAM:-"http://pkg.freebsd.org"}
 FBSD_PKG_JOBS=${FBSD_PKG_JOBS:-1}
 FBSD_PLATFORMS=$(mktemp)
-
+export BY_HASH=$(realpath $TO/.by-hash)
 export PARALLEL_SHELL=/bin/bash
 
 download_and_check() {
+	cd $BY_HASH
 	while read sum repopath; do
-		[[ -f $local_dir/$repopath ]] && continue
-		curl -m 600 -sSfRL --create-dirs -o $local_dir/$repopath.tmp $remote_url/$repopath
-		if [[ $? -ne 0 ]]; then
-			echo "[WARN] download failed $remote_url/$repopath"
-			rm -f $local_dir/$repopath.tmp
-			continue
-		fi
-		if echo $sum $local_dir/$repopath.tmp | sha256sum -c --quiet --status ; then
-			mv $local_dir/$repopath.tmp $local_dir/$repopath
-			echo "[INFO] downloaded $remote_url/$repopath"
+		if [[ -f $sum ]]; then
+			if [[ $(stat -c "%i" $sum) != $(stat -c "%i" $local_dir/$repopath) ]]; then
+				ln -f $sum $local_dir/$repopath
+			fi
 		else
-			echo "[WARN] checksum mismatch $remote_url/$repopath"
-			rm -f $local_dir/$repopath.tmp
+			echo "[INFO] download $remote_url/$repopath"
+			curl -m 600 -sSfRL -o $sum.tmp $remote_url/$repopath
+			if [[ $? -ne 0 ]]; then
+				echo "[WARN] download failed $remote_url/$repopath"
+				rm -f $sum.tmp
+				continue
+			fi
+
+			if echo $sum $sum.tmp | sha256sum -c --quiet --status ; then
+				mv $sum.tmp $sum
+				ln -f $sum $local_dir/$repopath
+			else
+				echo "[WARN] checksum mismatch $remote_url/$repopath"
+				rm -f $sum.tmp
+			fi
 		fi
 	done
 }
@@ -58,6 +66,9 @@ channel_sync() {
 
 	echo "[INFO] syncing $baseurl"
 
+	mkdir -p $basedir/All
+	cd $basedir
+
 	# clean unfinished downloads
 	find $basedir -name '*.tmp' -delete
 
@@ -92,8 +103,8 @@ channel_sync() {
 
 	# purge old packages
 	local removal_list=$(mktemp)
-	comm -23 <(ls $basedir/All | sort) <(awk '-F[ /]' '{print $3}' $meta | sort) | sed "s/^/${basedir//\//\\/}\\/All\\//g" | tee $removal_list | xargs rm -f 
-	sed 's/^/[INFO] remove /g' $removal_list 
+	comm -23 <(find All -type f | sort) <(awk '{print $2}' $meta | sort) | tee $removal_list | xargs rm -f
+	sed 's/^/[INFO] remove /g' $removal_list
 
 	# clean temp file or dir
 	rm -f $meta $removal_list
@@ -102,14 +113,18 @@ channel_sync() {
 	echo "[INFO] sync finished $baseurl"
 }
 
+mkdir -p $BY_HASH || return 1
+
 echo "[INFO] getting version list..."
 curl -sSL $FBSD_PKG_UPSTREAM | grep -oP 'FreeBSD:[0-9]+:[a-z0-9]+' | sort -t : -rnk 2 | uniq | tee $FBSD_PLATFORMS
 
 while read platform; do
-	mkdir -p $TO/$platform/latest
 	channel_sync $FBSD_PKG_UPSTREAM/$platform/latest $TO/$platform/latest
 done < $FBSD_PLATFORMS
 
 find $TO -type d -print0 | xargs -0 chmod 755
 
 rm $FBSD_PLATFORMS
+
+# purge old hash files
+find $BY_HASH -type f -links 1 -print0 | xargs -0 rm -f
