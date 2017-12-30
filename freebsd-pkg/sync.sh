@@ -127,4 +127,5 @@ find $TO -type d -print0 | xargs -0 chmod 755
 rm $FBSD_PLATFORMS
 
 # purge old hash files
-find $BY_HASH -type f -links 1 -print0 | xargs -0 rm -f
+echo "[INFO] clean hash files"
+find $BY_HASH -type f -links 1 -delete
