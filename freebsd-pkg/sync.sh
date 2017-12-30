@@ -12,7 +12,7 @@ download_and_check() {
 	cd $BY_HASH
 	while read sum repopath; do
 		if [[ -f $sum ]]; then
-			if [[ $(stat -c "%i" $sum) != $(stat -c "%i" $local_dir/$repopath) ]]; then
+			if [[ ! $sum -ef $local_dir/$repopath ]]; then
 				ln -f $sum $local_dir/$repopath
 			fi
 		else
