@@ -94,7 +94,7 @@ channel_sync() {
 		echo '[FATAL] unzip packagesite.txz failed.'
 		return 1
 	fi
-	jq -r '"\(.sum) \(.repopath)"' $tmpdir/packagesite.yaml > $meta
+	jq -r '"\(.sum) \(.repopath)"' $tmpdir/packagesite.yaml | sort -k2 > $meta
 	rm -f $tmpdir/packagesite.yaml
 	export local_dir=$basedir
 	parallel -j $FBSD_PKG_JOBS --pipepart -a $meta download_and_check
@@ -104,7 +104,7 @@ channel_sync() {
 
 	# purge old packages
 	local removal_list=$(mktemp)
-	comm -23 <(find All -type f | sort) <(awk '{print $2}' $meta | sort) | tee $removal_list | xargs rm -f
+	comm -23 <(find All -type f | sort) <(awk '{print $2}' $meta) | tee $removal_list | xargs rm -f
 	sed 's/^/[INFO] remove /g' $removal_list
 
 	# clean temp file or dir
