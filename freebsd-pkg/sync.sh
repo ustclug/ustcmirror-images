@@ -3,6 +3,7 @@
 [[ $DEBUG == true ]] && set -x
 
 FBSD_PKG_UPSTREAM=${FBSD_PKG_UPSTREAM:-"http://pkg.freebsd.org"}
+FBSD_PKG_EXCLUDE=${FBSD_PKG_EXCLUDE:-"^FreeBSD:[89]:"}
 FBSD_PKG_JOBS=${FBSD_PKG_JOBS:-1}
 FBSD_PLATFORMS=$(mktemp)
 export BY_HASH=$(realpath $TO/.by-hash)
@@ -116,7 +117,7 @@ channel_sync() {
 mkdir -p $BY_HASH || return 1
 
 echo "[INFO] getting version list..."
-curl -sSL $FBSD_PKG_UPSTREAM | grep -oP 'FreeBSD:[0-9]+:[a-z0-9]+' | sort -t : -rnk 2 | uniq | tee $FBSD_PLATFORMS
+curl -sSL $FBSD_PKG_UPSTREAM | grep -oP 'FreeBSD:[0-9]+:[a-z0-9]+' | grep -vP $FBSD_PKG_EXCLUDE | sort -t : -rnk 2 | uniq | tee $FBSD_PLATFORMS
 
 while read platform; do
 	channel_sync $FBSD_PKG_UPSTREAM/$platform/latest $TO/$platform/latest
