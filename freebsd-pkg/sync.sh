@@ -97,7 +97,7 @@ channel_sync() {
 	jq -r '"\(.sum) \(.repopath)"' $tmpdir/packagesite.yaml | sort -k2 > $meta
 	rm -f $tmpdir/packagesite.yaml
 	export local_dir=$basedir
-	parallel -j $FBSD_PKG_JOBS --pipepart -a $meta download_and_check
+	parallel --line-buffer -j $FBSD_PKG_JOBS --pipepart -a $meta download_and_check
 
 	# update meta-data
 	rsync -a $tmpdir/ $basedir/
