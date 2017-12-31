@@ -121,6 +121,9 @@ curl -sSL $FBSD_PKG_UPSTREAM | grep -oP 'FreeBSD:[0-9]+:[a-z0-9]+' | grep -vP $F
 
 while read platform; do
 	channel_sync $FBSD_PKG_UPSTREAM/$platform/latest $TO/$platform/latest
+	if curl -sLIf -o /dev/null http://pkg.freebsd.org/$platform/quarterly/packagesite.txz; then
+		channel_sync $FBSD_PKG_UPSTREAM/$platform/quarterly $TO/$platform/quarterly
+	fi
 done < $FBSD_PLATFORMS
 
 find $TO -type d -print0 | xargs -0 chmod 755
