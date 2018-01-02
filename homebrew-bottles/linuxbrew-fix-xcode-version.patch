@@ -1,0 +1,12 @@
+diff --git a/Library/Homebrew/os/mac/xcode.rb b/Library/Homebrew/os/mac/xcode.rb
+index 62752a174..fe181b69e 100644
+--- a/Library/Homebrew/os/mac/xcode.rb
++++ b/Library/Homebrew/os/mac/xcode.rb
+@@ -119,6 +119,7 @@ module OS
+       end
+ 
+       def detect_version
++        return false
+         # This is a separate function as you can't cache the value out of a block
+         # if return is used in the middle, which we do many times in here.
+         return if !MacOS::Xcode.installed? && !MacOS::CLT.installed?
