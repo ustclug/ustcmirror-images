@@ -12,7 +12,7 @@ export HOMEBREW_CACHE=$TO/bottles
 mkdir -p "$HOMEBREW_CACHE"
 echo "> RUN brew bottle-mirror..."
 brew bottle-mirror
-for HOMEBREW_TAP in science php dupes nginx apache portable; do
+for HOMEBREW_TAP in php portable; do
     export HOMEBREW_TAP
     echo "> RUN brew bottle-mirror..."
     git remote set-url origin git://github.com/Homebrew/homebrew-${HOMEBREW_TAP}.git
