@@ -5,3 +5,5 @@
 *.bac
 __pycache__/
 node_modules/
+build/
+Makefile

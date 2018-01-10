@@ -2,7 +2,8 @@ services:
   - docker
 language: c
 script:
-  - ./build.sh
+  - python3 ./configure.py
+  - make -j $(getconf _NPROCESSORS_ONLN) all
 after_success:
   - ./push.sh
 notifications:
