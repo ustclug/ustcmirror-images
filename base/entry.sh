@@ -22,6 +22,7 @@ if [[ ! -x $SYNC_SCRIPT ]]; then
     exit 1
 fi
 
+declare -ix RETRY
 export DEBUG="${DEBUG:-false}"
 [[ $DEBUG = true ]] && set -x
 set -u
@@ -30,27 +31,39 @@ export OWNER="${OWNER:-0:0}"
 export LOG_ROTATE_CYCLE="${LOG_ROTATE_CYCLE:-0}"
 export TO=/data/ LOGDIR=/log/
 export LOGFILE="$LOGDIR/result.log"
+export RETRY="${RETRY:-0}"
 
-chown "$OWNER" "$TO" # not recursive
+main() {
+    local abort ret
 
-[[ -f $PRE_SYNC_SCRIPT ]] && . $PRE_SYNC_SCRIPT
+    chown "$OWNER" "$TO" # not recursive
 
-if [[ $LOG_ROTATE_CYCLE -ne 0 ]]; then
-    trap 'rotate_log' EXIT
+    [[ -f $PRE_SYNC_SCRIPT ]] && . "$PRE_SYNC_SCRIPT"
+
+    if [[ $LOG_ROTATE_CYCLE -ne 0 ]]; then
+        trap 'rotate_log' EXIT
+    else
+        LOGFILE='/dev/null'
+    fi
+
     date '+============ SYNC STARTED AT %F %T ============' | su-exec "$OWNER" tee -a "$LOGFILE"
-    su-exec "$OWNER" $SYNC_SCRIPT &> >(tee -a "$LOGFILE") &
-else
-    LOGFILE='/dev/null'
-    date '+============ SYNC STARTED AT %F %T ============'
-    su-exec "$OWNER" $SYNC_SCRIPT &
-fi
 
-pid="$!"
-trap 'killer $pid' INT HUP TERM
-wait "$pid"
-RETCODE="$?"
-date '+============ SYNC FINISHED AT %F %T ============' | tee -a "$LOGFILE"
+    abort=0
+    while [[ $RETRY -ge 0 ]] && [[ $abort -eq 0 ]]; do
+        log "*********** 8< ***********"
+        su-exec "$OWNER" "$SYNC_SCRIPT" &> >(tee -a "$LOGFILE") &
+        pid="$!"
+        trap 'killer $pid; abort=1; log Aborted' INT HUP TERM
+        wait "$pid"
+        ret="$?"
+        RETRY=$((RETRY-1))
+    done
 
-[[ -f $POST_SYNC_SCRIPT ]] && . $POST_SYNC_SCRIPT
+    date '+============ SYNC FINISHED AT %F %T ============' | tee -a "$LOGFILE"
 
-exit $RETCODE
+    [[ -f $POST_SYNC_SCRIPT ]] && . "$POST_SYNC_SCRIPT"
+
+    return $ret
+}
+
+main
