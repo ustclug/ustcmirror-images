@@ -98,7 +98,7 @@ class Builder():
         self._build_tree(root)
         is_cron = os.environ.get('TRAVIS_EVENT_TYPE', '') == 'cron'
         date_tag = os.environ.get('DATE_TAG', '') != ''
-        self._generate(build_all=is_cron, date_tag=date_tag)
+        self._generate(is_cron=is_cron, force_date_tag=date_tag)
 
     def _build_tree(self, root):
         for derived in self._bases[root.name]:
@@ -107,10 +107,10 @@ class Builder():
                 sub = root.get_child(derived)
                 self._build_tree(sub)
 
-    def _generate(self, *, build_all, date_tag):
+    def _generate(self, *, is_cron, force_date_tag):
         all_targets = set()
 
-        if build_all:
+        if is_cron:
             to_build = self._dep_tree.enum_all()
         else:
             commits_range = os.environ.get('TRAVIS_COMMIT_RANGE', 'origin/master...HEAD')
@@ -132,7 +132,7 @@ class Builder():
                 self._print_command('cd {} && ./build {}'.format(img, tag))
             else:
                 self._print_command('docker build -t {0} $$LABELS {1}/'.format(dst, img))
-            if date_tag:
+            if not is_cron or force_date_tag:
                 if dst.endswith('latest'):
                     self._print_command('@docker tag {0} {1}'.format(dst, dst.replace('latest', self._now)))
                 else:
