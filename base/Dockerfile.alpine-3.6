@@ -1,9 +1,9 @@
-##! repo:tag=ustcmirror/base:alpine
+##! repo:tag=ustcmirror/base:alpine-3.6
 
-FROM alpine:3.7
+FROM alpine:3.6
 LABEL maintainer "Jian Zeng <anonymousknight96 AT gmail.com>"
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
 VOLUME ["/data", "/log"]
 ENTRYPOINT ["entry.sh"]
-RUN set -x && apk add --no-cache bash tzdata su-exec && \
+RUN apk add --no-cache bash tzdata su-exec && \
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime

@@ -1,3 +1,5 @@
+##! repo:tag=ustcmirror/base:debian
+
 FROM debian:stretch-slim
 LABEL maintainer "Jian Zeng <anonymousknight96 AT gmail.com>"
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
