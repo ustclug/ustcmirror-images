@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 apk add --no-cache wget ca-certificates rsync
 mkdir -p /etc/jigdo
 wget 'http://atterer.org/sites/atterer/files/2009-08/jigdo/jigdo-bin-0.7.3.tar.bz2'

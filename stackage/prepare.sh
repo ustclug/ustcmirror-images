@@ -1,5 +1,5 @@
 #!/bin/bash
-sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+set -e
 apt-get update
 apt-get install -y aria2 ca-certificates git wget libghc-bzlib-dev xz-utils musl-dev apt-utils ghc cabal-install haskell-platform libghc-cabal-dev
 mkdir /root/.cabal
