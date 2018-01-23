@@ -5,37 +5,47 @@ from __future__ import print_function, unicode_literals, with_statement, divisio
 import os
 from os import path
 import sys
-import configparser
+import glob
 import subprocess
 from datetime import datetime
 from collections import defaultdict
+
+class InvalidFrom(Exception):
+    pass
+
+class NoBaseImage(Exception):
+    pass
 
 class NaryTree():
     def __init__(self, name):
         self.name = name
         self._children = dict()
 
-    def add_child(self, name, tree):
-        self._children[name] = tree
+    def add_child(self, name):
+        self._children[name] = NaryTree(name)
 
     def get_child(self, name):
         return self._children.get(name, None)
 
     def find_updated_images(self, check):
-        q = [self]
+        q = list(self._children.values())
         while True:
             if not q:
                 break
             t = q.pop(0)
-            if not check(t.name):
+            encoded = encode_tag(t.name)
+            img = encoded.split('.')[0]
+            if not check(img):
                 for c in t._children.values():
                     q.append(c)
             else:
-                yield from t.enum_all(empty_parent=True)
+                yield (t.name, self.name)
+                yield from t.enum_all()
 
-    def enum_all(self, empty_parent=False):
-        if empty_parent:
-            yield (self.name, '')
+    def enum_all(self):
+        """
+        Enumerate all derived images and images based on the derived images
+        """
         for c in self._children.keys():
             yield (c, self.name)
         for c in self._children.values():
@@ -66,11 +76,12 @@ class Builder():
         self._targets = {}
         self._now = datetime.today().strftime('%Y%m%d')
         self._bases = defaultdict(list)
-        self._dep_tree = NaryTree('base')
+        self._dep_tree = NaryTree('')
 
     def __enter__(self):
         self._fout = open('Makefile', 'w')
         self._fout.write('.PHONY: all clean\r\n')
+        self._fout.write('export LABELS=--label ustcmirror.images --label org.ustcmirror.images=true\r\n')
         return self
 
     def __exit__(self, *args):
@@ -81,47 +92,49 @@ class Builder():
 
     def finish(self):
         root = self._dep_tree
-        for derived in self._bases['base']:
-            root.add_child(derived, NaryTree(derived))
-        for base, derived in self._bases.items():
-            if base == 'base':
-                continue
-            t = root.get_child(base)
-            for i in derived:
-                t.add_child(i, NaryTree(i))
-        event_type = os.environ.get('TRAVIS_EVENT_TYPE', '')
-        self._generate(build_all=event_type == 'cron')
+        self._build_tree(root)
+        is_cron = os.environ.get('TRAVIS_EVENT_TYPE', '') == 'cron'
+        date_tag = os.environ.get('DATE_TAG', '') != ''
+        self._generate(build_all=is_cron, date_tag=date_tag)
 
-    def _generate(self, build_all):
+    def _build_tree(self, root):
+        for derived in self._bases[root.name]:
+            root.add_child(derived)
+            if derived in self._bases:
+                sub = root.get_child(derived)
+                self._build_tree(sub)
+
+    def _generate(self, *, build_all, date_tag):
         all_targets = set()
 
         if build_all:
-            to_build = self._dep_tree.enum_all(empty_parent=True)
+            to_build = self._dep_tree.enum_all()
         else:
             commits_range = os.environ.get('TRAVIS_COMMIT_RANGE', 'origin/master...HEAD')
             differ = Differ(commits_range)
             to_build = self._dep_tree.find_updated_images(differ.changed)
 
-        for img, base in to_build:
-            all_targets.add(img)
-            all_targets.add(base)
+        for dst, base in to_build:
+            encoded_dst = encode_tag(dst)
+            encoded_base = encode_tag(base)
+            img, tag = encoded_dst.split('.', 1)
 
-            self._print_target(img, base)
-            build_script = path.join(img, 'build.sh')
-            if path.isfile(build_script) and os.access(build_script, os.X_OK):
-                self._print_command('cd {} && ./build.sh'.format(img))
+            all_targets.add(encoded_dst)
+            if encoded_base:
+                all_targets.add(encoded_base)
+
+            self._print_target(encoded_dst, encoded_base)
+            build_script = path.join(img, 'build')
+            if os.access(build_script, os.X_OK):
+                self._print_command('cd {} && ./build {}'.format(img, tag))
             else:
-                self._print_command('docker build -t ustcmirror/{0}:latest --label ustcmirror.images {0}/'.format(img))
-            if not build_all:
-                if img == 'base':
-                    self._print_command('@docker tag ustcmirror/base:alpine ustcmirror/base:alpine-{}'.format(self._now))
-                    self._print_command('@docker tag ustcmirror/base:debian ustcmirror/base:debian-{}'.format(self._now))
+                self._print_command('docker build -t {0} $$LABELS {1}/'.format(dst, img))
+            if date_tag:
+                if dst.endswith('latest'):
+                    self._print_command('@docker tag {0} {1}'.format(dst, dst.replace('latest', self._now)))
                 else:
-                    self._print_command('@docker tag ustcmirror/{0}:latest ustcmirror/{0}:{1}'.format(img, self._now))
-            self._print_command('@touch build/{}'.format(img))
-
-        if '' in all_targets:
-            all_targets.remove('')
+                    self._print_command('@docker tag {0} {0}-{1}'.format(dst, self._now))
+            self._print_command('@touch build/{}'.format(encoded_dst))
 
         prefixed = lambda s: 'build/{}'.format(s)
         self._fout.write('all: {}\r\n'.format(' '.join(map(prefixed, all_targets))))
@@ -136,42 +149,67 @@ class Builder():
     def _print_command(self, cmd):
         self._fout.write('\t' + cmd + '\r\n')
 
-def get_images(d):
-    _, dirs, _ = next(os.walk(d))
+def encode_tag(tag):
+    if tag:
+        return tag[len("ustcmirror/"):].replace(':', '.')
+    return ''
+
+def get_dest_image(img, f):
+    with open(f) as fin:
+        l = fin.readline().strip()
+
+    if l.startswith('##! repo:tag='):
+        spec = l.lstrip('##! repo:tag=')
+        if ':' not in spec:
+            return spec + ':latest'
+        return spec
+    else:
+        return 'ustcmirror/{}:latest'.format(img)
+
+def get_base_image(f):
+    with open(f) as fin:
+        for l in fin:
+            l = l.strip()
+            if not l.startswith('FROM'):
+                continue
+            s = l.split()
+            if len(s) != 2:
+                raise InvalidFrom(f)
+            tag = s[1]
+            if ':' not in tag:
+                return tag + ':latest'
+            return tag
+    raise NoBaseImage(f)
+
+def find_all_images(d):
+    root, dirs, _ = next(os.walk(d))
+    imgs = {}
     for d in dirs:
-        if d.startswith('.') or d == 'build' or d == 'base':
+        rule = path.join(root, d, 'Dockerfile*')
+        files = glob.glob(rule)
+        if not files:
             continue
-        yield d
+        for f in files:
+            dst_img = get_dest_image(d, f)
+            base_img = get_base_image(f)
+            imgs[dst_img] = base_img
+    return imgs
 
 def main():
     here = os.getcwd()
-    cfg_path = path.join(here, 'deps.ini')
-    if not path.isfile(cfg_path):
-        print('not a file: {}'.format(cfg_path))
-        return 1
 
     # Dont catch the Exception
     os.makedirs('build', exist_ok=True)
 
-    config = configparser.ConfigParser()
-    config.read([cfg_path])
-    if config.has_section('override'):
-        override = config['override']
-    else:
-        print('`override` section is missing')
-        return 1
+    imgs = find_all_images(here)
 
-    deps = {img: 'base' for img in get_images(here)}
-    for k, v in override.items():
-        if deps.get(k, None) is None:
-            print('unknown image: {}', k)
-            return 1
-        deps[k] = v
-
-    with Builder() as builder:
-        for k, v in deps.items():
-            builder.add(k, v)
-        builder.finish()
+    with Builder() as b:
+        for dst, base in imgs.items():
+            if base.startswith('ustcmirror'):
+                b.add(dst, base)
+            else:
+                b.add(dst, '')
+        b.finish()
 
 if __name__ == '__main__':
     sys.exit(main())
