@@ -17,6 +17,9 @@ class NoBaseImage(Exception):
     pass
 
 class NaryTree():
+    """
+    A n-ary tree
+    """
     def __init__(self, name):
         self.name = name
         self._children = dict()
@@ -149,17 +152,21 @@ class Builder():
     def _print_command(self, cmd):
         self._fout.write('\t' + cmd + '\r\n')
 
+def strip_prefix(s, prefix):
+    if s.startswith(prefix):
+        return s[len(prefix):]
+    return s
+
 def encode_tag(tag):
-    if tag:
-        return tag[len("ustcmirror/"):].replace(':', '.')
-    return ''
+    return strip_prefix(tag, 'ustcmirror/').replace(':', '.')
 
 def get_dest_image(img, f):
     with open(f) as fin:
         l = fin.readline().strip()
 
-    if l.startswith('##! repo:tag='):
-        spec = l.lstrip('##! repo:tag=')
+    directive = '##! repo:tag='
+    if l.startswith(directive):
+        spec = strip_prefix(l, directive)
         if ':' not in spec:
             return spec + ':latest'
         return spec
