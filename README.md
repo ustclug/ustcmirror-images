@@ -43,6 +43,7 @@ Docker images used by [ustcmirror](https://github.com/ustclug/ustcmirror)
 | `OWNER` | Set the uid and gid of the process so that the downloaded files wont get messed up. Defaults to `0:0` (aka root:root). |
 | `LOG_ROTATE_CYCLE` | Specify how many cycle versions of the logfile to be saved. Set this to `0` will disable rotation. Defaults to `0`. |
 | `REPO` | Name of the repository. Required in `archvsync`. |
+| `RETRY` | Times to re-sync if the process exits abnormally. Defaults to `0`. |
 
 ### aptsync
 
