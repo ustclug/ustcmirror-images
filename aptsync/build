@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+LABELS=${LABELS:-'--label ustcmirror.images --label org.ustcmirror.images=true'}
+
+cd upstream
+git apply ../update.patch
+cp apt-mirror ..
+docker build -t ustcmirror/aptsync $LABELS ..

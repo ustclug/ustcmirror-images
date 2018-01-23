@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+
+LABELS=${LABELS:-'--label ustcmirror.images --label org.ustcmirror.images=true'}
+
+case "$1" in
+    debian | alpine | alpine-3.6 )
+        docker build -f "Dockerfile.$1" -t "ustcmirror/base:$1" $LABELS .
+        ;;
+    * )
+        for i in Dockerfile.*; do
+            tag="ustcmirror/base:${i#*.}"
+            docker build -f "$i" -t "$tag" $LABELS .
+        done
+        ;;
+esac

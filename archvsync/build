@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+LABELS=${LABELS:-'--label ustcmirror.images --label org.ustcmirror.images=true'}
+
+cd upstream
+git apply ../update.patch
+cp bin/{common,ftpsync} ..
+docker build -t ustcmirror/archvsync $LABELS ..
