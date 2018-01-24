@@ -84,7 +84,6 @@ class Builder():
     def __enter__(self):
         self._fout = open('Makefile', 'w')
         self._fout.write('.PHONY: all clean\r\n')
-        self._fout.write('export LABELS=--label ustcmirror.images --label org.ustcmirror.images=true\r\n')
         return self
 
     def __exit__(self, *args):
@@ -128,13 +127,17 @@ class Builder():
                 all_targets.add(encoded_base)
 
             self._print_target(encoded_dst, encoded_base)
+
             build_script = path.join(img, 'build')
             if os.access(build_script, os.X_OK):
                 self._print_command('cd {} && ./build {}'.format(img, tag))
-            else:
+            elif tag == 'latest':
                 self._print_command('docker build -t {0} {1}/'.format(dst, img))
+            else:
+                self._print_command('docker build -t {0} -f {1}/Dockerfile.{2} {1}/'.format(dst, img, tag))
+
             if not is_cron or force_date_tag:
-                if dst.endswith('latest'):
+                if tag == 'latest':
                     self._print_command('@docker tag {0} {1}'.format(dst, dst.replace('latest', self._now)))
                 else:
                     self._print_command('@docker tag {0} {0}-{1}'.format(dst, self._now))
@@ -162,17 +165,13 @@ def encode_tag(tag):
     return strip_prefix(tag, 'ustcmirror/').replace(':', '.')
 
 def get_dest_image(img, f):
-    with open(f) as fin:
-        l = fin.readline().strip()
-
-    directive = '##! repo:tag='
-    if l.startswith(directive):
-        spec = strip_prefix(l, directive)
-        if ':' not in spec:
-            return spec + ':latest'
-        return spec
-    else:
+    n = path.basename(f)
+    default_name = 'Dockerfile'
+    if n == default_name:
         return 'ustcmirror/{}:latest'.format(img)
+    else:
+        tag = strip_prefix(n, default_name)[1:]
+        return 'ustcmirror/{}:{}'.format(img, tag)
 
 def get_base_image(f):
     with open(f) as fin:
