@@ -124,6 +124,7 @@ class Builder():
 
             all_targets.add(encoded_dst)
             if encoded_base:
+                # dont add the empty base
                 all_targets.add(encoded_base)
 
             self._print_target(encoded_dst, encoded_base)
@@ -131,7 +132,7 @@ class Builder():
             if os.access(build_script, os.X_OK):
                 self._print_command('cd {} && ./build {}'.format(img, tag))
             else:
-                self._print_command('docker build -t {0} $$LABELS {1}/'.format(dst, img))
+                self._print_command('docker build -t {0} {1}/'.format(dst, img))
             if not is_cron or force_date_tag:
                 if dst.endswith('latest'):
                     self._print_command('@docker tag {0} {1}'.format(dst, dst.replace('latest', self._now)))
