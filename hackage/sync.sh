@@ -16,7 +16,7 @@ function pull_hackage () {
     rm index.tar.gz || true &> /dev/null
 
     echo "Download latest index ..."
-    wget "$HACKAGE_BASE_URL/packages/index.tar.gz" -O index.tar.gz &> /dev/null
+    wget "$HACKAGE_BASE_URL/01-index.tar.gz" -O index.tar.gz &> /dev/null
 
 
     mkdir -p package
@@ -66,7 +66,8 @@ function pull_hackage () {
         rm "package/$pkg.tar.gz" || true &> /dev/null
     done
 
-    cp index.tar.gz 00-index.tar.gz
+    cp index.tar.gz 01-index.tar.gz
+    ln -sf 01-index.tar.gz 00-index.tar.gz
 }
 
 function download_pkg () {
