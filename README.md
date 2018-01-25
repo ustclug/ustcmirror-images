@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/ustclug/ustcmirror-images.svg?branch=master)](https://travis-ci.org/ustclug/ustcmirror-images)
 
+# Table Of Content
+
 - [Introduction](#introduction)
 - [Configuration](#configuration)
     - [Volumes](#volumes)
@@ -22,10 +24,11 @@
     - [rsync](#rsync)
     - [rubygems](#rubygems)
     - [stackage](#stackage)
+- [Contributing](#contributing)
 
 # Introduction
 
-Docker images used by [ustcmirror](https://github.com/ustclug/ustcmirror)
+These images are designed for mirroring remote directories/repositories in a consistent and portable way. They are used by [ustcmirror](https://github.com/ustclug/ustcmirror).
 
 # Configuration
 
@@ -195,3 +198,7 @@ ref:
 Stackage doesn't need to specify upstream, but this mirror use cabal to install necessary Haskell packages. Replacing default mirror of cabal with faster one will speed up building process.
 
 Read the [user guide](https://www.haskell.org/cabal/users-guide/installing-packages.html#repository-specification) before writing preferred mirror to `config`
+
+# Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
