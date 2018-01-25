@@ -122,9 +122,7 @@ class Builder():
             img, tag = encoded_dst.split('.', 1)
 
             all_targets.add(encoded_dst)
-            if encoded_base:
-                # dont add the empty base
-                all_targets.add(encoded_base)
+            all_targets.add(encoded_base)
 
             self._print_target(encoded_dst, encoded_base)
 
@@ -141,17 +139,11 @@ class Builder():
                     self._print_command('@docker tag {0} {1}'.format(dst, dst.replace('latest', self._now)))
                 else:
                     self._print_command('@docker tag {0} {0}-{1}'.format(dst, self._now))
-            self._print_command('@touch build/{}'.format(encoded_dst))
 
-        prefixed = lambda s: 'build/{}'.format(s)
-        self._fout.write('all: {}\r\n'.format(' '.join(map(prefixed, all_targets))))
-        self._fout.write('clean:\r\n\trm -f build/*')
+        self._fout.write('all: {}\r\n'.format(' '.join(all_targets)))
 
     def _print_target(self, target, dep):
-        if dep:
-            self._fout.write('build/{}: build/{}\r\n'.format(target, dep))
-        else:
-            self._fout.write('build/{}:\r\n'.format(target))
+        self._fout.write('{}: {}\r\n'.format(target, dep))
 
     def _print_command(self, cmd):
         self._fout.write('\t' + cmd + '\r\n')
@@ -204,9 +196,6 @@ def find_all_images(d):
 
 def main():
     here = os.getcwd()
-
-    # Dont catch the Exception
-    os.makedirs('build', exist_ok=True)
 
     imgs = find_all_images(here)
 
