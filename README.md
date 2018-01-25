@@ -50,6 +50,8 @@ These images are designed for mirroring remote directories/repositories in a con
 
 ### aptsync
 
+[![](https://images.microbadger.com/badges/image/ustcmirror/aptsync.svg)](https://microbadger.com/images/ustcmirror/aptsync "Get your own image badge on microbadger.com")
+
 | Parameter | Description |
 |-----------|-------------|
 | `APTSYNC_URL` | Sets the url of upstream. |
@@ -73,6 +75,8 @@ APTSYNC_DISTS='debian-jessie|main|i386 amd64:raspbian-jessie|main testing|armhf'
 
 ### archvsync
 
+[![](https://images.microbadger.com/badges/image/ustcmirror/archvsync.svg)](https://microbadger.com/images/ustcmirror/archvsync "Get your own image badge on microbadger.com")
+
 A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 
 `archvsync` respects the env vars used in `ftpsync`
@@ -83,6 +87,8 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 
 ### debian-cd
 
+[![](https://images.microbadger.com/badges/image/ustcmirror/debian-cd.svg)](https://microbadger.com/images/ustcmirror/debian-cd "Get your own image badge on microbadger.com")
+
 `debian-cd` accepts the same parameters specified in `debian-cd-mirror.conf`
 
 | Parameter | Description |
@@ -90,6 +96,8 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | `IGNORE_LOCK` | Purge lockfiles at first. Defaults to `false`. |
 
 ### freebsd-pkg
+
+[![](https://images.microbadger.com/badges/image/ustcmirror/freebsd-pkg.svg)](https://microbadger.com/images/ustcmirror/freebsd-pkg "Get your own image badge on microbadger.com")
 
 | Parameter           | Description                              |
 | ------------------- | ---------------------------------------- |
@@ -99,6 +107,8 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 
 ### freebsd-ports
 
+[![](https://images.microbadger.com/badges/image/ustcmirror/freebsd-ports.svg)](https://microbadger.com/images/ustcmirror/freebsd-ports "Get your own image badge on microbadger.com")
+
 | Parameter                       | Description                              |
 | ------------------------------- | ---------------------------------------- |
 | `FBSD_PORTS_INDEX_UPSTREAM`     | Set the URL of upstream git index. Defaults to `https://github.com/freebsd/freebsd-ports.git`. |
@@ -106,6 +116,8 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | `FBSD_PORTS_JOBS`               | Defaults to `1`.                         |
 
 ### gitsync
+
+[![](https://images.microbadger.com/badges/image/ustcmirror/gitsync.svg)](https://microbadger.com/images/ustcmirror/gitsync "Get your own image badge on microbadger.com")
 
 | Parameter | Description |
 |-----------|-------------|
@@ -116,6 +128,8 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 
 ### gsutil-rsync
 
+[![](https://images.microbadger.com/badges/image/ustcmirror/gsutil-rsync.svg)](https://microbadger.com/images/ustcmirror/gsutil-rsync "Get your own image badge on microbadger.com")
+
 | Parameter | Description |
 |-----------|-------------|
 | `GS_URL` | Sets the url of upstream. e.g. `gs://golang/`. |
@@ -123,17 +137,23 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 
 ### hackage
 
+[![](https://images.microbadger.com/badges/image/ustcmirror/hackage.svg)](https://microbadger.com/images/ustcmirror/hackage "Get your own image badge on microbadger.com")
+
 | Parameter | Description |
 |-----------|-------------|
 | `HACKAGE_BASE_URL` | Set the URL of upstream. Defaults to `https://hackage.haskell.org` |
 
 ### homebrew-bottles
 
+[![](https://images.microbadger.com/badges/image/ustcmirror/homebrew-bottles.svg)](https://microbadger.com/images/ustcmirror/homebrew-bottles "Get your own image badge on microbadger.com")
+
 | Parameter                | Description                              |
 | ------------------------ | ---------------------------------------- |
 | `HOMEBREW_BOTTLE_DOMAIN` | Set the URL of upstream. Defaults to `http://homebrew.bintray.com` |
 
 ### lftpsync
+
+[![](https://images.microbadger.com/badges/image/ustcmirror/lftpsync.svg)](https://microbadger.com/images/ustcmirror/lftpsync "Get your own image badge on microbadger.com")
 
 | Parameter | Description |
 |-----------|-------------|
@@ -144,9 +164,13 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 
 ### nodesource
 
+[![](https://images.microbadger.com/badges/image/ustcmirror/nodesource.svg)](https://microbadger.com/images/ustcmirror/nodesource "Get your own image badge on microbadger.com")
+
 Sync from official site. No parameter needed.
 
 ### pypi
+
+[![](https://images.microbadger.com/badges/image/ustcmirror/pypi.svg)](https://microbadger.com/images/ustcmirror/pypi "Get your own image badge on microbadger.com")
 
 | Parameter | Description |
 |-----------|-------------|
@@ -155,6 +179,8 @@ Sync from official site. No parameter needed.
 | `BANDERSNATCH_TIMEOUT` | Defaults to `20`. |
 
 ### rclone
+
+[![](https://images.microbadger.com/badges/image/ustcmirror/rclone.svg)](https://microbadger.com/images/ustcmirror/rclone "Get your own image badge on microbadger.com")
 
 | Parameter | Description |
 |-----------|-------------|
@@ -170,6 +196,8 @@ ref:
 * [rclone-sync manual](https://rclone.org/commands/rclone_sync/)
 
 ### rsync
+
+[![](https://images.microbadger.com/badges/image/ustcmirror/rsync.svg)](https://microbadger.com/images/ustcmirror/rsync "Get your own image badge on microbadger.com")
 
 | Parameter | Description |
 |-----------|-------------|
@@ -189,11 +217,15 @@ ref:
 
 ### rubygems
 
+[![](https://images.microbadger.com/badges/image/ustcmirror/rsync.svg)](https://microbadger.com/images/ustcmirror/rsync "Get your own image badge on microbadger.com")
+
 | Parameter | Description |
 |-----------|-------------|
 | `UPSTREAM` | Defaults to `http://rubygems.org`. |
 
 ### stackage
+
+[![](https://images.microbadger.com/badges/image/ustcmirror/stackage.svg)](https://microbadger.com/images/ustcmirror/stackage "Get your own image badge on microbadger.com")
 
 Stackage doesn't need to specify upstream, but this mirror use cabal to install necessary Haskell packages. Replacing default mirror of cabal with faster one will speed up building process.
 
