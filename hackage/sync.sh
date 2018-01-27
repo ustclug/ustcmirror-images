@@ -23,7 +23,7 @@ function pull_hackage () {
 
     # save remote package index to temporary file
     echo "Build remote package list ..."
-    tar -ztf index.tar.gz | awk 'BEGIN{FS="/"}{print($1"-"$2)}' | sort > $remote_pkgs || true
+    tar -ztf index.tar.gz | awk 'BEGIN{FS="/"}{print($1"-"$2)}' | sort | uniq > $remote_pkgs || true
     echo "Remote package list built"
 
     # save local package index to temporary file
