@@ -67,9 +67,10 @@ deb-amd64 https://apt.dockerproject.org/repo debian-jessie main
 deb-armhf https://apt.dockerproject.org/repo raspbian-jessie main testing
 ```
 
-is equivalent to the following `APTSYNC_DISTS`:
+is equivalent to the following parameters:
 
 ```
+APTSYNC_URL='https://apt.dockerproject.org/repo'
 APTSYNC_DISTS='debian-jessie|main|i386 amd64:raspbian-jessie|main testing|armhf'
 ```
 
