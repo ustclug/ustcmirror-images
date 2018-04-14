@@ -8,3 +8,4 @@ after_success:
   - ./push.sh
 notifications:
   webhooks: https://fathomless-fjord-24024.herokuapp.com/notify
+  email: false
