@@ -1,18 +1,24 @@
 #!/bin/bash
 
-LIST='/etc/apt/mirror.list'
+get_hostname() {
+    sed -re 's|[^/]*//([^@]*@)?([^:/]*).*|\2|' <<< "$1"
+}
 
-cat > "$LIST" << EOF
-set base_path         /var/spool/apt-mirror
-set mirror_path       $TO
-set skel_path         $TO
+_LIST='/etc/apt/mirror.list'
+_BASE='/var/spool/apt-mirror'
+
+cat > "$_LIST" << EOF
+set base_path         $_BASE
+set mirror_path       \$base_path/mirror
+set skel_path         \$base_path/skel
 set var_path          $LOGDIR
 set run_postmirror    0
 set nthreads          $APTSYNC_NTHREADS
 set unlink            $APTSYNC_UNLINK
 EOF
 
-chown -R "$OWNER" /var/spool/apt-mirror/
+chown -R "$OWNER" "$_BASE"
+ln -s "$TO" "$_BASE/mirror/$(get_hostname "$APTSYNC_URL")"
 
 IFS=':' read -ra dists <<< "$APTSYNC_DISTS"
 for dist in "${dists[@]}"; do
@@ -26,4 +32,4 @@ for dist in "${dists[@]}"; do
             echo "deb-$arch" "$APTSYNC_URL" "$release" "${data[1]}"
         done
     done
-done | tee -a "$LIST"
+done | tee -a "$_LIST"
