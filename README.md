@@ -11,6 +11,7 @@
     - [aptsync](#aptsync)
     - [archvsync](#archvsync)
     - [debian-cd](#debian-cd)
+    - [fedora](#fedora)
     - [freebsd-pkg](#freebsd-pkg)
     - [freebsd-ports](#freebsd-ports)
     - [gitsync](#gitsync)
@@ -95,6 +96,24 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | Parameter | Description |
 |-----------|-------------|
 | `IGNORE_LOCK` | Purge lockfiles at first. Defaults to `false`. |
+
+### fedora
+
+[![](https://images.microbadger.com/badges/image/ustcmirror/fedora.svg)](https://microbadger.com/images/ustcmirror/fedora "Get your own image badge on microbadger.com")
+
+[fedora-quick-mirror](https://pagure.io/quick-fedora-mirror)
+
+See [dist conf](https://pagure.io/quick-fedora-mirror/blob/master/f/quick-fedora-mirror.conf.dist) for parameters meaning.
+
+| Parameter | Description |
+|-----------|-------------|
+| `MODULE`    | fedora module to be mirrored, e.g. fedora-enchilada,fedora-epel |
+| `FILTEREXP` | A regular expression used to filter the file lists. It must be quoted (or very carefully escaped) |
+| `VERBOSE`   | log level(0-8), default is 7 |
+| `CHECKIN_SITE`     | see in mirrormanager |
+| `CHECKIN_PASSWORD` | see in mirrormanager |
+| `CHECKIN_HOST`     | see in mirrormanager |
+
 
 ### freebsd-pkg
 
