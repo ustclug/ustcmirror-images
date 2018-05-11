@@ -30,7 +30,7 @@ fi
 
 ln -s "$TO" "/mirror/$_MODULE_DIR"
 
-_RSYNCOPTS=(-aSH -f "'R .~tmp~'" --keep-dirlinks --stats --preallocate --delay-updates "--out-format='@ %i  %n%L'")
+_RSYNCOPTS=(-aSH -f "'R .~tmp~'" --keep-dirlinks --stats --delay-updates "--out-format='@ %i  %n%L'")
 
 if [[ -n "${BIND_ADDRESS:+1}" ]]; then
     if [[ "$BIND_ADDRESS" =~ .*: ]]; then
