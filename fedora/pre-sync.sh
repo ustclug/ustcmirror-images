@@ -1,6 +1,7 @@
 #!/bin/bash
 
 _CONF_FILE='/etc/quick-fedora-mirror.conf'
+LOGDIR="${LOGDIR%%/}"
 
 typeset -g -A MODULEMAPPING
 MODULEMAPPING=(
@@ -23,9 +24,20 @@ if [[ -z $_MODULE_DIR ]]; then
     exit 1
 fi
 
+
 # quick-fedora-mirror wants a root dir without module name
-mkdir /mirror/
-ln -s "$TO" "/mirror/$_MODULE_DIR"
+
+# hack fedora-enchilada directory.
+# we previously synced /fedora/linux/ to /fedora/
+if [[ "$MODULE" = "fedora-enchilada" ]]; then
+    mkdir /mirror/
+    mkdir -p "$LOGDIR"/filelists/
+    ln -s "$LOGDIR/filelists" /mirror/fedora
+    ln -s "$TO" /mirror/fedora/linux
+else
+    mkdir /mirror/
+    ln -s "$TO" "/mirror/$_MODULE_DIR"
+fi
 chown -R "$OWNER" /mirror/
 
 _RSYNCOPTS=(-aSH -f "'R .~tmp~'" --keep-dirlinks --stats --delay-updates "--out-format='@ %i  %n%L'")
