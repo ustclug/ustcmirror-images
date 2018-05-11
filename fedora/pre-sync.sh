@@ -33,11 +33,11 @@ mkdir /mirror/
 chown "$OWNER" /mirror/
 
 if [[ "$MODULE" = "fedora-enchilada" ]]; then
-    su-exec "OWNER" mkdir -p "$LOGDIR"/filelists/
-    su-exec "OWNER" ln -sf "$LOGDIR/filelists" /mirror/fedora
-    su-exec "OWNER" ln -sf "$TO" /mirror/fedora/linux
+    su-exec "$OWNER" mkdir -p "$LOGDIR"/filelists/
+    su-exec "$OWNER" ln -sf "$LOGDIR/filelists" /mirror/fedora
+    su-exec "$OWNER" ln -sf "$TO" /mirror/fedora/linux
 else
-    su-exec "OWNER" ln -s "$TO" "/mirror/$_MODULE_DIR"
+    su-exec "$OWNER" ln -s "$TO" "/mirror/$_MODULE_DIR"
 fi
 
 _RSYNCOPTS=(-aSH -f "'R .~tmp~'" --keep-dirlinks --stats --delay-updates "--out-format='@ %i  %n%L'")
