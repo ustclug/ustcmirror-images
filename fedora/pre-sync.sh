@@ -2,11 +2,6 @@
 
 _CONF_FILE='/etc/quick-fedora-mirror.conf'
 
-# quick-fedora-mirror wants a root dir without module name
-
-mkdir /mirror/
-chown -R "$OWNER" /mirror/
-
 typeset -g -A MODULEMAPPING
 MODULEMAPPING=(
 [fedora-alt]=alt
@@ -28,7 +23,10 @@ if [[ -z $_MODULE_DIR ]]; then
     exit 1
 fi
 
+# quick-fedora-mirror wants a root dir without module name
+mkdir /mirror/
 ln -s "$TO" "/mirror/$_MODULE_DIR"
+chown -R "$OWNER" /mirror/
 
 _RSYNCOPTS=(-aSH -f "'R .~tmp~'" --keep-dirlinks --stats --delay-updates "--out-format='@ %i  %n%L'")
 
