@@ -29,16 +29,16 @@ fi
 
 # hack fedora-enchilada directory.
 # we previously synced /fedora/linux/ to /fedora/
+mkdir /mirror/
+chown "$OWNER" /mirror/
+
 if [[ "$MODULE" = "fedora-enchilada" ]]; then
-    mkdir /mirror/
-    mkdir -p "$LOGDIR"/filelists/
-    ln -s "$LOGDIR/filelists" /mirror/fedora
-    ln -s "$TO" /mirror/fedora/linux
+    su-exec "OWNER" mkdir -p "$LOGDIR"/filelists/
+    su-exec "OWNER" ln -sf "$LOGDIR/filelists" /mirror/fedora
+    su-exec "OWNER" ln -sf "$TO" /mirror/fedora/linux
 else
-    mkdir /mirror/
-    ln -s "$TO" "/mirror/$_MODULE_DIR"
+    su-exec "OWNER" ln -s "$TO" "/mirror/$_MODULE_DIR"
 fi
-chown -R "$OWNER" /mirror/
 
 _RSYNCOPTS=(-aSH -f "'R .~tmp~'" --keep-dirlinks --stats --delay-updates "--out-format='@ %i  %n%L'")
 
