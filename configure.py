@@ -39,8 +39,7 @@ class NaryTree():
             encoded = encode_tag(t.name)
             img = encoded.split('.')[0]
             if not check(img):
-                for c in t._children.values():
-                    q.append(c)
+                q.extend(t._children.values())
             else:
                 yield (t.name, self.name)
                 yield from t.enum_all()
@@ -65,13 +64,12 @@ class NaryTree():
 
 
 class Differ():
-    def __init__(self, spec):
-        prev, now = spec.split('...')
+    def __init__(self, prev, now):
         self._prev = prev
         self._now = now
 
     def changed(self, img):
-        return 0 != subprocess.call(['git', 'diff', '--quiet', self._prev, self._now, '--', img])
+        return subprocess.call(['git', 'diff', '--quiet', self._prev, self._now, '--', img]) != 0
 
 
 class Builder():
@@ -112,8 +110,20 @@ class Builder():
         if is_cron:
             to_build = self._dep_tree.enum_all()
         else:
-            commits_range = os.environ.get('TRAVIS_COMMIT_RANGE', 'origin/master...HEAD')
-            differ = Differ(commits_range)
+            # TRAVIS_COMMIT_RANGE is empty for builds
+            # triggered by the initial commit of a new branch.
+            commits_range = os.environ.get('TRAVIS_COMMIT_RANGE', '')
+            if not commits_range:
+                commits_range = 'origin/master...HEAD'
+            prev, current = commits_range.split('...')
+            # invalid object/commit
+            if subprocess.call(['git', 'cat-file', '-e', prev]) != 0:
+                # current branch is master
+                if subprocess.getoutput('git symbolic-ref --short HEAD') == 'master':
+                    prev = 'HEAD~5'
+                else:
+                    prev = 'origin/master'
+            differ = Differ(prev, current)
             to_build = self._dep_tree.find_updated_images(differ.changed)
 
         for dst, base in to_build:
@@ -158,12 +168,12 @@ def encode_tag(tag):
 
 def get_dest_image(img, f):
     n = path.basename(f)
-    default_name = 'Dockerfile'
-    if n == default_name:
-        return 'ustcmirror/{}:latest'.format(img)
+    # tag may contain a dot
+    tag = strip_prefix(n, 'Dockerfile')
+    if tag:
+        return 'ustcmirror/{}:{}'.format(img, tag[1:])
     else:
-        tag = strip_prefix(n, default_name)[1:]
-        return 'ustcmirror/{}:{}'.format(img, tag)
+        return 'ustcmirror/{}:latest'.format(img)
 
 def get_base_image(f):
     with open(f) as fin:
@@ -206,6 +216,8 @@ def main():
             else:
                 b.add(dst, '')
         b.finish()
+
+    return 0
 
 if __name__ == '__main__':
     sys.exit(main())
