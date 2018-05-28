@@ -16,5 +16,5 @@ sync_nodesource(){
     done
 }
 
-sync_nodesource deb node_{4..9}.x node_0.1{0,2} iojs_{1..3}.x
-sync_nodesource rpm pub_{4..9}.x pub_0.1{0,2}
+sync_nodesource deb node_{4..10}.x node_0.1{0,2} iojs_{1..3}.x
+sync_nodesource rpm pub_{4..10}.x pub_0.1{0,2}
