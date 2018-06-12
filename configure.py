@@ -114,6 +114,10 @@ class Builder():
             # triggered by the initial commit of a new branch.
             commits_range = os.environ.get('TRAVIS_COMMIT_RANGE', '')
             if not commits_range:
+                # git clone --branch <branch> on travis
+                # need to add master branch back
+                subprocess.call(['git', 'remote', 'set-branches', '--add', 'origin', 'master'])
+                subprocess.call(['git', 'fetch', 'origin', 'master:master'])
                 commits_range = 'origin/master...HEAD'
             prev, current = commits_range.split('...')
             # invalid object/commit
