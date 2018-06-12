@@ -58,6 +58,7 @@ These images are designed for mirroring remote directories/repositories in a con
 | `APTSYNC_URL` | Sets the url of upstream. |
 | `APTSYNC_NTHREADS` | Defaults to `20`. |
 | `APTSYNC_UNLINK` | Set this to `1` to remove unneeded files automatically. Defaults to `0`. |
+| `APTSYNC_CREATE_DIR` | Set this to `true` to create same directory tree as upstream URL. Defaults to `true`. |
 | `APTSYNC_DISTS` | Various distros can be specified in the format `<release> [...]\|<componenet> [...]\|<arch> [...][:...]`. |
 
 Notes: The following `mirror.list`:
