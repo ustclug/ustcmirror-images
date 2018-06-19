@@ -10,11 +10,40 @@ import subprocess
 from datetime import datetime
 from collections import defaultdict
 
+def invoke(cmd, fail_fast=False):
+    from subprocess import call, DEVNULL
+    if fail_fast:
+        ret = call(cmd, stdout=DEVNULL)
+        if ret != 0:
+            sys.exit(ret)
+    else:
+        ret = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+    return ret
+
 class InvalidFrom(Exception):
     pass
 
 class NoBaseImage(Exception):
     pass
+
+class Git():
+    @staticmethod
+    def is_invalid_commit(desc):
+        return invoke(['git', 'cat-file', '-e', desc]) != 0
+
+    @staticmethod
+    def branch_exists(branch):
+        return invoke(['git', 'rev-parse', '--verify', branch]) == 0
+
+    @staticmethod
+    def fetch_master_branch():
+        invoke(['git', 'config', 'remote.origin.fetch', '+refs/heads/*:refs/remotes/origin/*'])
+        invoke(['git', 'fetch', 'origin', 'master:master'], fail_fast=True)
+
+    @staticmethod
+    def is_current_branch(branch):
+        return subprocess.getoutput('git symbolic-ref --short HEAD') == branch
+
 
 class NaryTree():
     """
@@ -69,7 +98,7 @@ class Differ():
         self._now = now
 
     def changed(self, img):
-        return subprocess.call(['git', 'diff', '--quiet', self._prev, self._now, '--', img]) != 0
+        return invoke(['git', 'diff', '--quiet', self._prev, self._now, '--', img]) != 0
 
 
 class Builder():
@@ -81,7 +110,7 @@ class Builder():
 
     def __enter__(self):
         self._fout = open('Makefile', 'w')
-        self._fout.write('.PHONY: all clean\r\n')
+        self._fout.write('.PHONY: all\r\n')
         return self
 
     def __exit__(self, *args):
@@ -116,14 +145,13 @@ class Builder():
             if not commits_range:
                 # git clone --branch <branch> on travis
                 # need to add master branch back
-                subprocess.call(['git', 'remote', 'set-branches', '--add', 'origin', 'master'])
-                subprocess.call(['git', 'fetch', 'origin', 'master:master'])
+                if not Git.branch_exists('master'):
+                    Git.fetch_master_branch()
                 commits_range = 'origin/master...HEAD'
             prev, current = commits_range.split('...')
-            # invalid object/commit
-            if subprocess.call(['git', 'cat-file', '-e', prev]) != 0:
-                # current branch is master
-                if subprocess.getoutput('git symbolic-ref --short HEAD') == 'master':
+            if Git.is_invalid_commit(prev):
+                if Git.is_current_branch('master'):
+                    # fallback
                     prev = 'HEAD~5'
                 else:
                     prev = 'origin/master'
