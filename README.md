@@ -18,6 +18,7 @@
     - [gsutil-rsync](#gsutil-rsync)
     - [hackage](#hackage)
     - [homebrew-bottles](#homebrew-bottles)
+    - [julia](#julia)
     - [lftpsync](#lftpsync)
     - [nodesource](#nodesource)
     - [pypi](#pypi)
@@ -171,6 +172,10 @@ See [dist conf](https://pagure.io/quick-fedora-mirror/blob/master/f/quick-fedora
 | Parameter                | Description                              |
 | ------------------------ | ---------------------------------------- |
 | `HOMEBREW_BOTTLE_DOMAIN` | Set the URL of upstream. Defaults to `http://homebrew.bintray.com` |
+
+### julia
+
+Sync from official site.  No parameters needed.
 
 ### lftpsync
 
