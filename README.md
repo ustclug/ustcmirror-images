@@ -35,10 +35,10 @@ These images are designed for mirroring remote directories/repositories in a con
 
 ### Volumes
 
-* `/data`: The mount point of the repository on the host. `export TO=/data/` in the entrypoint.
-* `/log`: The mount point of the host directory that save logs. `export LOGDIR=/log/` in the entrypoint.
+* `/data`: The mount point of the repository on the host. You can refer to it as environment variable `TO` in your program.
+* `/log`: The mount point of the host directory that save logs. You can refer to it as environment variable `LOG` in your program.
 
-### Common Configuration Parameters
+### Common Configuration Parameters(AKA environment variables)
 
 | Parameter | Description |
 |-----------|-------------|
