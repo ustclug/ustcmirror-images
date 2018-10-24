@@ -1,4 +1,3 @@
-
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE OverloadedStrings #-}
 import Data.Yaml
@@ -19,9 +18,10 @@ import Text.Printf              (printf)
 
 type URL = String
 type SHA1 = String
-
+type SHA256 = String
 type Platform = String
 type Version = String
+type Path = String
 
 --
 --  following data defs and instances
@@ -32,54 +32,83 @@ data ResourceInfo = ResourceInfo {
     version         :: String,
     url             :: String,
     contentLength   :: Int,
-    sha1            :: String,
-    configureEnv    :: M.Map String String
+    sha1            :: SHA1,
+    sha256          :: SHA256
+} deriving (Show)
+
+data GhcJSInfo = GhcJSInfo {
+    source          :: M.Map String ResourceInfo
 } deriving (Show)
 
 
 data StackSetup = StackSetup {
+    stack           :: M.Map Platform (M.Map Version ResourceInfo),
     sevenzexeInfo   :: ResourceInfo,
     sevenzdllInfo   :: ResourceInfo,
+    portableGit     :: ResourceInfo,
     msys2           :: M.Map Platform ResourceInfo,
-    ghc             :: M.Map Platform (M.Map Version ResourceInfo)
+    ghc             :: M.Map Platform (M.Map Version ResourceInfo),
+    ghcjs           :: GhcJSInfo
 } deriving (Show)
+
+instance FromJSON GhcJSInfo where
+    parseJSON = withObject "GhcJSInfo" $ \o -> do
+        source <- o .: "source"
+        return GhcJSInfo {..}
+
+instance ToJSON GhcJSInfo where
+    toJSON (GhcJSInfo source) = object
+        ["source" .= source]
+
 
 instance FromJSON ResourceInfo where
     parseJSON = withObject "ResourceInfo" $ \o -> do
         version <- o .:? "version" .!= ""
         url <- o .: "url"
-        contentLength <- o .: "content-length"
-        sha1 <- o .: "sha1"
-        configureEnv <- o .:? "configure-env" .!= M.fromList []
+        contentLength <- o .:? "content-length" .!= (-1)
+        sha1 <- o .:? "sha1" .!= ""
+        sha256 <- o .:? "sha256" .!= ""
         return ResourceInfo {..}
 
 instance ToJSON ResourceInfo where
-    toJSON (ResourceInfo v u c s e) = object $
+    toJSON (ResourceInfo v u c s1 s256) = object $
             (if null v then [] else ["version" .= v]) ++
-            ["url" .= u, "content-length" .= c, "sha1" .= s] ++
-            (if M.null e then [] else ["configure-env" .= e])
+            ["url" .= u] ++
+            (if c == -1 then [] else ["content-length" .= c]) ++
+            (if null s1 then [] else ["sha1" .= s1]) ++
+            (if null s256 then [] else ["sha256" .= s256])
 
 instance FromJSON StackSetup where
     parseJSON = withObject "StackSetup" $ \o -> do
+        stack <- o .: "stack"
         sevenzexeInfo <- o .: "sevenzexe-info"
         sevenzdllInfo <- o .: "sevenzdll-info"
+        portableGit <- o .: "portable-git"
         msys2 <- o .: "msys2"
         ghc <- o .: "ghc"
+        ghcjs <- o .: "ghcjs"
         return StackSetup {..}
 
 instance ToJSON StackSetup where
-    toJSON (StackSetup e d m g) = object
-            ["sevenzexe-info" .= e,
-             "sevenzdll-info" .= d,
-             "msys2"          .= m,
-             "ghc"            .= g]
+    toJSON (StackSetup stack exe dll pgit msys2 ghc ghcjs) = object
+            ["stack"          .= stack,
+             "sevenzexe-info" .= exe,
+             "sevenzdll-info" .= dll,
+             "portable-git"   .= pgit,
+             "msys2"          .= msys2,
+             "ghc"            .= ghc,
+             "ghcjs"          .= ghcjs]
 
 
+redirectToMirror :: Path -> ResourceInfo -> ResourceInfo
+redirectToMirror relPath (ResourceInfo ver url conLen s1 s256) =
+    let redirect = (++) ("https://mirrors.ustc.edu.cn/stackage/" ++ relPath ++ "/")  . last . splitOn "/" in
+    ResourceInfo ver (redirect url) conLen s1 s256
 
 
 -- download a file to given path
 -- sha-1 checksum is enabled when sha isn't empty string
-download :: URL -> FilePath -> SHA1 -> Bool -> IO ()
+download :: URL -> FilePath -> (SHA1, SHA256) -> Bool -> IO ()
 download url path sha force = do
     let fileName = last (splitOn "/" url)
     let filePath = path </> fileName
@@ -94,8 +123,10 @@ download url path sha force = do
                           "--out=" ++ fileName ++ ".tmp",
                           "--file-allocation=none", "--quiet=true"]
 
-           -- if sha isn't an empty string, append checksum option
-           let args = args_ ++ (words sha >>= \s -> ["--checksum=sha-1=" ++ s])
+           -- if sha1 isn't an empty string, append checksum option
+           let sha1Arg = (words (fst sha) >>= \s -> ["--checksum=sha-1=" ++ s])
+           let sha256Arg = (words (snd sha) >>= \s -> ["--checksum=sha-256=" ++ s])
+           let args = args_ ++ (if null sha256Arg then sha1Arg else sha256Arg)
 
            (exitCode, _, _) <- readProcessWithExitCode "aria2c" args ""
            if exitCode == ExitSuccess
@@ -119,6 +150,7 @@ updateChannels  basePath =
                                             destPath]
                              putStrLn $ printf "Clone %s finish" channel
 
+
 stackSetup :: FilePath -> FilePath -> IO ()
 stackSetup bp setupPath = do
     jr <- catch (decodeFile setupPath) 
@@ -129,26 +161,49 @@ stackSetup bp setupPath = do
 
     let r = fromJust jr
 
-    let (StackSetup e d m g) = r
+    let (StackSetup stack exe dll pgit msys2 ghc ghcjs) = r
 
-    let filesToDownload = M.toList g >>= M.toList . snd >>= return . snd
+    --  store stack
+    let filesToDownload = M.toList stack >>= M.toList . snd >>= return . snd
 
-    let dlEachGhc (ResourceInfo _ u _ s _) = download u (bp </> "ghc") s False
-        in sequence_ $ map dlEachGhc filesToDownload
+    let dlEachStack (ResourceInfo _ u _ s1 s256) = download u (bp </> "stack") (s1, s256) False
+        in mapM_ dlEachStack filesToDownload
+
+    let newStack = M.map (M.map (redirectToMirror "stack")) stack
+
+    -- store 7z
+    let dl7z (ResourceInfo _ u _ s1 s256) = download u (bp </> "7z") (s1, s256) False
+        in do 
+            dl7z exe
+            dl7z dll
+
+    let newExe = redirectToMirror "7z" exe
+    let newDll = redirectToMirror "7z" dll
+
+    -- store portable git
+    let dlGit (ResourceInfo _ u _ s1 s256) = download u (bp </> "pgit") (s1, s256) False
+        in dlGit pgit
+
+    let newPgit = redirectToMirror "pgit" pgit
 
 
-    let msys2 = M.fromList [
-                        ("windows32", ResourceInfo "20161025" "https://mirrors.ustc.edu.cn/msys2/distrib/i686/msys2-base-i686-20161025.tar.xz" 47526500 "5d17fa53077a93a38a9ac0acb8a03bf6c2fc32ad" (M.fromList [])),
-                        ("windows64", ResourceInfo "20161025" "https://mirrors.ustc.edu.cn/msys2/distrib/x86_64/msys2-base-x86_64-20161025.tar.xz" 47166584 "05fd74a6c61923837dffe22601c9014f422b5460" (M.fromList []))
-                    ]
+    -- store ghc
+    let filesToDownload = M.toList ghc >>= M.toList . snd >>= return . snd
 
+    let dlGhc (ResourceInfo _ u _ s1 s256) = download u (bp </> "ghc") (s1, s256) False
+        in mapM_ dlGhc filesToDownload
 
-    let newGhc = M.map (M.map riF) g
-            where riF (ResourceInfo v u c s e) = (ResourceInfo v (redirect u) c s e)
-                  redirect = ("https://mirrors.ustc.edu.cn/stackage/ghc/" ++) .
-                            last . splitOn "/"
+    let newGhc = M.map (M.map (redirectToMirror "ghc")) ghc
 
-    encodeFile (bp </> "stack-setup.yaml") (StackSetup e d msys2 newGhc)
+    -- store msys2
+    let filesToDownload = snd <$> M.toList msys2
+
+    let dlMsys2 (ResourceInfo _ u _ s1 s256) = download u (bp </> "msys2") (s1, s256) False
+        in mapM_ dlMsys2 filesToDownload
+
+    let newMsys2 = M.map (redirectToMirror "msys2") msys2
+
+    encodeFile (bp </> "stack-setup.yaml") (StackSetup newStack newExe newDll newPgit newMsys2 newGhc ghcjs)
     putStrLn $ printf "Stack setup successfully processed"
 
 
@@ -161,12 +216,12 @@ main = do
     updateChannels basePath
 
     -- load snapshots
-    download "https://www.stackage.org/download/snapshots.json" basePath "" True
+    download "https://www.stackage.org/download/snapshots.json" basePath ("", "") True
 
     -- load stack setup
     download "https://raw.githubusercontent.com/fpco/stackage-content/master/stack/stack-setup-2.yaml"
              "/tmp"
-             ""
+             ("", "")
              True
 
     stackSetup basePath "/tmp/stack-setup-2.yaml"
