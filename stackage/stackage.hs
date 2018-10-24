@@ -102,7 +102,7 @@ instance ToJSON StackSetup where
 
 redirectToMirror :: Path -> ResourceInfo -> ResourceInfo
 redirectToMirror relPath (ResourceInfo ver url conLen s1 s256) =
-    let redirect = (++) ("https://mirrors.ustc.edu.cn/stackage/" ++ relPath ++ "/")  . last . splitOn "/" in
+    let redirect = (++) ("https://mirrors.ustc.edu.cn/stackage/" ++ relPath ++ "/") . head . splitOn "?" . last . splitOn "/" in
     ResourceInfo ver (redirect url) conLen s1 s256
 
 
@@ -110,7 +110,7 @@ redirectToMirror relPath (ResourceInfo ver url conLen s1 s256) =
 -- sha-1 checksum is enabled when sha isn't empty string
 download :: URL -> FilePath -> (SHA1, SHA256) -> Bool -> IO ()
 download url path sha force = do
-    let fileName = last (splitOn "/" url)
+    let fileName = head (splitOn "?" (last (splitOn "/" url)))
     let filePath = path </> fileName
     putStrLn $ printf "Try to Download %s..." fileName
     pathExists <- doesDirectoryExist path
