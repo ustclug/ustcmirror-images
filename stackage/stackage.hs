@@ -218,18 +218,16 @@ syncStack basePath = do
              True
     let filename = "/tmp/latest"
     text <- BS.readFile filename
-    let latestInfoValue = case A.decode text of
+    let (Object latestInfo) = case A.decode text of
                          Just o -> o :: Value
                          _ -> error "decode latest fail!"
-    let (Object latestInfo) = latestInfoValue
     let (Just (Bool prerelease)) = HM.lookup "prerelease" latestInfo
     let (Just (Array assets)) = HM.lookup "assets" latestInfo
-    when (not prerelease) (syncAssets assets)
+    unless prerelease (syncAssets assets)
     where syncAssets = mapM_ syncAsset
           syncAsset assetValue = do
               let (Object asset) = assetValue
-              let (Just urlValue) = HM.lookup "browser_download_url" asset
-              let (String url) = urlValue
+              let (Just (String url)) = HM.lookup "browser_download_url" asset
               download (T.unpack url)
                        (basePath </> "stack")
                        ("", "")
