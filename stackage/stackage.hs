@@ -1,9 +1,13 @@
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE OverloadedStrings #-}
 import Data.Yaml
+import qualified Data.Aeson as A
 import Data.Aeson.Types     (ToJSON)
 import Data.Maybe           (isNothing, fromJust)
 import qualified Data.Map.Strict as M
+import qualified Data.ByteString.Lazy as BS
+import qualified Data.HashMap.Lazy as HM
+import qualified Data.Text as T
 import System.IO                (readFile, writeFile)
 import System.Exit              (ExitCode(..))
 import System.Process           (callProcess, readProcessWithExitCode)
@@ -14,7 +18,6 @@ import Control.Exception        (catch)
 import Control.Monad            (when, unless)
 import Data.List.Split          (splitOn)
 import Text.Printf              (printf)
-
 
 type URL = String
 type SHA1 = String
@@ -153,7 +156,7 @@ updateChannels  basePath =
 
 stackSetup :: FilePath -> FilePath -> IO ()
 stackSetup bp setupPath = do
-    jr <- catch (decodeFile setupPath) 
+    jr <- catch (decodeFile setupPath)
                 (\e -> do putStrLn (prettyPrintParseException e)
                           return Nothing) :: IO (Maybe StackSetup)
 
@@ -164,16 +167,16 @@ stackSetup bp setupPath = do
     let (StackSetup stack exe dll pgit msys2 ghc ghcjs) = r
 
     --  store stack
-    let filesToDownload = M.toList stack >>= M.toList . snd >>= return . snd
+    --  let filesToDownload = M.toList stack >>= M.toList . snd >>= return . snd
 
-    let dlEachStack (ResourceInfo _ u _ s1 s256) = download u (bp </> "stack") (s1, s256) False
-        in mapM_ dlEachStack filesToDownload
+    --  let dlEachStack (ResourceInfo _ u _ s1 s256) = download u (bp </> "stack") (s1, s256) False
+    --      in mapM_ dlEachStack filesToDownload
 
     let newStack = M.map (M.map (redirectToMirror "stack")) stack
 
     -- store 7z
     let dl7z (ResourceInfo _ u _ s1 s256) = download u (bp </> "7z") (s1, s256) False
-        in do 
+        in do
             dl7z exe
             dl7z dll
 
@@ -206,6 +209,33 @@ stackSetup bp setupPath = do
     encodeFile (bp </> "stack-setup.yaml") (StackSetup newStack newExe newDll newPgit newMsys2 newGhc ghcjs)
     putStrLn $ printf "Stack setup successfully processed"
 
+syncStack :: FilePath -> IO ()
+syncStack basePath = do
+    putStrLn "start to sync stack"
+    download "https://api.github.com/repos/commercialhaskell/stack/releases/latest"
+             "/tmp"
+             ("", "")
+             True
+    let filename = "/tmp/latest"
+    text <- BS.readFile filename
+    let latestInfoValue = case A.decode text of
+                         Just o -> o :: Value
+                         _ -> error "decode latest fail!"
+    let (Object latestInfo) = latestInfoValue
+    let (Just (Bool prerelease)) = HM.lookup "prerelease" latestInfo
+    let (Just (Array assets)) = HM.lookup "assets" latestInfo
+    when (not prerelease) (syncAssets assets)
+    where syncAssets = mapM_ syncAsset
+          syncAsset assetValue = do
+              let (Object asset) = assetValue
+              let (Just urlValue) = HM.lookup "browser_download_url" asset
+              let (String url) = urlValue
+              download (T.unpack url)
+                       (basePath </> "stack")
+                       ("", "")
+                       False
+
+
 
 main :: IO ()
 main = do
@@ -225,5 +255,8 @@ main = do
              True
 
     stackSetup basePath "/tmp/stack-setup-2.yaml"
+
+    -- sync stack from github
+    syncStack basePath
 
     putStrLn "sync finish"
