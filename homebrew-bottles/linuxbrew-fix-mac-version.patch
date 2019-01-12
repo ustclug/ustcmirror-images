@@ -1,9 +1,9 @@
 diff --git a/Library/Homebrew/os/linux.rb b/Library/Homebrew/os/linux.rb
-index 3299c75..24d5128 100644
+index d9d7a4b..698a0be 100644
 --- a/Library/Homebrew/os/linux.rb
 +++ b/Library/Homebrew/os/linux.rb
-@@ -12,7 +12,7 @@ module OS
-     end
+@@ -8,7 +8,7 @@ module OS
+     raise "Loaded OS::Linux on generic OS!" if ENV["HOMEBREW_TEST_GENERIC_OS"]
  
      def version
 -      Version::NULL
