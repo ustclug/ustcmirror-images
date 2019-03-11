@@ -4,8 +4,5 @@ LABEL maintainer="Jian Zeng <anonymousknight96 AT gmail.com>" \
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
 VOLUME ["/data", "/log"]
 ENTRYPOINT ["entry.sh"]
-RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && yum --noplugins install -y wget \
-    && wget -nv -O /usr/local/bin/su-exec 'https://github.com/knight42/su-exec/releases/download/v0.2/su-exec' \
-    && chmod +x /usr/local/bin/su-exec \
-    && yum erase -y wget && yum clean all && rm -rf /var/cache/yum/
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    curl -o /usr/local/bin/su-exec http://ftp.ustclug.org/misc/su-exec && chmod +x /usr/local/bin/su-exec
