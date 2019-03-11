@@ -5,7 +5,6 @@ ADD ["entry.sh", "savelog", "/usr/local/bin/"]
 VOLUME ["/data", "/log"]
 ENTRYPOINT ["entry.sh"]
 RUN echo 'Asia/Shanghai' > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata && \
-    apt-get update && apt-get install -y ca-certificates make libc6-dev gcc git && \
-    git clone https://github.com/ncopa/su-exec && \
-    cd /su-exec && make && mv su-exec /usr/local/bin/ && cd / && \
-    rm -rf /su-exec && apt-get purge -y --auto-remove ca-certificates make libc6-dev gcc git && rm -rf /var/lib/apt/lists/*
+    apt-get update && apt-get install -y wget && \
+    wget -O /usr/local/bin/su-exec http://ftp.ustclug.org/misc/su-exec && chmod +x /usr/local/bin/su-exec && \
+    apt-get purge -y --auto-remove wget && rm -rf /var/lib/apt/lists/*
