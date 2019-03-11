@@ -1,7 +1,5 @@
 #!/usr/bin/python -O
 # -*- coding: utf-8 -*-
-from __future__ import print_function, unicode_literals, with_statement, division, absolute_import
-
 import os
 from os import path
 import sys
@@ -9,6 +7,7 @@ import glob
 import subprocess
 from datetime import datetime
 from collections import defaultdict
+
 
 def invoke(cmd, fail_fast=False):
     from subprocess import call, DEVNULL
@@ -20,11 +19,14 @@ def invoke(cmd, fail_fast=False):
         ret = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
     return ret
 
+
 class InvalidFrom(Exception):
     pass
 
+
 class NoBaseImage(Exception):
     pass
+
 
 class Git():
     @staticmethod
@@ -37,7 +39,10 @@ class Git():
 
     @staticmethod
     def fetch_master_branch():
-        invoke(['git', 'config', 'remote.origin.fetch', '+refs/heads/*:refs/remotes/origin/*'])
+        invoke([
+            'git', 'config', 'remote.origin.fetch',
+            '+refs/heads/*:refs/remotes/origin/*'
+        ])
         invoke(['git', 'fetch', 'origin', 'master:master'], fail_fast=True)
 
     @staticmethod
@@ -49,6 +54,7 @@ class NaryTree():
     """
     A n-ary tree
     """
+
     def __init__(self, name):
         self.name = name
         self._children = dict()
@@ -98,7 +104,8 @@ class Differ():
         self._now = now
 
     def changed(self, img):
-        return invoke(['git', 'diff', '--quiet', self._prev, self._now, '--', img]) != 0
+        return invoke(
+            ['git', 'diff', '--quiet', self._prev, self._now, '--', img]) != 0
 
 
 class Builder():
@@ -142,19 +149,25 @@ class Builder():
             # TRAVIS_COMMIT_RANGE is empty for builds
             # triggered by the initial commit of a new branch.
             commits_range = os.environ.get('TRAVIS_COMMIT_RANGE', '')
+            print('TRAVIS_COMMIT_RANGE: {}'.format(commits_range))
             if not commits_range:
                 # git clone --branch <branch> on travis
                 # need to add master branch back
                 if not Git.branch_exists('master'):
+                    print('fetching master branch...')
                     Git.fetch_master_branch()
                 commits_range = 'origin/master...HEAD'
             prev, current = commits_range.split('...')
             if Git.is_invalid_commit(prev):
                 if Git.is_current_branch('master'):
                     # fallback
+                    print('invalid commit: {}, fallback to <HEAD~5>'.format(
+                        prev))
                     prev = 'HEAD~5'
                 else:
                     prev = 'origin/master'
+            print('prev: {}'.format(prev))
+            print('current: {}'.format(current))
             differ = Differ(prev, current)
             to_build = self._dep_tree.find_updated_images(differ.changed)
 
@@ -172,15 +185,20 @@ class Builder():
             if os.access(build_script, os.X_OK):
                 self._print_command('cd {} && ./build {}'.format(img, tag))
             elif tag == 'latest':
-                self._print_command('docker build -t {0} {1}/'.format(dst, img))
+                self._print_command('docker build -t {0} {1}/'.format(
+                    dst, img))
             else:
-                self._print_command('docker build -t {0} -f {1}/Dockerfile.{2} {1}/'.format(dst, img, tag))
+                self._print_command(
+                    'docker build -t {0} -f {1}/Dockerfile.{2} {1}/'.format(
+                        dst, img, tag))
 
             if not is_cron or force_date_tag:
                 if tag == 'latest':
-                    self._print_command('@docker tag {0} {1}'.format(dst, dst.replace('latest', self._now)))
+                    self._print_command('@docker tag {0} {1}'.format(
+                        dst, dst.replace('latest', self._now)))
                 else:
-                    self._print_command('@docker tag {0} {0}-{1}'.format(dst, self._now))
+                    self._print_command('@docker tag {0} {0}-{1}'.format(
+                        dst, self._now))
 
         self._fout.write('all: {}\r\n'.format(' '.join(all_targets)))
 
@@ -190,13 +208,16 @@ class Builder():
     def _print_command(self, cmd):
         self._fout.write('\t' + cmd + '\r\n')
 
+
 def strip_prefix(s, prefix):
     if s.startswith(prefix):
         return s[len(prefix):]
     return s
 
+
 def encode_tag(tag):
     return strip_prefix(tag, 'ustcmirror/').replace(':', '.')
+
 
 def get_dest_image(img, f):
     n = path.basename(f)
@@ -206,6 +227,7 @@ def get_dest_image(img, f):
         return 'ustcmirror/{}:{}'.format(img, tag[1:])
     else:
         return 'ustcmirror/{}:latest'.format(img)
+
 
 def get_base_image(f):
     with open(f) as fin:
@@ -222,6 +244,7 @@ def get_base_image(f):
             return tag
     raise NoBaseImage(f)
 
+
 def find_all_images(d):
     root, dirs, _ = next(os.walk(d))
     imgs = {}
@@ -235,6 +258,7 @@ def find_all_images(d):
             base_img = get_base_image(f)
             imgs[dst_img] = base_img
     return imgs
+
 
 def main():
     here = os.getcwd()
@@ -250,6 +274,7 @@ def main():
         b.finish()
 
     return 0
+
 
 if __name__ == '__main__':
     sys.exit(main())
