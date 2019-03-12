@@ -5,6 +5,7 @@
 # Table Of Content
 
 - [Introduction](#introduction)
+- [Quick Start](#quick-start)
 - [Configuration](#configuration)
     - [Volumes](#volumes)
     - [Common Configuration Parameters](#common-configuration-parameters)
@@ -31,6 +32,19 @@
 # Introduction
 
 These images are designed for mirroring remote directories/repositories in a consistent and portable way. They are used by [ustcmirror](https://github.com/ustclug/ustcmirror).
+
+# Quick Start
+
+```sh
+docker run --rm \
+    -e LOG_ROTATE_CYCLE='5' \
+    -e RSYNC_HOST='rsync.alpinelinux.org' \
+    -e RSYNC_PATH='alpine/' \
+    -e RSYNC_MAXDELETE='10000' \
+    -v /var/repos/alpine:/data \
+    -v /var/sync-logs/alpine:/log \
+    ustcmirror/rsync:latest
+```
 
 # Configuration
 
