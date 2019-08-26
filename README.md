@@ -31,7 +31,7 @@
 
 # Introduction
 
-These images are designed for mirroring remote directories/repositories in a consistent and portable way. They are used by [ustcmirror](https://github.com/ustclug/ustcmirror).
+These images are designed for mirroring remote directories/repositories in a consistent and portable way. They are used by [ustcmirror (yuki)](https://github.com/ustclug/yuki).
 
 # Quick Start
 
