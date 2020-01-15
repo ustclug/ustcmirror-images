@@ -13,7 +13,7 @@ RUN mkdir /tmp/nix.unpack && \
     rm -rf /tmp/nix.tar.xz /tmp/nix.unpack
 
 # ca-certificates required by nix
-RUN apk add ca-certificates python3 py3-requests py3-pip py3-lxml && \
+RUN apk add --no-cache ca-certificates python3 py3-requests py3-pip py3-lxml && \
     pip3 install pyquery
 
 ADD [ "sync.sh", "nix-channels.py", "/" ]
