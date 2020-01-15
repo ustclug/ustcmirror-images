@@ -21,6 +21,7 @@
     - [homebrew-bottles](#homebrew-bottles)
     - [julia](#julia)
     - [lftpsync](#lftpsync)
+    - [nix-channels](#nix-channels)
     - [nodesource](#nodesource)
     - [pypi](#pypi)
     - [rclone](#rclone)
@@ -201,6 +202,15 @@ Sync from official site.  No parameters needed.
 | `LFTPSYNC_PATH` | The destination path on the remote server. |
 | `LFTPSYNC_EXCLUDE` | Files to be excluded. Defaults to `-X .~tmp~/`. |
 | `LFTPSYNC_JOBS` | Defaults to `$(getconf _NPROCESSORS_ONLN)`. |
+
+### nix-channels
+
+[![](https://images.microbadger.com/badges/image/ustcmirror/nix-channels.svg)](https://microbadger.com/images/ustcmirror/nix-channels "Get your own image badge on microbadger.com")
+
+| Parameter | Description |
+|-----------|-------------|
+| `NIX_MIRROR_UPSTREAM` | Main page of Nix channels. No trailing slash. Defaults to [`https://nixos.org/channels`](https://nixos.org/channels) |
+| `NIX_MIRROR_BASE_URL` | The root URL this mirror will be served at. No trailing slash. Defaults to [`https://mirrors.ustc.edu.cn/nix-channels`](https://mirrors.ustc.edu.cn/nix-channels) |
 
 ### nodesource
 
