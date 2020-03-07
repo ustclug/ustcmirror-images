@@ -222,6 +222,10 @@ A new solution to sync Julia general registry (using `StorageMirrorServer.jl`). 
 |-----------|-------------|
 | `NIX_MIRROR_UPSTREAM` | Main page of Nix channels. No trailing slash. Defaults to [`https://nixos.org/channels`](https://nixos.org/channels) |
 | `NIX_MIRROR_BASE_URL` | The root URL this mirror will be served at. No trailing slash. Defaults to [`https://mirrors.ustc.edu.cn/nix-channels`](https://mirrors.ustc.edu.cn/nix-channels) |
+| `NIX_MIRROR_PATH_BATCH` | Number of paths to pass to `nix` each time, to avoid `E2BIG`. Defaults to `8192`, which is about 1/4 of the 2M `ARG_MAX`. |
+| `NIX_MIRROR_THREADS` | Number of threads to use to download in parallel. Defaults to 10 |
+| `NIX_MIRROR_RETAIN_DAYS` | Days to consider old versions as reachable. Defaults to 30. (The newest version of a release is always reachable) |
+| `NIX_MIRROR_DELETE_OLD` | Whether to actually delete files in garbage collection. Set to `1` to delete and `0` to not delete. Defaults to `1` |
 
 ### nodesource
 
