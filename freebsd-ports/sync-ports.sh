@@ -12,7 +12,7 @@ removal_list=$(mktemp)
 download_and_check() {
 	while read sum repopath; do
 		[[ -f $local_dir/$repopath ]] && continue
-		curl -m 600 -sSfRL --create-dirs -o $local_dir/$repopath.tmp $remote_url/$repopath
+		curl --fail -m 600 -sSfRL --create-dirs -o $local_dir/$repopath.tmp $remote_url/$repopath
 		if [[ $? -ne 0 ]]; then
 			echo "[WARN] download failed $remote_url/$repopath"
 			rm -f $local_dir/$repopath.tmp
@@ -54,13 +54,13 @@ remote_url=$FBSD_PORTS_DISTFILES_UPSTREAM local_dir=$TO/distfiles parallel -j $F
 git -C $TO/ports.git archive --format=tar.gz -o $TO/ports.tar.gz HEAD
 
 # remove old distfile
-comm -23 <(cd $TO/distfiles; find . -type f | sed 's/^\.\///g' | sort) <(awk '{print $2}' $meta) | tee $removal_list | xargs rm -f 
-sed 's/^/[INFO] remove /g' $removal_list 
+comm -23 <(cd $TO/distfiles; find . -type f | sed 's/^\.\///g' | sort) <(awk '{print $2}' $meta) | tee $removal_list | xargs rm -f
+sed 's/^/[INFO] remove /g' $removal_list
 
 # fix dir mode
 find $TO -type d -print0 | xargs -0 chmod 755
 
 # cleam temp file
-rm -f $meta $removal_list 
+rm -f $meta $removal_list
 rm -r $tmpdir
 

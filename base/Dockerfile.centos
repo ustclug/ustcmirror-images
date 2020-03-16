@@ -5,4 +5,4 @@ ADD ["entry.sh", "savelog", "/usr/local/bin/"]
 VOLUME ["/data", "/log"]
 ENTRYPOINT ["entry.sh"]
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
-    curl -o /usr/local/bin/su-exec http://ftp.ustclug.org/misc/su-exec && chmod +x /usr/local/bin/su-exec
+    curl --fail -o /usr/local/bin/su-exec https://ftp.lug.ustc.edu.cn/misc/su-exec && chmod +x /usr/local/bin/su-exec
