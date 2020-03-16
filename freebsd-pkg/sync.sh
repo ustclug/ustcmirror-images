@@ -89,7 +89,7 @@ channel_sync() {
 	download_or_fail false Latest/{pkg-devel.txz,pkg.txz,pkg.txz.sig}
 
 	# get packages
-	tar -C $tmpdir -xJf $tmpdir/packagesite.txz packagesite.yaml 
+	tar -C $tmpdir -xJf $tmpdir/packagesite.txz packagesite.yaml
 	if [[ $? -ne 0 ]]; then
 		echo '[FATAL] unzip packagesite.txz failed.'
 		return 1
@@ -121,12 +121,12 @@ is_ipv6() {
 
 if [[ -n $BIND_ADDRESS ]]; then
 	if is_ipv6 "$BIND_ADDRESS"; then
-		CURL_WRAP="curl -6 --interface $BIND_ADDRESS"
+		CURL_WRAP="curl --fail -6 --interface $BIND_ADDRESS"
 	else
-		CURL_WRAP="curl -4 --interface $BIND_ADDRESS"
+		CURL_WRAP="curl --fail -4 --interface $BIND_ADDRESS"
 	fi
 else
-	CURL_WRAP="curl"
+	CURL_WRAP="curl --fail"
 fi
 export CURL_WRAP
 
