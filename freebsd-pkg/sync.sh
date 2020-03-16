@@ -121,12 +121,12 @@ is_ipv6() {
 
 if [[ -n $BIND_ADDRESS ]]; then
 	if is_ipv6 "$BIND_ADDRESS"; then
-		CURL_WRAP="curl --fail -6 --interface $BIND_ADDRESS"
+		CURL_WRAP="curl -6 --interface $BIND_ADDRESS"
 	else
-		CURL_WRAP="curl --fail -4 --interface $BIND_ADDRESS"
+		CURL_WRAP="curl -4 --interface $BIND_ADDRESS"
 	fi
 else
-	CURL_WRAP="curl --fail"
+	CURL_WRAP="curl"
 fi
 export CURL_WRAP
 

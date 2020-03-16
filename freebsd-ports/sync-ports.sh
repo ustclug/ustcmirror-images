@@ -12,7 +12,7 @@ removal_list=$(mktemp)
 download_and_check() {
 	while read sum repopath; do
 		[[ -f $local_dir/$repopath ]] && continue
-		curl --fail -m 600 -sSfRL --create-dirs -o $local_dir/$repopath.tmp $remote_url/$repopath
+		curl -m 600 -sSfRL --create-dirs -o $local_dir/$repopath.tmp $remote_url/$repopath
 		if [[ $? -ne 0 ]]; then
 			echo "[WARN] download failed $remote_url/$repopath"
 			rm -f $local_dir/$repopath.tmp
