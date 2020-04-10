@@ -4,4 +4,13 @@ set -e
 _here=`dirname $(realpath $0)`
 . ${_here}/apt-download
 
-apt-download-binary $@
+apt-download-binary "$@"
+
+set +u
+if [ -n "$APTSYNC_UNLINK" ]; then
+  if [ $# -lt 6 ]; then
+    echo "Not enough arguments" >&2
+  else
+    apt-delete-old-debs "$5" "$6"
+  fi
+fi
