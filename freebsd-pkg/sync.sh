@@ -79,7 +79,8 @@ channel_sync() {
 	# get meta-data
 	export remote_url=$baseurl
 	export local_dir=$tmpdir
-	download_or_fail true digests.txz meta.txz packagesite.txz
+	download_or_fail false digests.txz
+	download_or_fail true meta.txz packagesite.txz
 	if [[ $? -ne 0 ]]; then
 		echo "[FATAL] download meta-data failed."
 		return 1
