@@ -3,7 +3,7 @@ services:
 language: c
 script:
   - python3 ./configure.py
-  - make -j $(getconf _NPROCESSORS_ONLN) all
+  - make all
 after_success:
   - ./push.sh
 notifications:
