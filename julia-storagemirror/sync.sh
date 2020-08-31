@@ -6,7 +6,7 @@ cd "$TO"
 
 UPSTREAMS="[\"https://us-east.storage.juliahub.com\", \"https://kr.storage.juliahub.com\"]"
 
-OUTPUT_DIR="$TO/static"
+OUTPUT_DIR="$TO"
 
 REGISTRY_NAME="General"
 REGISTRY_UUID="23338594-aafe-5451-b93e-139f81909106"
