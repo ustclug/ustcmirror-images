@@ -5,7 +5,7 @@
 # A workaround for this is to start julia with a project folder that is writable, e.g.,
 # `julia --project=$HOME/.julia/env/1.5"`
 
-SHARE_DIR = "/opt/julia/depot"
+SHARE_DIR = ENV["JULIA_DEPOT_PATH"]
 
 empty!(DEPOT_PATH)
 push!(DEPOT_PATH, joinpath(homedir(), ".julia"), SHARE_DIR)
