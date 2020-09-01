@@ -19,7 +19,7 @@
 ### 约定
 
 * 如果同步方式具有普适性，建议命名为 `xx-sync`，比如 `rsync`，`gitsync` 等。
-* 如果同步方式只适用于某一个特定的源，建议命名为那个源的名字，比如 `nodesource`，`stacakge` 等。
+* 如果同步方式只适用于某一个特定的源，建议命名为那个源的名字，比如 `nodesource`，`stackage` 等。
 * 任何同步方式对应的 image 都应该直接或间接地基于 `ustcmirror/base`。
 * 如果您构建的镜像需要打上 `latest` 以外的 tag，请创建新的 `Dockerfile` 并把 tag 作为 `Dockerfile` 的后缀名。可以参考 [base](base) 以及 [lftpsync](lftpsync) 文件夹下的内容。
 * 如果构建镜像前需要做额外的工作，您可以创建 `$your-sync-method/build` 来实现（需要可执行权限）。可以参考 [aptsync](aptsync)，[archvsync](archvsync) 文件夹下的内容。您的自定义构建程序应该 fail fast，如果是 Bash script 的话，请记得 `set -e`。构建时会以 `cd $your-sync-method/ && ./build $tag` 的方式来调用您的构建程序，如果需要构建多个镜像的话，可以根据第一个参数来决定构建哪一个。
