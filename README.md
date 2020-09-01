@@ -192,7 +192,7 @@ See [dist conf](https://pagure.io/quick-fedora-mirror/blob/master/f/quick-fedora
 
 Sync from official site.  No parameters needed.
 
-### julia-storagemirror
+### julia-storage
 
 A new solution to sync Julia general registry (using `StorageMirrorServer.jl`). No parameters needed.
 
