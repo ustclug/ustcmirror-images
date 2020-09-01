@@ -4,7 +4,7 @@ BASE_URL="https://us-east.storage.juliahub.com"
 [[ -d "$TO" ]]
 cd "$TO"
 
-UPSTREAMS="[\"https://us-east.storage.juliahub.com\", \"https://kr.storage.juliahub.com\"]"
+UPSTREAMS='["https://us-east.storage.juliahub.com", "https://kr.storage.juliahub.com"]'
 
 OUTPUT_DIR="$TO"
 
