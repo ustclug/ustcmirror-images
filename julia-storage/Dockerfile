@@ -9,4 +9,4 @@ RUN apk update && apk add --no-cache curl python3 gnupg && \
         chmod a+rx -R $JULIA_DEPOT_PATH
 
 ADD startup.jl /opt/julia/etc/julia/startup.jl
-ADD sync.sh /
+ADD ["pre-sync.sh", "sync.sh", "/"]
