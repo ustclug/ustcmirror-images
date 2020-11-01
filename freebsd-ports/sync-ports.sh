@@ -9,10 +9,21 @@ tmpdir=$(mktemp -d)
 meta=$(mktemp)
 removal_list=$(mktemp)
 
+if [[ -n $BIND_ADDRESS ]]; then
+	if is_ipv6 "$BIND_ADDRESS"; then
+		CURL_WRAP="curl -6 --interface $BIND_ADDRESS"
+	else
+		CURL_WRAP="curl -4 --interface $BIND_ADDRESS"
+	fi
+else
+	CURL_WRAP="curl"
+fi
+export CURL_WRAP
+
 download_and_check() {
 	while read sum repopath; do
 		[[ -f $local_dir/$repopath ]] && continue
-		curl -m 600 -sSfRL --create-dirs -o $local_dir/$repopath.tmp $remote_url/$repopath
+		$CURL_WRAP -m 600 -sSfRL --create-dirs -o $local_dir/$repopath.tmp $remote_url/$repopath
 		if [[ $? -ne 0 ]]; then
 			echo "[WARN] download failed $remote_url/$repopath"
 			rm -f $local_dir/$repopath.tmp

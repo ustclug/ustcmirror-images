@@ -4,11 +4,13 @@
 
 # Table Of Content
 
+- [ustcmirror-images](#ustcmirror-images)
+- [Table Of Content](#table-of-content)
 - [Introduction](#introduction)
 - [Quick Start](#quick-start)
 - [Configuration](#configuration)
     - [Volumes](#volumes)
-    - [Common Configuration Parameters](#common-configuration-parameters)
+    - [Common Configuration Parameters(AKA environment variables)](#common-configuration-parametersaka-environment-variables)
     - [aptsync](#aptsync)
     - [archvsync](#archvsync)
     - [debian-cd](#debian-cd)
@@ -20,6 +22,7 @@
     - [hackage](#hackage)
     - [homebrew-bottles](#homebrew-bottles)
     - [julia](#julia)
+    - [julia-storage](#julia-storage)
     - [lftpsync](#lftpsync)
     - [nix-channels](#nix-channels)
     - [nodesource](#nodesource)
@@ -145,6 +148,8 @@ See [dist conf](https://pagure.io/quick-fedora-mirror/blob/master/f/quick-fedora
 ### freebsd-ports
 
 [![](https://images.microbadger.com/badges/image/ustcmirror/freebsd-ports.svg)](https://microbadger.com/images/ustcmirror/freebsd-ports "Get your own image badge on microbadger.com")
+
+Notice: BIND_ADDRESS is only added for `curl` in freebsd-ports. Make sure that github.com is accessible under default network settings.
 
 | Parameter                       | Description                              |
 | ------------------------------- | ---------------------------------------- |
