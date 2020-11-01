@@ -9,6 +9,11 @@ tmpdir=$(mktemp -d)
 meta=$(mktemp)
 removal_list=$(mktemp)
 
+is_ipv6() {
+	# string contains a colon
+	[[ $1 =~ .*: ]]
+}
+
 if [[ -n $BIND_ADDRESS ]]; then
 	if is_ipv6 "$BIND_ADDRESS"; then
 		CURL_WRAP="curl -6 --interface $BIND_ADDRESS"
