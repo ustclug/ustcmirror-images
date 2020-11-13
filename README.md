@@ -193,6 +193,7 @@ Notice: BIND_ADDRESS is only added for `curl` in freebsd-ports. Make sure that g
 | ------------------------ | ---------------------------------------- |
 | `HOMEBREW_BOTTLE_DOMAIN` | Set the URL of upstream. Defaults to `http://homebrew.bintray.com` |
 | `HOMEBREW_REPO`          | Set the URL of core repo. Defaults to `git://github.com/homebrew/homebrew-core.git`  |
+| `TARGET_OS`              | `mac` or `linux`. Defaults to `mac`      |
 
 ### julia
 
