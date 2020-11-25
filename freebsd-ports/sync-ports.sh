@@ -31,6 +31,7 @@ download_and_check() {
 	while read sum repopath; do
 		if [[ -f $sum ]]; then
 			if [[ ! $sum -ef $local_dir/$repopath ]]; then
+				mkdir -p $(dirname $local_dir/$repopath)
 				ln -f $sum $local_dir/$repopath
 			fi
 		else
@@ -44,6 +45,7 @@ download_and_check() {
 
 			if echo $sum $sum.tmp | sha256sum -c --quiet --status ; then
 				mv $sum.tmp $sum
+				mkdir -p $(dirname $local_dir/$repopath)
 				ln -f $sum $local_dir/$repopath
 			else
 				echo "[WARN] checksum mismatch $remote_url/$repopath"
