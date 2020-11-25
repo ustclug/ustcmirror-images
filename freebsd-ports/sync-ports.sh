@@ -82,7 +82,8 @@ remote_url=$FBSD_PORTS_DISTFILES_UPSTREAM local_dir=$TO/distfiles parallel --lin
 git -C $TO/ports.git archive --format=tar.gz -o $TO/ports.tar.gz HEAD
 
 # remove old distfile
-comm -23 <(cd $TO/distfiles; find . -type f | sed 's/^\.\///g' | sort) <(awk '{print $2}' $meta) | tee $removal_list | xargs rm -f
+cd $TO/distfiles
+comm -23 <(find . -type f | sed 's/^\.\///g' | sort) <(awk '{print $2}' $meta) | tee $removal_list | xargs rm -f
 sed 's/^/[INFO] remove /g' $removal_list
 
 # fix dir mode
