@@ -375,6 +375,11 @@ translates to:
 YUMSYNC_URL='https://repo.mysql.com/yum/@{comp}/el/@{os_ver}/@{arch}/'
 YUMSYNC_DISTS='6-8|mysql-8.0-community,mysql-5.7-community|aarch64,i386,x86_64|@{arch}|/yum/@{comp}/el/@{os_ver}/@{arch}/'
 ```
+# License
+
+Specially, contents of folder `apt-sync` and `yum-sync` and the generated container image from them are under GPLv3 license, as it uses code from <https://github.com/tuna/tunasync-scripts>.
+
+Other contents are under MIT license.
 
 # License
 
