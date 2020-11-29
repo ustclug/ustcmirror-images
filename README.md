@@ -31,6 +31,7 @@
     - [rsync](#rsync)
     - [rubygems](#rubygems)
     - [stackage](#stackage)
+- [License](#license)
 - [Contributing](#contributing)
 
 # Introduction
@@ -295,6 +296,12 @@ ref:
 Stackage doesn't need to specify upstream, but this mirror use cabal to install necessary Haskell packages. Replacing default mirror of cabal with faster one will speed up building process.
 
 Read the [user guide](https://www.haskell.org/cabal/users-guide/installing-packages.html#repository-specification) before writing preferred mirror to `config`
+
+# License
+
+Specially, contents of folder `apt-sync` and the generated container image "ustcmirror/apt-sync", are under GPLv3 license, as it uses code from <https://github.com/tuna/tunasync-scripts>.
+
+Other contents are under MIT license.
 
 # Contributing
 
