@@ -1,7 +1,7 @@
 FROM ustcmirror/base:alpine
 LABEL maintainer "Jian Zeng <anonymousknight96 AT gmail.com>"
 
-ENV RCLONE_VERSION=v1.40 \
+ENV RCLONE_VERSION=v1.53.3 \
     RCLONE_DELETE_AFTER=true \
     RCLONE_DELETE_EXCLUDED=true
 
