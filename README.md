@@ -1,6 +1,6 @@
 # ustcmirror-images
 
-[![Build Status](https://travis-ci.org/ustclug/ustcmirror-images.svg?branch=master)](https://travis-ci.org/ustclug/ustcmirror-images)
+[![Build Status](https://travis-ci.com/ustclug/ustcmirror-images.svg?branch=master)](https://travis-ci.com/ustclug/ustcmirror-images)
 
 # Table Of Content
 
