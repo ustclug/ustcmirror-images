@@ -135,6 +135,7 @@ See [dist conf](https://pagure.io/quick-fedora-mirror/blob/master/f/quick-fedora
 | `CHECKIN_PASSWORD` | see in mirrormanager |
 | `CHECKIN_HOST`     | see in mirrormanager |
 
+Note: This image is not in use now, as `quick-fedora-mirror` has some mysterious bugs when being used.
 
 ### freebsd-pkg
 
