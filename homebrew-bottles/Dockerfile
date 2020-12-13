@@ -1,5 +1,5 @@
 FROM ustcmirror/base:alpine-3.11
-MAINTAINER Yifan Gao <docker@yfgao.com>
+LABEL maintainer="Yifan Gao <docker@yfgao.com>"
 ENV HOMEBREW_BOTTLE_DOMAIN=http://homebrew.bintray.com \
     HOMEBREW_CACHE=/data
 
