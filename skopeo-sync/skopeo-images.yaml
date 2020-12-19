@@ -1,0 +1,10 @@
+k8s.gcr.io:
+  images:
+    kube-apiserver:
+      - v1.18.3
+      - v1.18.4
+      - v1.18.5
+registry.hub.docker.com:
+  images:
+    library/hello-world:
+      - latest
