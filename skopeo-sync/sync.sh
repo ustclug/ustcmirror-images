@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
 
-skopeo login -u mirror -p "$REGISTRY_PASSWD" "$REGISTRY_HOST"
-exec skopeo --insecure-policy sync --scoped --src yaml --dest docker /etc/skopeo-images.yaml "$REGISTRY_HOST"
+VERIFY_TLS=${VERIFY_TLS:-"false"}
+
+if [ -n "$NEEDS_LOGIN" ]; then
+  skopeo login --tls-verify="$VERIFY_TLS" "$REGISTRY_HOST" -u "$REGISTRY_USERNAME" -p "$REGISTRY_PASSWORD"
+  if [ $? -ne 0 ]; then
+    echo "Registry login failed"
+    exit 255
+  fi
+fi
+
+exec skopeo --insecure-policy sync --dest-tls-verify="$VERIFY" --scoped --src yaml --dest docker /etc/skopeo-images.yaml "$REGISTRY_HOST"
