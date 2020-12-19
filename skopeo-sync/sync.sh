@@ -10,4 +10,4 @@ if [ -n "$NEEDS_LOGIN" ]; then
   fi
 fi
 
-exec skopeo --insecure-policy sync --dest-tls-verify="$VERIFY" --scoped --src yaml --dest docker /etc/skopeo-images.yaml "$REGISTRY_HOST"
+exec skopeo --insecure-policy sync --dest-tls-verify="$VERIFY_TLS" --src yaml --dest docker /etc/skopeo-images.yaml "$REGISTRY_HOST"
