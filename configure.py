@@ -129,7 +129,7 @@ class Builder():
     def finish(self):
         root = self._dep_tree
         self._build_tree(root)
-        is_cron = os.environ.get('TRAVIS_EVENT_TYPE', '') == 'cron'
+        is_cron = os.environ.get('GITHUB_EVENT', '') == 'schedule'
         date_tag = os.environ.get('DATE_TAG', '') != ''
         self._generate(is_cron=is_cron, force_date_tag=date_tag)
 
@@ -151,12 +151,18 @@ class Builder():
             commits_range = os.environ.get('TRAVIS_COMMIT_RANGE', '')
             print('TRAVIS_COMMIT_RANGE: {}'.format(commits_range))
             if not commits_range:
-                # git clone --branch <branch> on travis
-                # need to add master branch back
-                if not Git.branch_exists('master'):
-                    print('fetching master branch...')
-                    Git.fetch_master_branch()
-                commits_range = 'origin/master...HEAD'
+                # GitHub Actions ($COMMIT_FROM & $COMMIT_TO)
+                commit_from = os.environ.get('COMMIT_FROM', '')
+                commit_to = os.environ.get('COMMIT_TO', '')
+                if commit_from and commit_to:
+                    commits_range = "{}...{}".format(commit_from, commit_to)
+                else:
+                    # git clone --branch <branch> on travis
+                    # need to add master branch back
+                    if not Git.branch_exists('master'):
+                        print('fetching master branch...')
+                        Git.fetch_master_branch()
+                    commits_range = 'origin/master...HEAD'
             prev, current = commits_range.split('...')
             if Git.is_invalid_commit(prev):
                 if Git.is_current_branch('master'):
