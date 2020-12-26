@@ -21,8 +21,17 @@ jobs:
         run: |
           python3 ./configure.py
           make all
+        env:
+          GITHUB_EVENT: ${{ github.event_name }}
+          COMMIT_FROM: ${{ github.event.before }}
+          COMMIT_TO: ${{ github.event.after }}
 
       - name: Deploy
         run: ./push.sh
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+          GITHUB_EVENT: ${{ github.event_name }}
+          GITHUB_REF: ${{ github.ref }}
       
       # TODO: notification

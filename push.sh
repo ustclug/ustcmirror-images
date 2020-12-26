@@ -2,10 +2,10 @@
 
 [[ $DEBUG = true ]] && set -x
 
-if [[ $TRAVIS_EVENT_TYPE != push && $TRAVIS_EVENT_TYPE != cron ]]; then
+if [[ $GITHUB_EVENT != push && $GITHUB_EVENT != schedule ]]; then
     exit 0
 fi
-if [[ $TRAVIS_EVENT_TYPE == push && $TRAVIS_BRANCH != master ]]; then
+if [[ $GITHUB_EVENT == push && $GITHUB_REF != "refs/heads/master" ]]; then
     exit 0
 fi
 
