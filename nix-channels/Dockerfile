@@ -11,7 +11,7 @@ RUN \
     ln -s /nix/store/*-nix-*/bin/* /usr/local/bin && \
     rm -rf /tmp/nix.tar.xz /tmp/nix.unpack && \
     # ca-certificates required by nix
-    apk add --no-cache ca-certificates python3 py3-requests py3-pip py3-lxml && \
+    apk add --no-cache ca-certificates python3 py3-requests py3-pip py3-lxml py3-tz && \
     pip3 install pyquery minio
 
 ADD [ "sync.sh", "nix-channels.py", "/" ]
