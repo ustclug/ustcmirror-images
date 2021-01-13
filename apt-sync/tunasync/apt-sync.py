@@ -300,6 +300,7 @@ def main():
                     failed.append((os, comp, arch))
     if len(failed) > 0:
         print(f"Failed APT repos of {args.base_url}: ", failed)
+        exit(len(failed))  # notice outside that it fails
         return
     if args.delete or args.delete_dry_run:
         apt_delete_old_debs(args.working_dir, deb_set, args.delete_dry_run)

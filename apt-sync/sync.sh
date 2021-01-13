@@ -3,7 +3,7 @@
 set -e
 [[ $DEBUG = true ]] && set -x
 
-if [[ -n "$DELETE" ]]; then
+if [[ -n "$APTSYNC_UNLINK" ]]; then
   DELETE=--delete
 fi
 
@@ -26,5 +26,5 @@ while [[ "$DISTS" == *:* ]]; do
   APT_ARCH="${APT_ARCH// /,}"
   APT_COMP="${APT_COMP// /,}"
 
-  python3 apt-sync.py $DELETE "$APTSYNC_URL" "$APT_DIST" "$APT_COMP" "$APT_ARCH" "/data/${APT_DIR}"
+  python3 apt-sync.py $DELETE "$APTSYNC_URL" "$APT_DIST" "$APT_COMP" "$APT_ARCH" "${TO}/${APT_DIR}"
 done
