@@ -3,15 +3,16 @@
 set -e
 [[ $DEBUG = true ]] && set -x
 
-if [[ -n "$USE_CREATEREPO" ]]; then
-  DOWNLOAD_REPODATA=
-else
+if [[ -n "$YUMSYNC_UNLINK" ]]; then
+  DELETE=--delete
+fi
+
+if [[ -n "$YUMSYNC_DOWNLOAD_REPODATA" ]]; then
   DOWNLOAD_REPODATA=--download-repodata
 fi
 
 cd /usr/local/lib/tunasync
 DISTS="$YUMSYNC_DISTS:"
-YUM_REPONAME=${YUM_REPONAME:-"@{comp}-el@{os_ver}"}
 while [[ "$DISTS" == *:* ]]; do
   THISDIST="${DISTS%%:*}|"
   DISTS="${DISTS#*:}"
@@ -19,15 +20,17 @@ while [[ "$DISTS" == *:* ]]; do
   YUM_DIST="${THISDIST}"
   YUM_COMP="${YUM_DIST#*|}"
   YUM_ARCH="${YUM_COMP#*|}"
-  YUM_DIR="${YUM_ARCH#*|}"
+  YUM_REPO="${YUM_ARCH#*|}"
+  YUM_DIR="${YUM_REPO#*|}"
 
   YUM_DIST="${THISDIST%%|*}"
   YUM_COMP="${YUM_COMP%%|*}"
   YUM_ARCH="${YUM_ARCH%%|*}"
+  YUM_REPO="${YUM_REPO%%|*}"
   YUM_DIR="${YUM_DIR%%|*}"
 
   YUM_ARCH="${YUM_ARCH// /,}"
   YUM_COMP="${YUM_COMP// /,}"
 
-  exec python3 yum-sync.py "$YUMSYNC_URL" "$YUM_DIST" "$YUM_COMP" "$YUM_ARCH" "$YUM_REPONAME" "${TO}/${YUM_DIR}" $DOWNLOAD_REPODATA
+  python3 yum-sync.py $DELETE $DOWNLOAD_REPODATA "$YUMSYNC_URL" "$YUM_DIST" "$YUM_COMP" "$YUM_ARCH" "$YUM_REPO" "${TO}/${YUM_DIR}"
 done
