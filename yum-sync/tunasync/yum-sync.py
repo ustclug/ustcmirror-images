@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+## We use a modified version of yum-sync from tunasync.
+## This version adds support of working dir substitution, which helps us keep the same dir structure as upstream.
+## And the configuration is different from tunasync, too.
+## Be careful when backporting changes (and read `main()` before that).
+
 import hashlib
 import traceback
 import json
@@ -192,14 +198,14 @@ def main():
                     traceback.print_exc()
 
     for arch in arch_list:
-        dest_dirs = []
-        conf = tempfile.NamedTemporaryFile("w", suffix=".conf")
-        conf.write('''
+        # dest_dirs = []
+        for name, url, working_dir in combination_os_comp(arch):
+            working_dir.mkdir(parents=True, exist_ok=True)
+            conf = tempfile.NamedTemporaryFile("w", suffix=".conf")
+            conf.write('''
 [main]
 keepcache=0
 ''')
-        for name, url, working_dir in combination_os_comp(arch):
-            working_dir.mkdir(parents=True, exist_ok=True)
             conf.write(f'''
 [{name}]
 name={name}
@@ -208,35 +214,37 @@ repo_gpgcheck=0
 gpgcheck=0
 enabled=1
 ''')
-            dst = (working_dir / name).absolute()
+            dst = working_dir.absolute()
             dst.mkdir(parents=True, exist_ok=True)
-            dest_dirs.append(dst)
-        conf.flush()
-        # sp.run(["cat", conf.name])
-        # sp.run(["ls", "-la", cache_dir])
+            # dest_dirs.append(dst)
+            conf.flush()
+            # sp.run(["cat", conf.name])
+            # sp.run(["ls", "-la", cache_dir])
 
-        if len(dest_dirs) == 0:
-            print("Nothing to sync", flush=True)
-            failed.append(('', arch))
-            continue
+            # if len(dest_dirs) == 0:
+            #     print("Nothing to sync", flush=True)
+            #     failed.append(('', arch))
+            #     continue
 
-        cmd_args = ["reposync", "-a", arch, "-c", conf.name, "-d", "-p", str(working_dir.absolute()), "-e", cache_dir]
-        print("Launching reposync", flush=True)
-        # print(cmd_args)
-        ret = sp.run(cmd_args)
-        if ret.returncode != 0:
-            failed.append((name, arch))
-            continue
+            cmd_args = ["reposync", "-a", arch, "-c", conf.name, "-d", "-p", dst, "-e", cache_dir]
+            print("Launching reposync", flush=True)
+            # print(cmd_args)
+            ret = sp.run(cmd_args)
+            if ret.returncode != 0:
+                failed.append((name, arch))
+                continue
 
-        for path in dest_dirs:
-            path.mkdir(exist_ok=True)
+        # for path in dest_dirs:
+            # dst.mkdir(exist_ok=True)
             if args.download_repodata:
-                download_repodata(url, path)
+                download_repodata(url, dst)
             else:
-                cmd_args = ["createrepo", "--update", "-v", "-c", cache_dir, "-o", str(path), str(path)]
+                cmd_args = ["createrepo", "--update", "-v", "-c", cache_dir, "-o", str(dst), str(dst)]
                 # print(cmd_args)
                 ret = sp.run(cmd_args)
-            calc_repo_size(path)
+            calc_repo_size(dst)
+
+            conf.close()
 
     if len(failed) > 0:
         print("Failed YUM repos: ", failed)
