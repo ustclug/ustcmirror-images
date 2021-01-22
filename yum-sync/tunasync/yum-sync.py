@@ -148,7 +148,7 @@ def main():
     parser.add_argument("component", type=str, help="e.g. mysql56-community,mysql57-community")
     parser.add_argument("arch", type=str, help="e.g. x86_64")
     parser.add_argument("repo_name", type=str, help="e.g. @{comp}-el@{os_ver}")
-    parser.add_argument("working_dir", type=Path, help="working directory")
+    parser.add_argument("working_dir", type=str, help="working directory (with substitution support)")
     parser.add_argument("--download-repodata", action='store_true',
                         help='download repodata files instead of generating them')
     args = parser.parse_args()
@@ -167,7 +167,6 @@ def main():
     check_args("arch", arch_list)
 
     failed = []
-    args.working_dir.mkdir(parents=True, exist_ok=True)
     cache_dir = tempfile.mkdtemp()
 
     def combination_os_comp(arch: str):
@@ -181,11 +180,12 @@ def main():
 
                 name = substitute_vars(args.repo_name, vardict)
                 url = substitute_vars(args.base_url, vardict)
+                working_dir = Path(substitute_vars(args.working_dir, vardict))
                 try:
                     probe_url = url + ('' if url.endswith('/') else '/') + "repodata/repomd.xml"
                     r = requests.head(probe_url, timeout=(7,7))
                     if r.status_code < 400 or r.status_code == 403:
-                        yield (name, url)
+                        yield (name, url, working_dir)
                     else:
                         print(probe_url, "->", r.status_code)
                 except:
@@ -198,7 +198,8 @@ def main():
 [main]
 keepcache=0
 ''')
-        for name, url in combination_os_comp(arch):
+        for name, url, working_dir in combination_os_comp(arch):
+            working_dir.mkdir(parents=True, exist_ok=True)
             conf.write(f'''
 [{name}]
 name={name}
@@ -207,7 +208,7 @@ repo_gpgcheck=0
 gpgcheck=0
 enabled=1
 ''')
-            dst = (args.working_dir / name).absolute()
+            dst = (working_dir / name).absolute()
             dst.mkdir(parents=True, exist_ok=True)
             dest_dirs.append(dst)
         conf.flush()
@@ -219,7 +220,7 @@ enabled=1
             failed.append(('', arch))
             continue
 
-        cmd_args = ["reposync", "-a", arch, "-c", conf.name, "-d", "-p", str(args.working_dir.absolute()), "-e", cache_dir]
+        cmd_args = ["reposync", "-a", arch, "-c", conf.name, "-d", "-p", str(working_dir.absolute()), "-e", cache_dir]
         print("Launching reposync", flush=True)
         # print(cmd_args)
         ret = sp.run(cmd_args)
