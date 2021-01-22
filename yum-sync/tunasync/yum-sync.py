@@ -239,7 +239,7 @@ enabled=1
             if args.download_repodata:
                 download_repodata(url, dst)
             else:
-                cmd_args = ["createrepo", "--update", "-v", "-c", cache_dir, "-o", str(dst), str(dst)]
+                cmd_args = ["createrepo", "--update", "-v", "-c", cache_dir, "-o", str(working_dir), str(working_dir)]
                 # print(cmd_args)
                 ret = sp.run(cmd_args)
             calc_repo_size(dst)
