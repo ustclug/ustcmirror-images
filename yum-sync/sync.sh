@@ -1,6 +1,8 @@
 #!/bin/bash
 
 set -e
+# set default rpmdb path
+HOME=/tmp
 [[ $DEBUG = true ]] && set -x
 
 if [[ -n "$YUMSYNC_UNLINK" ]]; then
