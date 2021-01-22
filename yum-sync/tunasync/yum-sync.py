@@ -153,7 +153,7 @@ def main():
     parser.add_argument("os_version", type=str, help="e.g. 6-8")
     parser.add_argument("component", type=str, help="e.g. mysql56-community,mysql57-community")
     parser.add_argument("arch", type=str, help="e.g. x86_64")
-    parser.add_argument("repo_name", type=str, help="e.g. @{comp}-el@{os_ver}")
+    parser.add_argument("repo_name", type=str, help="e.g. @{comp}-el@{os_ver}, usually the parent name of repodata")
     parser.add_argument("working_dir", type=str, help="working directory (with substitution support)")
     parser.add_argument("--download-repodata", action='store_true',
                         help='download repodata files instead of generating them')
@@ -214,8 +214,8 @@ repo_gpgcheck=0
 gpgcheck=0
 enabled=1
 ''')
-            dst = working_dir.absolute()
-            dst.mkdir(parents=True, exist_ok=True)
+            dst = working_dir.parent.absolute()
+            # dst.mkdir(parents=True, exist_ok=True)
             # dest_dirs.append(dst)
             conf.flush()
             # sp.run(["cat", conf.name])
