@@ -1,6 +1,6 @@
 # ustcmirror-images
 
-[![Build Status](https://travis-ci.org/ustclug/ustcmirror-images.svg?branch=master)](https://travis-ci.org/ustclug/ustcmirror-images)
+[![Build Status](https://travis-ci.com/ustclug/ustcmirror-images.svg?branch=master)](https://travis-ci.com/ustclug/ustcmirror-images)
 
 # Table Of Content
 
@@ -12,6 +12,7 @@
     - [Volumes](#volumes)
     - [Common Configuration Parameters(AKA environment variables)](#common-configuration-parametersaka-environment-variables)
     - [aptsync](#aptsync)
+    - [apt-sync](#apt-sync)
     - [archvsync](#archvsync)
     - [debian-cd](#debian-cd)
     - [fedora](#fedora)
@@ -64,7 +65,7 @@ docker run --rm \
 | Parameter | Description |
 |-----------|-------------|
 | `DEBUG` | Set this to `true` to enable debugging. |
-| `BIND_ADDRESS` | Set the local ip to be bound. Require `--network=host`. |
+| `BIND_ADDRESS` | Set the local ip to be bound. Require `--network=host`. (Some programs don't support this parameter) |
 | `OWNER` | Set the uid and gid of the process so that the downloaded files wont get messed up. Defaults to `0:0` (aka root:root). |
 | `LOG_ROTATE_CYCLE` | Specify how many cycle versions of the logfile to be saved. Set this to `0` will disable rotation. Defaults to `0`. |
 | `REPO` | Name of the repository. Required in `archvsync`. |
@@ -96,6 +97,20 @@ is equivalent to the following parameters:
 APTSYNC_URL='https://apt.dockerproject.org/repo'
 APTSYNC_DISTS='debian-jessie|main|i386 amd64:raspbian-jessie|main testing|armhf'
 ```
+
+### apt-sync
+
+[![](https://images.microbadger.com/badges/image/ustcmirror/apt-sync.svg)](https://microbadger.com/images/ustcmirror/apt-sync "Get your own image badge on microbadger.com")
+
+| Parameter | Description |
+|-----------|-------------|
+| `APTSYNC_URL` | Sets the url of upstream. |
+| `APTSYNC_UNLINK` | Set this to `1` to remove unneeded files automatically. Defaults to `0`. |
+| `APTSYNC_DISTS` | Various distros can be specified in the format `<release> [...]\|<componenet> [...]\|<arch> [...]\|<download_dir> [...][:...]`. |
+
+It is almost the same as aptsync. Except that `APTSYNC_DISTS` accepts 4 parameters (rather than 3) for every item.
+
+Consider use `apt-sync` when the upstream replaces packages in-place, as `aptsync` will simply ignore if there're any changes in existed packages.
 
 ### archvsync
 
@@ -136,6 +151,7 @@ See [dist conf](https://pagure.io/quick-fedora-mirror/blob/master/f/quick-fedora
 | `CHECKIN_PASSWORD` | see in mirrormanager |
 | `CHECKIN_HOST`     | see in mirrormanager |
 
+Note: This image is not in use now, as `quick-fedora-mirror` has some mysterious bugs when being used.
 
 ### freebsd-pkg
 
@@ -199,9 +215,13 @@ Notice: BIND_ADDRESS is only added for `curl` in freebsd-ports. Make sure that g
 
 ### julia
 
-Sync from official site.  No parameters needed.
+[![](https://images.microbadger.com/badges/image/ustcmirror/julia.svg)](https://microbadger.com/images/ustcmirror/julia "Get your own image badge on microbadger.com")
+
+Sync from official site.  No parameters needed. (Deprecated)
 
 ### julia-storage
+
+[![](https://images.microbadger.com/badges/image/ustcmirror/julia-storage.svg)](https://microbadger.com/images/ustcmirror/julia-storage "Get your own image badge on microbadger.com")
 
 A new solution to sync Julia general registry (using `StorageMirrorServer.jl`). No parameters needed.
 
@@ -355,6 +375,7 @@ translates to:
 YUMSYNC_URL='https://repo.mysql.com/yum/@{comp}/el/@{os_ver}/@{arch}/'
 YUMSYNC_DISTS='6-8|mysql-8.0-community,mysql-5.7-community|aarch64,i386,x86_64|@{arch}|/yum/@{comp}/el/@{os_ver}/@{arch}/'
 ```
+
 # License
 
 Specially, contents of folder `apt-sync` and `yum-sync` and the generated container image from them are under GPLv3 license, as it uses code from <https://github.com/tuna/tunasync-scripts>.
