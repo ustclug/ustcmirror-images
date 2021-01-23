@@ -32,6 +32,7 @@
     - [rsync](#rsync)
     - [rubygems](#rubygems)
     - [stackage](#stackage)
+    - [yum-sync](#yum-sync)
 - [License](#license)
 - [Contributing](#contributing)
 
@@ -316,6 +317,64 @@ ref:
 Stackage doesn't need to specify upstream, but this mirror use cabal to install necessary Haskell packages. Replacing default mirror of cabal with faster one will speed up building process.
 
 Read the [user guide](https://www.haskell.org/cabal/users-guide/installing-packages.html#repository-specification) before writing preferred mirror to `config`
+
+### yum-sync
+
+[![](https://images.microbadger.com/badges/image/ustcmirror/yum-sync.svg)](https://microbadger.com/images/ustcmirror/yum-sync "Get your own image badge on microbadger.com")
+
+| Parameter | Description |
+|-----------|-------------|
+| `YUMSYNC_URL` | Sets the url of upstream. |
+| `YUMSYNC_DISTS` | Various distros can be specified in the format `<release> [...]\|<component> [...]\|<arch> [...]\|<reponame>\|<download_dir> [:...]`. |
+| `YUMSYNC_DOWNLOAD_REPODATA` | Whether to download repodata files instead of generating them by `createrepo` |
+
+`yum-sync` tries to imitate the parameters of `aptsync`, and it supports the following substitution rule for `YUMSYNC_URL` and `<reponame>` & `<download_dir>` in `YUMSYNC_DISTS`:
+
+- `@{arch}`: Architecture (x86_64, armhf, ...)
+- `@{os_ver}`: OS version (6-8, ...)
+- `@{comp}`: The `<component>` in `YUMSYNC_DISTS`
+
+`yum-sync.py` is modified to get the same directory structure as upstream when syncing. And `<reponame>` should be named the same as the directory containing `repodata` dir.
+
+Notes:
+
+The following repo configuration:
+
+```
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el$releasever-$basearch
+```
+
+translates to:
+
+```
+YUMSYNC_URL='https://packages.cloud.google.com/yum/repos/kubernetes-el@{os_ver}-@{arch}'
+YUMSYNC_DISTS='6-7|kubernetes|x86_64,aarch64,armhfp,ppc64le,s390x|kubernetes-el@{os_ver}-@{arch}|/yum/repos/kubernetes-el@{os_ver}-@{arch}'
+```
+
+And the following:
+
+```
+[mysql80-community]
+name=MySQL 8.0 Community Server
+baseurl=http://repo.mysql.com/yum/mysql-8.0-community/el/$releasever/$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-mysql
+
+[mysql57-community]
+name=MySQL 5.7 Community Server
+baseurl=http://repo.mysql.com/yum/mysql-5.7-community/el/$releasever/$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-mysql
+```
+
+translates to:
+
+```
+YUMSYNC_URL='https://repo.mysql.com/yum/@{comp}/el/@{os_ver}/@{arch}/'
+YUMSYNC_DISTS='6-8|mysql-8.0-community,mysql-5.7-community|aarch64,i386,x86_64|@{arch}|/yum/@{comp}/el/@{os_ver}/@{arch}/'
+```
 
 # License
 

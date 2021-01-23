@@ -5,10 +5,6 @@ set -e
 HOME=/tmp
 [[ $DEBUG = true ]] && set -x
 
-if [[ -n "$YUMSYNC_UNLINK" ]]; then
-  DELETE=--delete
-fi
-
 if [[ -n "$YUMSYNC_DOWNLOAD_REPODATA" ]]; then
   DOWNLOAD_REPODATA=--download-repodata
 fi
@@ -34,5 +30,5 @@ while [[ "$DISTS" == *:* ]]; do
   YUM_ARCH="${YUM_ARCH// /,}"
   YUM_COMP="${YUM_COMP// /,}"
 
-  python3 yum-sync.py $DELETE $DOWNLOAD_REPODATA "$YUMSYNC_URL" "$YUM_DIST" "$YUM_COMP" "$YUM_ARCH" "$YUM_REPO" "${TO}/${YUM_DIR}"
+  python3 yum-sync.py $DOWNLOAD_REPODATA "$YUMSYNC_URL" "$YUM_DIST" "$YUM_COMP" "$YUM_ARCH" "$YUM_REPO" "${TO}/${YUM_DIR}"
 done
