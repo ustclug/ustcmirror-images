@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ '*' ]
 
-  workflow_dispatch:
+  workflow_dispatch: {}
   schedule:
     - cron: '30 23 1 * *'
 
@@ -30,6 +30,7 @@ jobs:
           COMMIT_TO: ${{ github.event.after }}
 
       - name: Deploy
+        if: "github.ref == 'refs/heads/master' && github.repository == 'ustclug/ustcmirror-images'"
         run: ./push.sh
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
