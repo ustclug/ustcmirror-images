@@ -36,5 +36,3 @@ jobs:
           DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
           GITHUB_EVENT: ${{ github.event_name }}
           GITHUB_REF: ${{ github.ref }}
-      
-      # TODO: notification
