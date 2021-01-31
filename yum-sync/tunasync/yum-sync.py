@@ -248,6 +248,7 @@ enabled=1
 
     if len(failed) > 0:
         print("Failed YUM repos: ", failed)
+        exit(len(failed))
     else:
         if len(REPO_SIZE_FILE) > 0:
             with open(REPO_SIZE_FILE, "a") as fd:
