@@ -13,6 +13,8 @@
 #LFTPSYNC_EXCLUDE=
 #LFTPSYNC_JOBS=
 
+LFTPSYNC_MAX_JOBS=32  # count of processors on mirrors2
+
 is_ipv6() {
     # string contains a colon
     [[ $1 =~ .*: ]]
@@ -25,6 +27,10 @@ LFTPSYNC_PATH=${LFTPSYNC_PATH:-}
 LFTPSYNC_JOBS="${LFTPSYNC_JOBS:-$(getconf _NPROCESSORS_ONLN)}"
 LFTPSYNC_EXCLUDE="${LFTPSYNC_EXCLUDE:- -X .~tmp~/}"
 BIND_ADDRESS="${BIND_ADDRESS:-}"
+
+if [ "$LFTPSYNC_JOBS" -gt "$LFTPSYNC_MAX_JOBS" ]; then
+    LFTPSYNC_JOBS=$LFTPSYNC_MAX_JOBS
+fi
 
 commands='set cmd:fail-exit true;'
 
