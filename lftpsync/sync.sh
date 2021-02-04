@@ -37,8 +37,10 @@ commands='set cmd:fail-exit true;'
 if [[ -n $BIND_ADDRESS ]]; then
     if is_ipv6 "$BIND_ADDRESS"; then
         commands+="set net:socket-bind-ipv6 $BIND_ADDRESS;"
+        commands+="set dns:order \"inet6 inet\";"
     else
         commands+="set net:socket-bind-ipv4 $BIND_ADDRESS;"
+        commands+="set dns:order \"inet inet6\";"
     fi
 fi
 
