@@ -18,6 +18,7 @@
     - [fedora](#fedora)
     - [freebsd-pkg](#freebsd-pkg)
     - [freebsd-ports](#freebsd-ports)
+    - [github-release](#github-release)
     - [gitsync](#gitsync)
     - [gsutil-rsync](#gsutil-rsync)
     - [hackage](#hackage)
@@ -174,6 +175,14 @@ Notice: BIND_ADDRESS is only added for `curl` in freebsd-ports. Make sure that g
 | `FBSD_PORTS_INDEX_UPSTREAM`     | Set the URL of upstream git index. Defaults to `https://github.com/freebsd/freebsd-ports.git`. |
 | `FBSD_PORTS_DISTFILES_UPSTREAM` | Set the URL of upstream distfiles. Defaults to `http://distcache.freebsd.org/ports-distfiles`. |
 | `FBSD_PORTS_JOBS`               | Defaults to `1`.                         |
+
+### github-release
+
+| Parameter | Description |
+|-----------|-------------|
+| `UPSTREAM_URL` | GitHub API base URL. Defaults to `https://api.github.com/repos/`. |
+| `WORKERS` | Number of concurrent downloading jobs. Defaults to `8`. |
+| `FAST_SKIP` | Not verify size and timestamp of existing files. Set it to any true string to enable the skipping. |
 
 ### gitsync
 
