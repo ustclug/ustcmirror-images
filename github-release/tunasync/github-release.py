@@ -10,8 +10,11 @@ from datetime import datetime
 import requests
 
 
-BASE_URL = os.getenv("TUNASYNC_UPSTREAM_URL", "https://api.github.com/repos/")
+BASE_URL = os.getenv("UPSTREAM_URL", "https://api.github.com/repos/")
 WORKING_DIR = os.getenv("TUNASYNC_WORKING_DIR")
+WORKERS = int(os.getenv("WORKERS", "8"))
+FAST_SKIP = bool(os.getenv("FAST_SKIP", ""))
+
 REPOS = [
     "AdoptOpenJDK/openjdk8-binaries",
     "AdoptOpenJDK/openjdk9-binaries",
@@ -102,9 +105,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", default=BASE_URL)
     parser.add_argument("--working-dir", default=WORKING_DIR)
-    parser.add_argument("--workers", default=1, type=int,
+    parser.add_argument("--workers", default=WORKERS, type=int,
                         help='number of concurrent downloading jobs')
-    parser.add_argument("--fast-skip", action='store_true',
+    parser.add_argument("--fast-skip", action='store_true', default=FAST_SKIP,
                         help='do not verify size and timestamp of existing files')
     args = parser.parse_args()
 
