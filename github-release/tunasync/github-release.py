@@ -13,35 +13,14 @@ import requests
 BASE_URL = os.getenv("TUNASYNC_UPSTREAM_URL", "https://api.github.com/repos/")
 WORKING_DIR = os.getenv("TUNASYNC_WORKING_DIR")
 REPOS = [
-    "Homebrew/homebrew-portable-ruby",  # Used by homebrew-bottles
-    {"repo": "googlefonts/noto-fonts", "tarball": True},
-    {"repo": "googlefonts/noto-cjk", "tarball": True},
-    {"repo": "googlefonts/noto-emoji", "tarball": True},
-    "be5invis/Sarasa-Gothic",
-    "be5invis/Iosevka",
-    "z4yx/GoAuthing",
-    "VSCodium/vscodium",
-    "openark/orchestrator",
-    "git-lfs/git-lfs",
-    "git-for-windows/git",
-    "prometheus/prometheus",
-    {"repo": "commercialhaskell/stackage-content", "versions": -1},  # Used by stackage
-    {"repo": "xxr3376/Learn-Project", "versions": -1},
-    {"repo": "robertying/learnX", "versions": -1},
-    "rust-analyzer/rust-analyzer",
-    "kubernetes/minikube",
-    {"repo": "iina/iina", "versions": -1, "pre_release": True, "flat": True},
-    {"repo": "FreeCAD/FreeCAD", "versions": 3, "pre_release": True},
-    "goharbor/harbor",
-    {"repo": "tuna/thuthesis", "versions": -1, "flat": True},
-    "cmderdev/cmder",
-    "balena-io/etcher",
-    "llvm/llvm-project",
-    "conda-forge/miniforge",
-    "texstudio-org/texstudio",
-    "Stellarium/stellarium",
-    "UNIDY2002/THUInfo",
-    {"repo": "obsproject/obs-studio", "versions": 5, "pre_release": False},
+    "AdoptOpenJDK/openjdk8-binaries",
+    "AdoptOpenJDK/openjdk9-binaries",
+    "AdoptOpenJDK/openjdk10-binaries",
+    "AdoptOpenJDK/openjdk11-binaries",
+    "AdoptOpenJDK/openjdk12-binaries",
+    "AdoptOpenJDK/openjdk13-binaries",
+    "pbatard/rufus",
+    "Homebrew/homebrew-portable-ruby",
 ]
 
 # connect and read timeout value
