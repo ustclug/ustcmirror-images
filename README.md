@@ -185,6 +185,12 @@ Notice: BIND_ADDRESS is only added for `curl` in freebsd-ports. Make sure that g
 | `UPSTREAM_URL` | GitHub API base URL. Defaults to `https://api.github.com/repos/`. |
 | `WORKERS` | Number of concurrent downloading jobs. Defaults to `8`. |
 | `FAST_SKIP` | Not verify size and timestamp of existing files. Set it to any true string to enable the skipping. |
+| `REPOS` | YAML-format repo list config. See below for details. |
+
+To specified the repo list to sync, you can:
+
+- Mount a YAML file into the container at `/repos.yaml`. If the YAML file gives a list, the list is used as repo list. Otherwise `repos` field in the YAML file is used. See [examples](github-release/examples).
+- Pass the YAML-format repo list as `REPOS` env.
 
 ### gitsync
 
