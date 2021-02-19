@@ -8,6 +8,7 @@ from pathlib import Path
 from datetime import datetime
 
 import requests
+import yaml
 
 
 BASE_URL = os.getenv("UPSTREAM_URL", "https://api.github.com/repos/")
@@ -15,16 +16,26 @@ WORKING_DIR = os.getenv("TUNASYNC_WORKING_DIR")
 WORKERS = int(os.getenv("WORKERS", "8"))
 FAST_SKIP = bool(os.getenv("FAST_SKIP", ""))
 
-REPOS = [
-    "AdoptOpenJDK/openjdk8-binaries",
-    "AdoptOpenJDK/openjdk9-binaries",
-    "AdoptOpenJDK/openjdk10-binaries",
-    "AdoptOpenJDK/openjdk11-binaries",
-    "AdoptOpenJDK/openjdk12-binaries",
-    "AdoptOpenJDK/openjdk13-binaries",
-    "pbatard/rufus",
-    "Homebrew/homebrew-portable-ruby",
-]
+
+def get_repos():
+    try:
+        with open('/repos.yaml') as f:
+            content = f.read()
+    except FileNotFoundError:
+        content = os.getenv("REPOS", None)
+        if content is None:
+            raise Exception("Loading /repos.yaml file and reading REPOS env both failed")
+    repos = yaml.safe_load(content)
+    if isinstance(repos, list):
+        return repos
+    else:
+        repos = repos['repos']
+        if not isinstance(repos, list):
+            raise Exception("Can not inspect repo list from the given file/env")
+        return repos
+
+
+REPOS = get_repos()
 
 # connect and read timeout value
 TIMEOUT_OPTION = (7, 10)
