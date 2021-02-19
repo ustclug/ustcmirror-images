@@ -178,6 +178,8 @@ Notice: BIND_ADDRESS is only added for `curl` in freebsd-ports. Make sure that g
 
 ### github-release
 
+[![](https://images.microbadger.com/badges/image/ustcmirror/github-release.svg)](https://microbadger.com/images/ustcmirror/github-release "Get your own image badge on microbadger.com")
+
 | Parameter | Description |
 |-----------|-------------|
 | `UPSTREAM_URL` | GitHub API base URL. Defaults to `https://api.github.com/repos/`. |
