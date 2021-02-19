@@ -6,3 +6,9 @@
 - AdoptOpenJDK/openjdk13-binaries
 - pbatard/rufus
 - Homebrew/homebrew-portable-ruby
+- a/b
+- repo: a/b
+  tarball: true
+- repo: a/b
+  version: -1
+# See also https://github.com/tuna/tunasync-scripts/blob/master/github-release.py#L15

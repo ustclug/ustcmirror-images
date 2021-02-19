@@ -189,8 +189,8 @@ Notice: BIND_ADDRESS is only added for `curl` in freebsd-ports. Make sure that g
 
 To specified the repo list to sync, you can:
 
-- Mount a YAML file into the container at `/repos.yaml`. If the YAML file gives a list, the list is used as repo list. Otherwise `repos` field in the YAML file is used. See [examples](github-release/examples).
-- Pass the YAML-format repo list as `REPOS` env.
+- Read-only bind mount a YAML file into the container at `/repos.yaml`. See the [example](github-release/examples/repos.yaml).
+- Pass the YAML-format repo list string as `REPOS` env.
 
 ### gitsync
 
