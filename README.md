@@ -18,6 +18,7 @@
     - [fedora](#fedora)
     - [freebsd-pkg](#freebsd-pkg)
     - [freebsd-ports](#freebsd-ports)
+    - [github-release](#github-release)
     - [gitsync](#gitsync)
     - [gsutil-rsync](#gsutil-rsync)
     - [hackage](#hackage)
@@ -174,6 +175,22 @@ Notice: BIND_ADDRESS is only added for `curl` in freebsd-ports. Make sure that g
 | `FBSD_PORTS_INDEX_UPSTREAM`     | Set the URL of upstream git index. Defaults to `https://github.com/freebsd/freebsd-ports.git`. |
 | `FBSD_PORTS_DISTFILES_UPSTREAM` | Set the URL of upstream distfiles. Defaults to `http://distcache.freebsd.org/ports-distfiles`. |
 | `FBSD_PORTS_JOBS`               | Defaults to `1`.                         |
+
+### github-release
+
+[![](https://images.microbadger.com/badges/image/ustcmirror/github-release.svg)](https://microbadger.com/images/ustcmirror/github-release "Get your own image badge on microbadger.com")
+
+| Parameter | Description |
+|-----------|-------------|
+| `UPSTREAM_URL` | GitHub API base URL. Defaults to `https://api.github.com/repos/`. |
+| `WORKERS` | Number of concurrent downloading jobs. Defaults to `8`. |
+| `FAST_SKIP` | Not verify size and timestamp of existing files. Set it to any true string to enable the skipping. |
+| `REPOS` | YAML-format repo list config. See below for details. |
+
+To specified the repo list to sync, you can:
+
+- Read-only bind mount a YAML file into the container at `/repos.yaml`. See the [example](github-release/examples/repos.yaml).
+- Pass the YAML-format repo list string as `REPOS` env.
 
 ### gitsync
 
