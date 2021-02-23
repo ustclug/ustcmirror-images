@@ -21,6 +21,10 @@ fi
 curl_init
 
 $CURL_WRAP -sSL -o "$FORMULA_JSON" "$URL_JSON"
+if [[ $? -ne 0 ]]; then
+    echo "[FATAL] download meta-data failed."
+    exit 1
+fi
 jq -r ' .[].bottle | .[].files | .[] | "\(.sha256) \(.url)"' < $FORMULA_JSON > $BOTTLES
 sed -i "s|$URL_BASE/||" $BOTTLES
 gawk -i inplace  -niord '{printf RT?$0chr("0x"substr(RT,2)):$0}' RS=%.. $BOTTLES #urldecode
