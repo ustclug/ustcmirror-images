@@ -238,8 +238,7 @@ To specified the repo list to sync, you can:
 
 | Parameter                | Description                                                                         |
 | ------------------------ | ----------------------------------------------------------------------------------- |
-| `HOMEBREW_BOTTLE_DOMAIN` | Set the URL of upstream. Defaults to `http://homebrew.bintray.com`                  |
-| `HOMEBREW_REPO`          | Set the URL of core repo. Defaults to `git://github.com/homebrew/homebrew-core.git` |
+| `HOMEBREW_BOTTLES_JOBS`  | Defaults to `1`.                                                                    |
 | `TARGET_OS`              | `mac` or `linux`. Defaults to `mac`                                                 |
 
 ### julia
