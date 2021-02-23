@@ -1,4 +1,4 @@
-FROM ustcmirror/base:alpine
+FROM ustcmirror/curl-helper
 LABEL maintainer="Yifan Gao docker@yfgao.com"
-RUN apk add --no-cache curl coreutils rsync parallel gawk sed grep xz tar jq findutils bash
+RUN apk add --no-cache rsync parallel gawk sed xz tar jq bash
 ADD sync.sh /
