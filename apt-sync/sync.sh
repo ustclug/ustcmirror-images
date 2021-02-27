@@ -26,5 +26,5 @@ while [[ "$DISTS" == *:* ]]; do
   APT_ARCH="${APT_ARCH// /,}"
   APT_COMP="${APT_COMP// /,}"
 
-  python3 apt-sync.py $DELETE "$APTSYNC_URL" "$APT_DIST" "$APT_COMP" "$APT_ARCH" "${TO}/${APT_DIR}"
+  python3 apt-sync.py $DELETE "$APTSYNC_URL""${APT_DIR}" "$APT_DIST" "$APT_COMP" "$APT_ARCH" "${TO}/${APT_DIR}"
 done
