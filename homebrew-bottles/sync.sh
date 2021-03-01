@@ -14,8 +14,8 @@ elif [[ $TARGET_OS == linux ]]; then
 	URL_BASE=https://linuxbrew.bintray.com
 	URL_JSON=https://formulae.brew.sh/api/formula-linux.json
 else
-	echo "unsupported target"
-	exit 1
+	echo "[ERROR] unsupported target."
+	exit 2
 fi
 
 curl_init
@@ -23,7 +23,7 @@ curl_init
 $CURL_WRAP -sSL -o "$FORMULA_JSON" "$URL_JSON"
 if [[ $? -ne 0 ]]; then
     echo "[FATAL] download meta-data failed."
-    exit 1
+    exit 3
 fi
 jq -r ' .[].bottle | .[].files | .[] | "\(.sha256) \(.url)"' < $FORMULA_JSON > $BOTTLES
 sed -i "s|$URL_BASE/||" $BOTTLES
