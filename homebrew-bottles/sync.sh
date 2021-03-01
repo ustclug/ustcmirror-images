@@ -37,7 +37,7 @@ export by_hash=$(realpath $TO/.by-hash)
 export by_hash_pattern="./.by-hash/*"
 export remote_url=$URL_BASE
 export local_dir=$TO
-enable_checksum=true parallel --line-buffer -j 4 --pipepart -a $BOTTLES download
+enable_checksum=true parallel --line-buffer -j $HOMEBREW_BOTTLE_JOBS --pipepart -a $BOTTLES download
 
 removal_list=$(mktemp)
 cd $local_dir
