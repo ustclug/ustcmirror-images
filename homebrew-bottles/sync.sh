@@ -8,10 +8,8 @@ source /curl-helper.sh
 FORMULA_JSON=$(mktemp)
 BOTTLES=$(mktemp)
 if [[ $TARGET_OS == mac ]]; then
-	URL_BASE=https://homebrew.bintray.com
 	URL_JSON=https://formulae.brew.sh/api/formula.json
 elif [[ $TARGET_OS == linux ]]; then
-	URL_BASE=https://linuxbrew.bintray.com
 	URL_JSON=https://formulae.brew.sh/api/formula-linux.json
 else
 	echo "[ERROR] unsupported target."
@@ -26,7 +24,18 @@ if [[ $? -ne 0 ]]; then
     exit 3
 fi
 jq -r ' .[].bottle | .[].files | .[] | "\(.sha256) \(.url)"' < $FORMULA_JSON > $BOTTLES
-sed -i "s|$URL_BASE/||" $BOTTLES
+URL_BASE=$(grep -oP 'https?://.+(?=/bottles/[^/]+.gz$)' $BOTTLES | uniq)
+if [[ -z $URL_BASE ]]; then
+    echo "[FATAL] unexpected URL format, please report."
+    exit 4
+elif [[ `wc -l <<<$URL_BASE` != 1 ]]; then
+    echo "[WARN] inconsistent URL base."
+fi
+HOMEBREW_BOTTLE_DOMAIN=${HOMEBREW_BOTTLE_DOMAIN:-$(head -n 1 <<<$URL_BASE)}
+
+# drop URL common base, leave only "bottles/*.tar.gz"
+sed -i 's|https\?://.\+/\(bottles/.\+\.gz\)$|\1|' $BOTTLES
+
 # urldecode
 gawk -i inplace  -niord '{printf RT?$0chr("0x"substr(RT,2)):$0}' RS=%.. $BOTTLES
 
@@ -38,7 +47,7 @@ fi
 
 export by_hash=$(realpath $TO/.by-hash)
 export by_hash_pattern="./.by-hash/*"
-export remote_url=$URL_BASE
+export remote_url=$HOMEBREW_BOTTLE_DOMAIN
 export local_dir=$TO
 enable_checksum=true parallel --line-buffer -j $HOMEBREW_BOTTLE_JOBS --pipepart -a $BOTTLES download
 
