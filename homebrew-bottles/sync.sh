@@ -27,8 +27,11 @@ if [[ $? -ne 0 ]]; then
 fi
 jq -r ' .[].bottle | .[].files | .[] | "\(.sha256) \(.url)"' < $FORMULA_JSON > $BOTTLES
 sed -i "s|$URL_BASE/||" $BOTTLES
-gawk -i inplace  -niord '{printf RT?$0chr("0x"substr(RT,2)):$0}' RS=%.. $BOTTLES #urldecode
+# urldecode
+gawk -i inplace  -niord '{printf RT?$0chr("0x"substr(RT,2)):$0}' RS=%.. $BOTTLES
 
+# JSON API mixing linuxbrew bottles and homebrew bottles
+# we need to filtering linuxbrew one
 if [[ $TARGET_OS == linux ]]; then
 	sed -i '/x86_64_linux/!d' $BOTTLES
 fi
