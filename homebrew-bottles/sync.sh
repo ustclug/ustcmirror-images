@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-HOMEBREW_BOTTLE_JOBS=${HOMEBREW_BOTTLES_JOBS:-1}
+HOMEBREW_BOTTLES_JOBS=${HOMEBREW_BOTTLES_JOBS:-1}
 TARGET_OS=${TARGET_OS:-mac}
 
 source /curl-helper.sh
@@ -49,7 +49,7 @@ export by_hash=$(realpath $TO/.by-hash)
 export by_hash_pattern="./.by-hash/*"
 export remote_url=$HOMEBREW_BOTTLE_DOMAIN
 export local_dir=$TO
-enable_checksum=true parallel --line-buffer -j $HOMEBREW_BOTTLE_JOBS --pipepart -a $BOTTLES download
+enable_checksum=true parallel --line-buffer -j $HOMEBREW_BOTTLES_JOBS --pipepart -a $BOTTLES download
 
 removal_list=$(mktemp)
 cd $local_dir
