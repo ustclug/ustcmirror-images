@@ -2,6 +2,12 @@
 
 [[ $DEBUG == true ]] && set -x
 
+urldecode() {
+	: "${*//+/ }"
+	echo -e "${_//\%/\\x}"
+}
+export -f urldecode
+
 download() {
 	if [[ $enable_checksum == "true" ]]; then
 		download_with_checksum
@@ -20,7 +26,7 @@ download_with_checksum() {
 	curl_init
 	mkdir -p $by_hash || return 1
 	while read checksum path; do
-		local p=$local_dir/$path
+		local p=$(urldecode $local_dir/$path)
 		local c=$by_hash/$checksum
 		local url=$remote_url/$path
 		if [[ -f $c ]]; then
@@ -57,7 +63,7 @@ download_with_mtime() {
 	curl_init
 	[[ $DEBUG == true  ]] && echo "[DEBUG] fail_to_exit=${fail_to_exit}"
 	while read path; do
-		local p=$local_dir/$path
+		local p=$(urldecode $local_dir/$path)
 		local url=$remote_url/$path
 		if [[ -f $p ]]; then
 			local remote_mtime=$($CURL_WRAP -sLI $url | grep -oP '(?<=^Last-Modified: ).+$')

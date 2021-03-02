@@ -36,9 +36,6 @@ HOMEBREW_BOTTLE_DOMAIN=${HOMEBREW_BOTTLE_DOMAIN:-$(head -n 1 <<<$URL_BASE)}
 # drop URL common base, leave only "bottles/*.tar.gz"
 sed -i 's|https\?://.\+/\(bottles/.\+\.gz\)$|\1|' $BOTTLES
 
-# urldecode
-gawk -i inplace  -niord '{printf RT?$0chr("0x"substr(RT,2)):$0}' RS=%.. $BOTTLES
-
 # JSON API mixing linuxbrew bottles and homebrew bottles
 # we need to filtering linuxbrew one
 if [[ $TARGET_OS == linux ]]; then
@@ -50,6 +47,9 @@ export by_hash_pattern="./.by-hash/*"
 export remote_url=$HOMEBREW_BOTTLE_DOMAIN
 export local_dir=$TO
 enable_checksum=true parallel --line-buffer -j $HOMEBREW_BOTTLES_JOBS --pipepart -a $BOTTLES download
+
+# urldecode
+gawk -i inplace  -niord '{printf RT?$0chr("0x"substr(RT,2)):$0}' RS=%.. $BOTTLES
 
 removal_list=$(mktemp)
 cd $local_dir
