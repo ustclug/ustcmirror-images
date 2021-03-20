@@ -26,7 +26,8 @@ download_with_checksum() {
 	curl_init
 	mkdir -p $by_hash || return 1
 	while read checksum path; do
-		local p=$(urldecode $local_dir/$path)
+		[[ $need_urldecode == "true" ]] && path=$(urldecode "$path")
+		local p=$local_dir/$path
 		local c=$by_hash/$checksum
 		local url=$remote_url/$path
 		if [[ -f $c ]]; then
@@ -63,7 +64,8 @@ download_with_mtime() {
 	curl_init
 	[[ $DEBUG == true  ]] && echo "[DEBUG] fail_to_exit=${fail_to_exit}"
 	while read path; do
-		local p=$(urldecode $local_dir/$path)
+		[[ $need_urldecode == "true" ]] && path=$(urldecode "$path")
+		local p=$local_dir/$path
 		local url=$remote_url/$path
 		if [[ -f $p ]]; then
 			local remote_mtime=$($CURL_WRAP -sLI $url | grep -oP '(?<=^Last-Modified: ).+$')

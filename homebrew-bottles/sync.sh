@@ -59,6 +59,7 @@ export by_hash=$(realpath $TO/.by-hash)
 export by_hash_pattern="./.by-hash/*"
 export remote_url=$HOMEBREW_BOTTLE_DOMAIN
 export local_dir=$TO
+export need_urldecode=true
 enable_checksum=true parallel --line-buffer -j $HOMEBREW_BOTTLES_JOBS --pipepart -a $BOTTLES download
 
 # urldecode
