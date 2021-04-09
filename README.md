@@ -238,7 +238,6 @@ To specified the repo list to sync, you can:
 
 | Parameter                | Description                                                                         |
 | ------------------------ | ----------------------------------------------------------------------------------- |
-| `HOMEBREW_BOTTLE_DOMAIN` | Set the URL of upstream. Default value from JSON API                                |
 | `HOMEBREW_BOTTLES_JOBS`  | Parallel jobs. Defaults to `1`                                                      |
 | `TARGET_OS`              | `mac` or `linux`. Defaults to `mac`                                                 |
 
