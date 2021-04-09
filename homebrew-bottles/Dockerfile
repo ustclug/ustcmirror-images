@@ -1,4 +1,4 @@
-FROM rust:1-alpine as builder
+from rust:1-alpine as builder
 WORKDIR /usr/src/bottles-json/
 COPY bottles-json .
 RUN apk add --no-cache musl-dev
