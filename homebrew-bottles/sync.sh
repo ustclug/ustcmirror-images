@@ -9,8 +9,10 @@ FORMULA_JSON=$(mktemp)
 BOTTLES=$(mktemp)
 if [[ $TARGET_OS == mac ]]; then
 	URL_JSON=https://formulae.brew.sh/api/formula.json
+	HOMEBREW_BOTTLE_DOMAIN=${HOMEBREW_BOTTLE_DOMAIN:-https://homebrew.bintray.com}
 elif [[ $TARGET_OS == linux ]]; then
 	URL_JSON=https://formulae.brew.sh/api/formula-linux.json
+	HOMEBREW_BOTTLE_DOMAIN=${HOMEBREW_BOTTLE_DOMAIN:-https://linuxbrew.bintray.com}
 else
 	echo "[ERROR] unsupported target."
 	exit 2
@@ -27,26 +29,8 @@ fi
 # extract sha256 and URL from JSON result
 jq -r ' .[].bottle | .[].files | .[] | "\(.sha256) \(.url)"' < $FORMULA_JSON > $BOTTLES
 
-# get common prefix of URLs
-# at the time of 2021-3-2 the value set is:
-# https://homebrew.bintray.com
-# https://dl.bintray.com/homebrew
-# https://linuxbrew.bintray.com
-# https://dl.bintray.com/linuxbrew
-URL_BASE=$(grep -oP 'https?://.+(?=/bottles/[^/]+.gz$)' $BOTTLES | uniq)
-if [[ -z $URL_BASE ]]; then
-    echo "[FATAL] unexpected URL format, please report."
-    exit 4
-elif [[ `wc -l <<<$URL_BASE` != 1 ]]; then
-    echo "[WARN] inconsistent URL base."
-fi
-
-# if not specified, use the first URL prefix extracted from JSON API
-# this could take a risk, while upstream use different bottle sites for diffrent formulea
-HOMEBREW_BOTTLE_DOMAIN=${HOMEBREW_BOTTLE_DOMAIN:-$(head -n 1 <<<$URL_BASE)}
-
 # drop URL common base, leave only "bottles/*.tar.gz"
-sed -i 's|https\?://.\+/\(bottles/.\+\.gz\)$|\1|' $BOTTLES
+sed -i 's|https\?://.\+/\([^/]\+\.gz\)$|bottles/\1|' $BOTTLES
 
 # JSON API mixing linuxbrew bottles and homebrew bottles
 # we need to filtering linux one
