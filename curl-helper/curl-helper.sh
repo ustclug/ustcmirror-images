@@ -26,13 +26,12 @@ download_with_checksum() {
 	[[ $DEBUG == true ]] && set -x
 	curl_init
 	mkdir -p $by_hash || return 1
-	while read checksum path; do
+	while read checksum path alt_path; do
+		[[ $enable_urldecode == "true" ]] && path=$(urldecode "$path")
 		if [[ $enable_alternative_path == "true" ]]; then
-			local alt_path=${path#* }
-			local url=${path% *}
 			local p=$local_dir/$alt_path
+			local url=$path
 		else
-			[[ $enable_urldecode == "true" ]] && path=$(urldecode "$path")
 			local p=$local_dir/$path
 			local url=$remote_url/$path
 		fi
