@@ -23,13 +23,20 @@ download_with_checksum() {
 	local local_dir=${local_dir:="$TO"}
 	local remote_url=${remote_url:=""}
 	local by_hash=${by_hash:-"$local_dir/.by-hash"}
+	[[ $DEBUG == true ]] && set -x
 	curl_init
 	mkdir -p $by_hash || return 1
 	while read checksum path; do
-		[[ $need_urldecode == "true" ]] && path=$(urldecode "$path")
-		local p=$local_dir/$path
+		if [[ $enable_alternative_path == "true" ]]; then
+			local alt_path=${path#* }
+			local url=${path% *}
+			local p=$local_dir/$alt_path
+		else
+			[[ $enable_urldecode == "true" ]] && path=$(urldecode "$path")
+			local p=$local_dir/$path
+			local url=$remote_url/$path
+		fi
 		local c=$by_hash/$checksum
-		local url=$remote_url/$path
 		if [[ -f $c ]]; then
 			if [[ ! $c -ef $p ]]; then
 				mkdir -p $(dirname $p)
@@ -64,7 +71,7 @@ download_with_mtime() {
 	curl_init
 	[[ $DEBUG == true  ]] && echo "[DEBUG] fail_to_exit=${fail_to_exit}"
 	while read path; do
-		[[ $need_urldecode == "true" ]] && path=$(urldecode "$path")
+		[[ $enable_urldecode == "true" ]] && path=$(urldecode "$path")
 		local p=$local_dir/$path
 		local url=$remote_url/$path
 		if [[ -f $p ]]; then
@@ -95,6 +102,7 @@ is_ipv6() {
 export -f is_ipv6
 
 curl_init() {
+	[[ -n $CURL_WRAP ]] && return
 	if [[ -n $BIND_ADDRESS ]]; then
 		if is_ipv6 "$BIND_ADDRESS"; then
 			CURL_WRAP="curl -6 --interface $BIND_ADDRESS"
