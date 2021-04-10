@@ -37,14 +37,10 @@ fn main() -> Result<()> {
         if f.versions.bottle {
             let name = f.name;
             let ver = f.versions.stable.unwrap();
-            let rebuild = f.bottle.stable.as_ref().unwrap().rebuild;
-            for (platform, v) in f
-                .bottle
-                .stable
-                .as_ref()
-                .unwrap()
+            let bs = f.bottle.stable.as_ref().unwrap();
+            let rebuild = bs.rebuild;
+            for (platform, v) in bs
                 .files
-                .clone()
                 .as_object()
                 .unwrap()
                 .iter()
