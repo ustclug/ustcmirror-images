@@ -39,12 +39,7 @@ fn main() -> Result<()> {
             let ver = f.versions.stable.unwrap();
             let bs = f.bottle.stable.as_ref().unwrap();
             let rebuild = bs.rebuild;
-            for (platform, v) in bs
-                .files
-                .as_object()
-                .unwrap()
-                .iter()
-            {
+            for (platform, v) in bs.files.as_object().unwrap().iter() {
                 let v: BottleInfo = serde_json::from_value(v.clone()).unwrap();
                 //a2ps-4.14.arm64_big_sur.bottle.4.tar.gz
                 println!(
