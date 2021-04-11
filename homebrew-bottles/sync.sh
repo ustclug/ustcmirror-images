@@ -26,6 +26,10 @@ fi
 
 # extract sha256, URL and file name from JSON result
 bottles-json < $FORMULA_JSON > $BOTTLES
+if [[ $? -ne 0 ]]; then
+    echo "[FATAL] json parsing failed."
+    exit 4
+fi
 
 # JSON API mixing linuxbrew bottles and homebrew bottles
 # we need to filtering linux one

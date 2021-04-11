@@ -1,20 +1,24 @@
+#![feature(try_trait)]
+
 use serde::Deserialize;
-use serde_json::{Result, Value};
 
 #[derive(Deserialize)]
 struct Versions {
     stable: Option<String>,
     bottle: bool,
 }
+
 #[derive(Deserialize)]
 struct Bottle {
     stable: Option<BottleStable>,
 }
+
 #[derive(Deserialize)]
 struct BottleStable {
-    rebuild: u8,
-    files: Value,
+    rebuild: u64,
+    files: serde_json::Value,
 }
+
 #[derive(Deserialize)]
 struct Formula {
     name: String,
@@ -31,30 +35,28 @@ struct BottleInfo {
     sha256: String,
 }
 
-fn main() -> Result<()> {
-    let f: Formulae = serde_json::from_reader(std::io::stdin())?;
-    for f in f.0 {
-        if f.versions.bottle {
-            let name = f.name;
-            let ver = f.versions.stable.unwrap();
-            let bs = f.bottle.stable.as_ref().unwrap();
-            let rebuild = bs.rebuild;
-            for (platform, v) in bs.files.as_object().unwrap().iter() {
-                let v: BottleInfo = serde_json::from_value(v.clone()).unwrap();
-                //a2ps-4.14.arm64_big_sur.bottle.4.tar.gz
+fn d(f: &Formula) -> Option<()> {
+    if f.versions.bottle {
+        let name = &f.name;
+        let ver = f.versions.stable.as_ref()?;
+        let bs = f.bottle.stable.as_ref()?;
+        let rebuild = bs.rebuild;
+        for (platform, v) in bs.files.as_object()?.iter() {
+            if let Ok(bi) = serde_json::from_value::<BottleInfo>(v.clone()) {
                 if rebuild == 0 {
-                    println!(
-                        "{} {} bottles/{}-{}.{}.bottle.tar.gz",
-                        v.sha256, v.url, name, ver, platform
-                    );
+                    println!("{} {} bottles/{}-{}.{}.bottle.tar.gz", bi.sha256, bi.url, name, ver, platform);
                 } else {
-                    println!(
-                        "{} {} bottles/{}-{}.{}.bottle.{}.tar.gz",
-                        v.sha256, v.url, name, ver, platform, rebuild
-                    );
+                    println!("{} {} bottles/{}-{}.{}.bottle.{}.tar.gz", bi.sha256, bi.url, name, ver, platform, rebuild);
                 }
             }
         }
     }
-    Ok(())
+    Some(())
+}
+
+fn main() {
+    let f: Formulae = serde_json::from_reader(std::io::stdin()).unwrap();
+    for f in f.0 {
+        d(&f);
+    }
 }
