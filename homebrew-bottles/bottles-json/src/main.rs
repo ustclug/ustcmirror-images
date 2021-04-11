@@ -42,10 +42,17 @@ fn main() -> Result<()> {
             for (platform, v) in bs.files.as_object().unwrap().iter() {
                 let v: BottleInfo = serde_json::from_value(v.clone()).unwrap();
                 //a2ps-4.14.arm64_big_sur.bottle.4.tar.gz
-                println!(
-                    "{} {} bottles/{}-{}.{}.bottle.{}.tar.gz",
-                    v.sha256, v.url, name, ver, platform, rebuild
-                );
+                if rebuild == 0 {
+                    println!(
+                        "{} {} bottles/{}-{}.{}.bottle.tar.gz",
+                        v.sha256, v.url, name, ver, platform
+                    );
+                } else {
+                    println!(
+                        "{} {} bottles/{}-{}.{}.bottle.{}.tar.gz",
+                        v.sha256, v.url, name, ver, platform, rebuild
+                    );
+                }
             }
         }
     }
