@@ -24,7 +24,6 @@ struct Formula {
     name: String,
     versions: Versions,
     bottle: Bottle,
-    revision: u64,
 }
 
 #[derive(Deserialize)]
@@ -37,20 +36,18 @@ struct BottleInfo {
 }
 
 fn d(f: &Formula) -> Option<()> {
-    let revision = f.revision;
-    let revision = if revision == 0 { "".to_string() } else { format!("_{}", revision) };
     if f.versions.bottle {
         let name = &f.name;
-        let version = f.versions.stable.as_ref()?;
+        let ver = f.versions.stable.as_ref()?;
         let bs = f.bottle.stable.as_ref()?;
         let rebuild = bs.rebuild;
-        let rebuild = if rebuild == 0 { "".to_string() } else { format!(".{}", rebuild) };
         for (platform, v) in bs.files.as_object()?.iter() {
-            if let Ok(v) = serde_json::from_value::<BottleInfo>(v.clone()) {
-                println!(
-                    "{} {} bottles/{}-{}{}.{}.bottle{}.tar.gz",
-                    v.sha256, v.url, name, version, revision, platform, rebuild
-                );
+            if let Ok(bi) = serde_json::from_value::<BottleInfo>(v.clone()) {
+                if rebuild == 0 {
+                    println!("{} {} {}-{}.{}.bottle.tar.gz", bi.sha256, bi.url, name, ver, platform);
+                } else {
+                    println!("{} {} {}-{}.{}.bottle.{}.tar.gz", bi.sha256, bi.url, name, ver, platform, rebuild);
+                }
             }
         }
     }
