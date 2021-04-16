@@ -44,9 +44,9 @@ fn d(f: &Formula) -> Option<()> {
         for (platform, v) in bs.files.as_object()?.iter() {
             if let Ok(bi) = serde_json::from_value::<BottleInfo>(v.clone()) {
                 if rebuild == 0 {
-                    println!("{} {} bottles/{}-{}.{}.bottle.tar.gz", bi.sha256, bi.url, name, ver, platform);
+                    println!("{} {} {}-{}.{}.bottle.tar.gz", bi.sha256, bi.url, name, ver, platform);
                 } else {
-                    println!("{} {} bottles/{}-{}.{}.bottle.{}.tar.gz", bi.sha256, bi.url, name, ver, platform, rebuild);
+                    println!("{} {} {}-{}.{}.bottle.{}.tar.gz", bi.sha256, bi.url, name, ver, platform, rebuild);
                 }
             }
         }
