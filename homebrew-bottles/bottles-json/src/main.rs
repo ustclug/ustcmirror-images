@@ -37,19 +37,19 @@ struct BottleInfo {
 }
 
 fn d(f: &Formula) -> Option<()> {
-    let revision = f.revision;
-    let revision = if revision == 0 { "".to_string() } else { format!("_{}", revision) };
     if f.versions.bottle {
-        let name = &f.name;
-        let version = f.versions.stable.as_ref()?;
         let bs = f.bottle.stable.as_ref()?;
-        let rebuild = bs.rebuild;
-        let rebuild = if rebuild == 0 { "".to_string() } else { format!(".{}", rebuild) };
         for (platform, v) in bs.files.as_object()?.iter() {
             if let Ok(bi) = serde_json::from_value::<BottleInfo>(v.clone()) {
                 println!(
-                    "{} {} {}-{}{}.{}.bottle{}.tar.gz",
-                    bi.sha256, bi.url, name, version, revision, platform, rebuild
+                    "{sha256} {url} {name}-{version}{revision}.{platform}.bottle{rebuild}.tar.gz",
+                    sha256 = bi.sha256,
+                    url = bi.url,
+                    name = f.name,
+                    version = f.versions.stable.as_ref()?,
+                    revision = if f.revision == 0 { "".to_owned() } else { format!("_{}", f.revision) },
+                    platform = platform,
+                    rebuild = if bs.rebuild == 0 { "".to_owned() } else { format!(".{}", bs.rebuild) },
                 );
             }
         }
