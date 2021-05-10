@@ -1,4 +1,4 @@
-from ustcmirror/base:alpine as builder
+FROM ustcmirror/base:alpine AS builder
 RUN apk add --no-cache build-base
 WORKDIR /tmp
 ADD lchmod.c .
