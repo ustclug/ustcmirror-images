@@ -1,4 +1,4 @@
-#!/usr/bin/python -O
+#!/usr/bin/env python -O
 # -*- coding: utf-8 -*-
 import os
 from os import path
@@ -54,7 +54,6 @@ class NaryTree():
     """
     A n-ary tree
     """
-
     def __init__(self, name):
         self.name = name
         self._children = dict()
@@ -146,23 +145,19 @@ class Builder():
         if is_cron:
             to_build = self._dep_tree.enum_all()
         else:
-            # TRAVIS_COMMIT_RANGE is empty for builds
-            # triggered by the initial commit of a new branch.
-            commits_range = os.environ.get('TRAVIS_COMMIT_RANGE', '')
-            print('TRAVIS_COMMIT_RANGE: {}'.format(commits_range))
-            if not commits_range:
-                # GitHub Actions ($COMMIT_FROM & $COMMIT_TO)
-                commit_from = os.environ.get('COMMIT_FROM', '')
-                commit_to = os.environ.get('COMMIT_TO', '')
-                if commit_from and commit_to:
-                    commits_range = "{}...{}".format(commit_from, commit_to)
-                else:
-                    # git clone --branch <branch> on travis
-                    # need to add master branch back
-                    if not Git.branch_exists('master'):
-                        print('fetching master branch...')
-                        Git.fetch_master_branch()
-                    commits_range = 'origin/master...HEAD'
+            # GitHub Actions ($COMMIT_FROM & $COMMIT_TO)
+            commit_from = os.environ.get('COMMIT_FROM', '')
+            commit_to = os.environ.get('COMMIT_TO', '')
+            if commit_from and commit_to:
+                commits_range = "{}...{}".format(commit_from, commit_to)
+            else:
+                # git clone --branch <branch> on travis
+                # need to add master branch back
+                if not Git.branch_exists('master'):
+                    print('fetching master branch...')
+                    Git.fetch_master_branch()
+                commits_range = 'origin/master...HEAD'
+            print('COMMITS_RANGE: {}'.format(commits_range))
             prev, current = commits_range.split('...')
             if Git.is_invalid_commit(prev):
                 if Git.is_current_branch('master'):
@@ -237,7 +232,8 @@ def get_dest_image(img, f):
 
 def get_base_image(f):
     with open(f) as fin:
-        for l in fin:
+        # Read Dockerfile in reverse order to get the base image
+        for l in reversed(fin.readlines()):
             l = l.strip()
             if not l.startswith('FROM'):
                 continue
