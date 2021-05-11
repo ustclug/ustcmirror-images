@@ -11,7 +11,10 @@ cd /usr/local/lib/tunasync
 DISTS="$APTSYNC_DISTS:"
 RET=0
 while [[ "$DISTS" == *:* ]]; do
-  THISDIST="${DISTS%%:*}|"
+  THISDIST="${DISTS%%:*}"
+  THISDIST="${THISDIST%"${THISDIST##*[![:space:]]}"}"
+  THISDIST="${THISDIST#"${THISDIST%%[![:space:]]*}"}"
+  THISDIST="${THISDIST}|"
   DISTS="${DISTS#*:}"
 
   APT_DIST="${THISDIST}"
