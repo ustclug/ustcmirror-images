@@ -128,7 +128,7 @@ class Builder():
     def finish(self):
         root = self._dep_tree
         self._build_tree(root)
-        is_cron = os.environ.get('GITHUB_EVENT', '') == 'schedule'
+        is_cron = os.environ.get('GITHUB_EVENT_NAME', '') == 'schedule'
         date_tag = os.environ.get('DATE_TAG', '') != ''
         self._generate(is_cron=is_cron, force_date_tag=date_tag)
 

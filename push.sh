@@ -2,10 +2,10 @@
 
 [[ $DEBUG = true ]] && set -x
 
-if [[ $GITHUB_EVENT != push && $GITHUB_EVENT != schedule ]]; then
+if [[ $GITHUB_EVENT_NAME != push && $GITHUB_EVENT_NAME != schedule ]]; then
     exit 0
 fi
-if [[ $GITHUB_EVENT == push && $GITHUB_REF != "refs/heads/master" ]]; then
+if [[ $GITHUB_EVENT_NAME == push && $GITHUB_REF != "refs/heads/master" ]]; then
     exit 0
 fi
 

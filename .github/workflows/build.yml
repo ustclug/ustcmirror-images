@@ -25,7 +25,6 @@ jobs:
           python3 ./configure.py
           make all
         env:
-          GITHUB_EVENT: ${{ github.event_name }}
           COMMIT_FROM: ${{ github.event.before }}
           COMMIT_TO: ${{ github.event.after }}
 
@@ -35,5 +34,3 @@ jobs:
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
-          GITHUB_EVENT: ${{ github.event_name }}
-          GITHUB_REF: ${{ github.ref }}
