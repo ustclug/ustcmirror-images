@@ -2,6 +2,7 @@
 
 import sys
 import os
+import re
 import subprocess
 
 
@@ -18,7 +19,9 @@ os.chdir(WORK_DIR)
 
 cmds = []
 rets = []
-for dist in APTSYNC_DISTS.split(":"):
+for dist in re.split(r"[:\n]+", APTSYNC_DISTS):
+    if not dist.strip():
+        continue
     apt_dist, apt_comp, apt_arch, apt_dir = dist.strip().split("|")
     apt_arch = apt_arch.replace(" ", ",")
     apt_comp = apt_comp.replace(" ", ",")
