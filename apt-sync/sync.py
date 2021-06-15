@@ -27,7 +27,7 @@ for dist in APTSYNC_DISTS.split(":"):
     if DELETE:
         cmd.append("--delete")
 
-    cmd += [APTSYNC_URL + apt_dir, apt_dist, apt_comp, apt_arch, TO + "/" + apt_dir]
+    cmd += [APTSYNC_URL + apt_dir, apt_dist, apt_comp, apt_arch, os.path.join(TO, apt_dir)]
     cmds.append(cmd[:])
     cp = subprocess.run(cmd)
     rets.append(cp.returncode)
