@@ -19,8 +19,8 @@ from typing import List, Dict, Set, Tuple, IO
 import requests
 
 
-APT_SYNC_USER_AGENT = os.getenv("APT_SYNC_USER_AGENT", "APT-Mirror-Tool/1.0")
-requests.utils.default_user_agent = lambda: APT_SYNC_USER_AGENT
+APTSYNC_USER_AGENT = os.getenv("APTSYNC_USER_AGENT", "APT-Mirror-Tool/1.0")
+requests.utils.default_user_agent = lambda: APTSYNC_USER_AGENT
 
 OS_TEMPLATE = {
     'ubuntu-current': ["xenial", "bionic", "eoan", "focal"],
