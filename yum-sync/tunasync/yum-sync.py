@@ -164,6 +164,8 @@ def main():
         os_list = [ str(i) for i in range(
             int(args.os_version[:dash]),
             1+int(args.os_version[dash+1:])) ]
+    elif ',' in args.os_version:
+        os_list = args.os_version.split(",")
     else:
         os_list = [args.os_version]
     check_args("os_version", os_list)
