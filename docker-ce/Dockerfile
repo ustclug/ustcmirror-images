@@ -1,5 +1,5 @@
 FROM ustcmirror/base:alpine
-MAINTAINER Keyu Tao <taoky@ustclug.org>
+LABEL maintainer="Keyu Tao <taoky@ustclug.org>"
 RUN apk add --no-cache --update wget perl ca-certificates git python3 py3-requests py3-pip && \
     pip install pyquery && \
     mkdir -p /usr/local/lib/tunasync
