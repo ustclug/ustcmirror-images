@@ -15,6 +15,7 @@
     - [apt-sync](#apt-sync)
     - [archvsync](#archvsync)
     - [debian-cd](#debian-cd)
+    - [docker-ce](#docker-ce)
     - [fedora](#fedora)
     - [freebsd-pkg](#freebsd-pkg)
     - [freebsd-ports](#freebsd-ports)
@@ -138,6 +139,19 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | Parameter     | Description                                    |
 | ------------- | ---------------------------------------------- |
 | `IGNORE_LOCK` | Purge lockfiles at first. Defaults to `false`. |
+
+### docker-ce
+
+[![docker-ce](https://img.shields.io/docker/image-size/ustcmirror/docker-ce/latest)](https://hub.docker.com/r/ustcmirror/docker-ce "docker-ce")
+[![docker-ce](https://img.shields.io/microbadger/layers/ustcmirror/docker-ce)](https://hub.docker.com/r/ustcmirror/docker-ce "docker-ce")
+
+`docker-ce` accepts following parameters:
+
+| Parameter     | Description                                    |
+| ------------- | ---------------------------------------------- |
+| `SYNC_WORKERS` | Download workers. Defaults to 1. |
+| `SYNC_USER_AGENT` | The user agent of `docker-ce` syncing program. Defaults to `Docker-ce Syncing Tool/1.0`. |
+| `SYNC_EXTRA` | Extra parameters. `--fast-skip` can be set to skip size & timestamp check. |
 
 ### fedora
 
