@@ -14,13 +14,16 @@ from pyquery import PyQuery as pq
 
 
 SYNC_USER_AGENT = os.getenv("SYNC_USER_AGENT", "Docker-ce Syncing Tool/1.0")
-requests.utils.default_user_agent = lambda: SYNC_USER_AGENT
 BASE_URL = os.getenv("UPSTREAM", "https://download.docker.com/")
 WORKING_DIR = os.getenv("TO")
 WORKERS = os.getenv("SYNC_WORKERS", 1)
 
 # connect and read timeout value
 TIMEOUT_OPTION = (7, 10)
+# user agent
+requests.utils.default_user_agent = lambda: SYNC_USER_AGENT
+# retries
+requests.adapters.DEFAULT_RETRIES = 3
 
 REL_URL_RE = re.compile(r"https?:\/\/.+?\/(.+)")
 
