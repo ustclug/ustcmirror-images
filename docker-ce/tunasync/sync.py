@@ -25,7 +25,7 @@ requests.utils.default_user_agent = lambda: SYNC_USER_AGENT
 # retries
 requests.adapters.DEFAULT_RETRIES = 3
 
-REL_URL_RE = re.compile(r"https?:\/\/.+?\/(.+)")
+REL_URL_RE = re.compile(r"https?:\/\/.+?\/(.+?)(\/index\.html)?$")
 
 
 class RemoteSite:
