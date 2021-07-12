@@ -72,8 +72,8 @@ class RemoteSite:
                 origin_dir = base_url.split("/")[-2]
                 if target_dir != origin_dir:
                     # here we create a symlink on the fly
-                    from_dir = REL_URL_RE.findall(base_url)[0]
-                    to_dir = REL_URL_RE.findall(r.url)[0]
+                    from_dir = REL_URL_RE.findall(base_url)[0][0]
+                    to_dir = REL_URL_RE.findall(r.url)[0][0]
                     yield (from_dir, to_dir)  # tuple -> create symlink
                     return
         except Exception as e:
