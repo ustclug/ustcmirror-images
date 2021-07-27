@@ -76,7 +76,7 @@ docker run --rm \
 ### aptsync
 
 [![aptsync](https://img.shields.io/docker/image-size/ustcmirror/aptsync/latest)](https://hub.docker.com/r/ustcmirror/aptsync "aptsync")
-[![aptsync](https://img.shields.io/microbadger/layers/ustcmirror/aptsync)](https://hub.docker.com/r/ustcmirror/aptsync "aptsync")
+[![aptsync](https://img.shields.io/docker/pulls/ustcmirror/aptsync)](https://hub.docker.com/r/ustcmirror/aptsync "aptsync")
 
 | Parameter            | Description                                                                                               |
 | -------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -104,7 +104,7 @@ APTSYNC_DISTS='debian-jessie|main|i386 amd64:raspbian-jessie|main testing|armhf'
 ### apt-sync
 
 [![apt-sync](https://img.shields.io/docker/image-size/ustcmirror/apt-sync/latest)](https://hub.docker.com/r/ustcmirror/apt-sync "apt-sync")
-[![apt-sync](https://img.shields.io/microbadger/layers/ustcmirror/apt-sync)](https://hub.docker.com/r/ustcmirror/apt-sync "apt-sync")
+[![apt-sync](https://img.shields.io/docker/pulls/ustcmirror/apt-sync)](https://hub.docker.com/r/ustcmirror/apt-sync "apt-sync")
 
 | Parameter        | Description                                                                                                                     |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
@@ -119,7 +119,7 @@ Consider use `apt-sync` when the upstream replaces packages in-place, as `aptsyn
 ### archvsync
 
 [![archvsync](https://img.shields.io/docker/image-size/ustcmirror/archvsync/latest)](https://hub.docker.com/r/ustcmirror/archvsync "archvsync")
-[![archvsync](https://img.shields.io/microbadger/layers/ustcmirror/archvsync)](https://hub.docker.com/r/ustcmirror/archvsync "archvsync")
+[![archvsync](https://img.shields.io/docker/pulls/ustcmirror/archvsync)](https://hub.docker.com/r/ustcmirror/archvsync "archvsync")
 
 A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 
@@ -132,7 +132,7 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 ### debian-cd
 
 [![debian-cd](https://img.shields.io/docker/image-size/ustcmirror/debian-cd/latest)](https://hub.docker.com/r/ustcmirror/debian-cd "debian-cd")
-[![debian-cd](https://img.shields.io/microbadger/layers/ustcmirror/debian-cd)](https://hub.docker.com/r/ustcmirror/debian-cd "debian-cd")
+[![debian-cd](https://img.shields.io/docker/pulls/ustcmirror/debian-cd)](https://hub.docker.com/r/ustcmirror/debian-cd "debian-cd")
 
 `debian-cd` accepts the same parameters specified in `debian-cd-mirror.conf`
 
@@ -143,20 +143,20 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 ### docker-ce
 
 [![docker-ce](https://img.shields.io/docker/image-size/ustcmirror/docker-ce/latest)](https://hub.docker.com/r/ustcmirror/docker-ce "docker-ce")
-[![docker-ce](https://img.shields.io/microbadger/layers/ustcmirror/docker-ce)](https://hub.docker.com/r/ustcmirror/docker-ce "docker-ce")
+[![docker-ce](https://img.shields.io/docker/pulls/ustcmirror/docker-ce)](https://hub.docker.com/r/ustcmirror/docker-ce "docker-ce")
 
 `docker-ce` accepts following parameters:
 
-| Parameter     | Description                                    |
-| ------------- | ---------------------------------------------- |
-| `SYNC_WORKERS` | Download workers. Defaults to 1. |
+| Parameter         | Description                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| `SYNC_WORKERS`    | Download workers. Defaults to 1.                                                         |
 | `SYNC_USER_AGENT` | The user agent of `docker-ce` syncing program. Defaults to `Docker-ce Syncing Tool/1.0`. |
-| `SYNC_EXTRA` | Extra parameters. `--fast-skip` can be set to skip size & timestamp check. |
+| `SYNC_EXTRA`      | Extra parameters. `--fast-skip` can be set to skip size & timestamp check.               |
 
 ### fedora
 
 [![fedora](https://img.shields.io/docker/image-size/ustcmirror/fedora/latest)](https://hub.docker.com/r/ustcmirror/fedora "fedora")
-[![fedora](https://img.shields.io/microbadger/layers/ustcmirror/fedora)](https://hub.docker.com/r/ustcmirror/fedora "fedora")
+[![fedora](https://img.shields.io/docker/pulls/ustcmirror/fedora)](https://hub.docker.com/r/ustcmirror/fedora "fedora")
 
 [fedora-quick-mirror](https://pagure.io/quick-fedora-mirror)
 
@@ -176,7 +176,7 @@ Note: This image is not in use now, as `quick-fedora-mirror` has some mysterious
 ### freebsd-pkg
 
 [![freebsd-pkg](https://img.shields.io/docker/image-size/ustcmirror/freebsd-pkg/latest)](https://hub.docker.com/r/ustcmirror/freebsd-pkg "freebsd-pkg")
-[![freebsd-pkg](https://img.shields.io/microbadger/layers/ustcmirror/freebsd-pkg)](https://hub.docker.com/r/ustcmirror/freebsd-pkg "freebsd-pkg")
+[![freebsd-pkg](https://img.shields.io/docker/pulls/ustcmirror/freebsd-pkg)](https://hub.docker.com/r/ustcmirror/freebsd-pkg "freebsd-pkg")
 
 | Parameter           | Description                                                      |
 | ------------------- | ---------------------------------------------------------------- |
@@ -187,7 +187,7 @@ Note: This image is not in use now, as `quick-fedora-mirror` has some mysterious
 ### freebsd-ports
 
 [![freebsd-ports](https://img.shields.io/docker/image-size/ustcmirror/freebsd-ports/latest)](https://hub.docker.com/r/ustcmirror/freebsd-ports "freebsd-ports")
-[![freebsd-ports](https://img.shields.io/microbadger/layers/ustcmirror/freebsd-ports)](https://hub.docker.com/r/ustcmirror/freebsd-ports "freebsd-ports")
+[![freebsd-ports](https://img.shields.io/docker/pulls/ustcmirror/freebsd-ports)](https://hub.docker.com/r/ustcmirror/freebsd-ports "freebsd-ports")
 
 Notice: BIND_ADDRESS is only added for `curl` in freebsd-ports. Make sure that github.com is accessible under default network settings.
 
@@ -200,7 +200,7 @@ Notice: BIND_ADDRESS is only added for `curl` in freebsd-ports. Make sure that g
 ### github-release
 
 [![github-release](https://img.shields.io/docker/image-size/ustcmirror/github-release/latest)](https://hub.docker.com/r/ustcmirror/github-release "github-release")
-[![github-release](https://img.shields.io/microbadger/layers/ustcmirror/github-release)](https://hub.docker.com/r/ustcmirror/github-release "github-release")
+[![github-release](https://img.shields.io/docker/pulls/ustcmirror/github-release)](https://hub.docker.com/r/ustcmirror/github-release "github-release")
 
 | Parameter      | Description                                                                                        |
 | -------------- | -------------------------------------------------------------------------------------------------- |
@@ -217,7 +217,7 @@ To specified the repo list to sync, you can:
 ### gitsync
 
 [![gitsync](https://img.shields.io/docker/image-size/ustcmirror/gitsync/latest)](https://hub.docker.com/r/ustcmirror/gitsync "gitsync")
-[![gitsync](https://img.shields.io/microbadger/layers/ustcmirror/gitsync)](https://hub.docker.com/r/ustcmirror/gitsync "gitsync")
+[![gitsync](https://img.shields.io/docker/pulls/ustcmirror/gitsync)](https://hub.docker.com/r/ustcmirror/gitsync "gitsync")
 
 | Parameter        | Description                               |
 | ---------------- | ----------------------------------------- |
@@ -229,7 +229,7 @@ To specified the repo list to sync, you can:
 ### gsutil-rsync
 
 [![gsutil-rsync](https://img.shields.io/docker/image-size/ustcmirror/gsutil-rsync/latest)](https://hub.docker.com/r/ustcmirror/gsutil-rsync "gsutil-rsync")
-[![gsutil-rsync](https://img.shields.io/microbadger/layers/ustcmirror/gsutil-rsync)](https://hub.docker.com/r/ustcmirror/gsutil-rsync "gsutil-rsync")
+[![gsutil-rsync](https://img.shields.io/docker/pulls/ustcmirror/gsutil-rsync)](https://hub.docker.com/r/ustcmirror/gsutil-rsync "gsutil-rsync")
 
 | Parameter    | Description                                    |
 | ------------ | ---------------------------------------------- |
@@ -239,7 +239,7 @@ To specified the repo list to sync, you can:
 ### hackage
 
 [![hackage](https://img.shields.io/docker/image-size/ustcmirror/hackage/latest)](https://hub.docker.com/r/ustcmirror/hackage "hackage")
-[![hackage](https://img.shields.io/microbadger/layers/ustcmirror/hackage)](https://hub.docker.com/r/ustcmirror/hackage "hackage")
+[![hackage](https://img.shields.io/docker/pulls/ustcmirror/hackage)](https://hub.docker.com/r/ustcmirror/hackage "hackage")
 
 | Parameter          | Description                                                        |
 | ------------------ | ------------------------------------------------------------------ |
@@ -248,31 +248,31 @@ To specified the repo list to sync, you can:
 ### homebrew-bottles
 
 [![homebrew-bottles](https://img.shields.io/docker/image-size/ustcmirror/homebrew-bottles/latest)](https://hub.docker.com/r/ustcmirror/homebrew-bottles "homebrew-bottles")
-[![homebrew-bottles](https://img.shields.io/microbadger/layers/ustcmirror/homebrew-bottles)](https://hub.docker.com/r/ustcmirror/homebrew-bottles "homebrew-bottles")
+[![homebrew-bottles](https://img.shields.io/docker/pulls/ustcmirror/homebrew-bottles)](https://hub.docker.com/r/ustcmirror/homebrew-bottles "homebrew-bottles")
 
-| Parameter                | Description                                                                         |
-| ------------------------ | ----------------------------------------------------------------------------------- |
-| `HOMEBREW_BOTTLES_JOBS`  | Parallel jobs. Defaults to `1`                                                      |
-| `TARGET_OS`              | `mac` or `linux`. Defaults to `mac`                                                 |
+| Parameter               | Description                         |
+| ----------------------- | ----------------------------------- |
+| `HOMEBREW_BOTTLES_JOBS` | Parallel jobs. Defaults to `1`      |
+| `TARGET_OS`             | `mac` or `linux`. Defaults to `mac` |
 
 ### julia
 
 [![julia](https://img.shields.io/docker/image-size/ustcmirror/julia/latest)](https://hub.docker.com/r/ustcmirror/julia "julia")
-[![julia](https://img.shields.io/microbadger/layers/ustcmirror/julia)](https://hub.docker.com/r/ustcmirror/julia "julia")
+[![julia](https://img.shields.io/docker/pulls/ustcmirror/julia)](https://hub.docker.com/r/ustcmirror/julia "julia")
 
 Sync from official site. No parameters needed. (Deprecated)
 
 ### julia-storage
 
 [![julia-storage](https://img.shields.io/docker/image-size/ustcmirror/julia-storage/latest)](https://hub.docker.com/r/ustcmirror/julia-storage "julia-storage")
-[![julia-storage](https://img.shields.io/microbadger/layers/ustcmirror/julia-storage)](https://hub.docker.com/r/ustcmirror/julia-storage "julia-storage")
+[![julia-storage](https://img.shields.io/docker/pulls/ustcmirror/julia-storage)](https://hub.docker.com/r/ustcmirror/julia-storage "julia-storage")
 
 A new solution to sync Julia general registry (using `StorageMirrorServer.jl`). No parameters needed.
 
 ### lftpsync
 
 [![lftpsync](https://img.shields.io/docker/image-size/ustcmirror/lftpsync/latest)](https://hub.docker.com/r/ustcmirror/lftpsync "lftpsync")
-[![lftpsync](https://img.shields.io/microbadger/layers/ustcmirror/lftpsync)](https://hub.docker.com/r/ustcmirror/lftpsync "lftpsync")
+[![lftpsync](https://img.shields.io/docker/pulls/ustcmirror/lftpsync)](https://hub.docker.com/r/ustcmirror/lftpsync "lftpsync")
 
 | Parameter          | Description                                     |
 | ------------------ | ----------------------------------------------- |
@@ -284,7 +284,7 @@ A new solution to sync Julia general registry (using `StorageMirrorServer.jl`). 
 ### nix-channels
 
 [![nix-channels](https://img.shields.io/docker/image-size/ustcmirror/nix-channels/latest)](https://hub.docker.com/r/ustcmirror/nix-channels "nix-channels")
-[![nix-channels](https://img.shields.io/microbadger/layers/ustcmirror/nix-channels)](https://hub.docker.com/r/ustcmirror/nix-channels "nix-channels")
+[![nix-channels](https://img.shields.io/docker/pulls/ustcmirror/nix-channels)](https://hub.docker.com/r/ustcmirror/nix-channels "nix-channels")
 
 | Parameter                | Description                                                                                                                                                       |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -298,14 +298,14 @@ A new solution to sync Julia general registry (using `StorageMirrorServer.jl`). 
 ### nodesource
 
 [![nodesource](https://img.shields.io/docker/image-size/ustcmirror/nodesource/latest)](https://hub.docker.com/r/ustcmirror/nodesource "nodesource")
-[![nodesource](https://img.shields.io/microbadger/layers/ustcmirror/nodesource)](https://hub.docker.com/r/ustcmirror/nodesource "nodesource")
+[![nodesource](https://img.shields.io/docker/pulls/ustcmirror/nodesource)](https://hub.docker.com/r/ustcmirror/nodesource "nodesource")
 
 Sync from official site. No parameter needed.
 
 ### pypi
 
 [![pypi](https://img.shields.io/docker/image-size/ustcmirror/pypi/latest)](https://hub.docker.com/r/ustcmirror/pypi "pypi")
-[![pypi](https://img.shields.io/microbadger/layers/ustcmirror/pypi)](https://hub.docker.com/r/ustcmirror/pypi "pypi")
+[![pypi](https://img.shields.io/docker/pulls/ustcmirror/pypi)](https://hub.docker.com/r/ustcmirror/pypi "pypi")
 
 | Parameter                    | Description         |
 | ---------------------------- | ------------------- |
@@ -316,7 +316,7 @@ Sync from official site. No parameter needed.
 ### rclone
 
 [![rclone](https://img.shields.io/docker/image-size/ustcmirror/rclone/latest)](https://hub.docker.com/r/ustcmirror/rclone "rclone")
-[![rclone](https://img.shields.io/microbadger/layers/ustcmirror/rclone)](https://hub.docker.com/r/ustcmirror/rclone "rclone")
+[![rclone](https://img.shields.io/docker/pulls/ustcmirror/rclone)](https://hub.docker.com/r/ustcmirror/rclone "rclone")
 
 | Parameter                | Description                                                                        |
 | ------------------------ | ---------------------------------------------------------------------------------- |
@@ -334,7 +334,7 @@ ref:
 ### rsync
 
 [![rsync](https://img.shields.io/docker/image-size/ustcmirror/rsync/latest)](https://hub.docker.com/r/ustcmirror/rsync "rsync")
-[![rsync](https://img.shields.io/microbadger/layers/ustcmirror/rsync)](https://hub.docker.com/r/ustcmirror/rsync "rsync")
+[![rsync](https://img.shields.io/docker/pulls/ustcmirror/rsync)](https://hub.docker.com/r/ustcmirror/rsync "rsync")
 
 | Parameter             | Description                                                      |
 | --------------------- | ---------------------------------------------------------------- |
@@ -355,7 +355,7 @@ ref:
 ### rubygems
 
 [![rubygems](https://img.shields.io/docker/image-size/ustcmirror/rubygems/latest)](https://hub.docker.com/r/ustcmirror/rubygems "rubygems")
-[![rubygems](https://img.shields.io/microbadger/layers/ustcmirror/rubygems)](https://hub.docker.com/r/ustcmirror/rubygems "rubygems")
+[![rubygems](https://img.shields.io/docker/pulls/ustcmirror/rubygems)](https://hub.docker.com/r/ustcmirror/rubygems "rubygems")
 
 | Parameter  | Description                        |
 | ---------- | ---------------------------------- |
@@ -364,7 +364,7 @@ ref:
 ### stackage
 
 [![stackage](https://img.shields.io/docker/image-size/ustcmirror/stackage/latest)](https://hub.docker.com/r/ustcmirror/stackage "stackage")
-[![stackage](https://img.shields.io/microbadger/layers/ustcmirror/stackage)](https://hub.docker.com/r/ustcmirror/stackage "stackage")
+[![stackage](https://img.shields.io/docker/pulls/ustcmirror/stackage)](https://hub.docker.com/r/ustcmirror/stackage "stackage")
 
 Stackage doesn't need to specify upstream, but this mirror use cabal to install necessary Haskell packages. Replacing default mirror of cabal with faster one will speed up building process.
 
@@ -373,7 +373,7 @@ Read the [user guide](https://www.haskell.org/cabal/users-guide/installing-packa
 ### yum-sync
 
 [![yum-sync](https://img.shields.io/docker/image-size/ustcmirror/yum-sync/latest)](https://hub.docker.com/r/ustcmirror/yum-sync "yum-sync")
-[![yum-sync](https://img.shields.io/microbadger/layers/ustcmirror/yum-sync)](https://hub.docker.com/r/ustcmirror/yum-sync "yum-sync")
+[![yum-sync](https://img.shields.io/docker/pulls/ustcmirror/yum-sync)](https://hub.docker.com/r/ustcmirror/yum-sync "yum-sync")
 
 | Parameter                   | Description                                                                                                                           |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
