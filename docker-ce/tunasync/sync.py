@@ -78,7 +78,7 @@ class RemoteSite:
                     return
         except Exception as e:
             print("Panic: failed to get file list")
-            traceback.print_exc(e)
+            traceback.print_exc()
             sys.exit(1)
         if not r.ok:
             return
