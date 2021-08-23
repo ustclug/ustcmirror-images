@@ -81,6 +81,7 @@ class RemoteSite:
             traceback.print_exc()
             # We don't exit here as it may hang the whole syncing program.
             # sys.exit(1)
+            return
         if not r.ok:
             return
 
@@ -218,6 +219,7 @@ def main():
     task_queue.join()
     # stop workers
     for i in range(args.workers):
+        # TODO: it may hang here when workers threads exit unexpectedly
         task_queue.put(None)
 
     local_filelist = []
