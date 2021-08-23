@@ -77,9 +77,10 @@ class RemoteSite:
                     yield (from_dir, to_dir)  # tuple -> create symlink
                     return
         except Exception as e:
-            print("Panic: failed to get file list")
+            print("Panic: get an exception while getting file list")
             traceback.print_exc()
-            sys.exit(1)
+            # We don't exit here as it may hang the whole syncing program.
+            # sys.exit(1)
         if not r.ok:
             return
 
