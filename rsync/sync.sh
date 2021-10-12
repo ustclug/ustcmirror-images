@@ -38,11 +38,13 @@ RSYNC_EXTRA=${RSYNC_EXTRA:-''}
 RSYNC_RSH=${RSYNC_RSH:-''}
 RSYNC_DELAY_UPDATES="${RSYNC_DELAY_UPDATES:-true}"
 RSYNC_SPARSE="${RSYNC_SPARSE:-true}"
+RSYNC_DELETE_DELAY="${RSYNC_DELETE_DELAY:-true}"
 
-opts="-pPrltvH --partial-dir=.rsync-partial --timeout ${RSYNC_TIMEOUT} --safe-links --delete-delay --delete-excluded"
+opts="-pPrltvH --partial-dir=.rsync-partial --timeout ${RSYNC_TIMEOUT} --safe-links --delete-excluded"
 
 [[ -n $RSYNC_USER ]] && RSYNC_HOST="$RSYNC_USER@$RSYNC_HOST"
 
+[[ $RSYNC_DELETE_DELAY = true ]] && opt+=' --delete-delay' || opt+= ' --delete'
 [[ $RSYNC_DELAY_UPDATES = true ]] && opts+=' --delay-updates'
 [[ $RSYNC_SPARSE = true ]] && opts+=' --sparse'
 [[ $RSYNC_BLKSIZE -ne 0 ]] && opts+=" --block-size ${RSYNC_BLKSIZE}"

@@ -349,6 +349,7 @@ ref:
 | `RSYNC_TIMEOUT`       | Defaults to `14400`.                                             |
 | `RSYNC_SPARSE`        | Defaults to `true`.                                              |
 | `RSYNC_DELAY_UPDATES` | Defaults to `true`.                                              |
+| `RSYNC_DELETE_DELAY`  | Defaults to `true`. Use `--delete-delay` rather than `--delete`  |
 | `RSYNC_MAXDELETE`     | Maximum number of files that can be removed. Defaults to `4000`. |
 | `RSYNC_RSH`           | Specify the remote shell, e.g. `ssh -i /path/to/key`.            |
 
