@@ -44,7 +44,7 @@ opts="-pPrltvH --partial-dir=.rsync-partial --timeout ${RSYNC_TIMEOUT} --safe-li
 
 [[ -n $RSYNC_USER ]] && RSYNC_HOST="$RSYNC_USER@$RSYNC_HOST"
 
-[[ $RSYNC_DELETE_DELAY = true ]] && opt+=' --delete-delay' || opt+=' --delete'
+[[ $RSYNC_DELETE_DELAY = true ]] && opts+=' --delete-delay' || opts+=' --delete'
 [[ $RSYNC_DELAY_UPDATES = true ]] && opts+=' --delay-updates'
 [[ $RSYNC_SPARSE = true ]] && opts+=' --sparse'
 [[ $RSYNC_BLKSIZE -ne 0 ]] && opts+=" --block-size ${RSYNC_BLKSIZE}"
