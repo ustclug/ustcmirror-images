@@ -8,6 +8,7 @@ from pathlib import Path
 from email.utils import parsedate_to_datetime
 import re
 import traceback
+import signal
 
 import requests
 from pyquery import PyQuery as pq
@@ -79,8 +80,9 @@ class RemoteSite:
         except Exception as e:
             print("Panic: get an exception while getting file list")
             traceback.print_exc()
-            # We don't exit here as it may hang the whole syncing program.
+            # We should exit whole program, because incomplete file list may let script delete existing files!
             # sys.exit(1)
+            os.kill(os.getpid(), signal.SIGINT)  # suicide
             return
         if not r.ok:
             return
