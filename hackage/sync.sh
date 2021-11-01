@@ -18,6 +18,11 @@ function pull_hackage () {
     echo "Download latest index ..."
     wget "$HACKAGE_BASE_URL/01-index.tar.gz" -O index.tar.gz &> /dev/null
 
+    # download extra json files
+    extra_json=("mirrors.json" "root.json" "snapshot.json" "timestamp.json")
+    for json in "${extra_json[@]}"; do
+        wget "$HACKAGE_BASE_URL/$json" -O "$json" &> /dev/null
+    done
 
     mkdir -p package
 
