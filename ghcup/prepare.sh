@@ -16,4 +16,4 @@ cabal update
 cabal build -O2
 cp $(cabal list-bin -O2 ghcupsync) /
 
-rm -rf /dist* /root/.cabal /root/.ghcup /root/.ghc && apt-get purge -y --auto-remove build-essential curl libffi-dev libgmp-dev libncurses-dev libnuma-dev && rm -rf /var/lib/apt/lists/*
+rm -rf /dist* /root/.cabal /root/.ghcup /root/.ghc && apt-get purge -y --auto-remove build-essential libffi-dev libgmp-dev libncurses-dev && rm -rf /var/lib/apt/lists/*
