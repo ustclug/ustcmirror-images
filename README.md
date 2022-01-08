@@ -19,6 +19,7 @@
     - [fedora](#fedora)
     - [freebsd-pkg](#freebsd-pkg)
     - [freebsd-ports](#freebsd-ports)
+    - [ghcup](#ghcup)
     - [github-release](#github-release)
     - [gitsync](#gitsync)
     - [gsutil-rsync](#gsutil-rsync)
@@ -196,6 +197,13 @@ Notice: BIND_ADDRESS is only added for `curl` in freebsd-ports. Make sure that g
 | `FBSD_PORTS_INDEX_UPSTREAM`     | Set the URL of upstream git index. Defaults to `https://github.com/freebsd/freebsd-ports.git`. |
 | `FBSD_PORTS_DISTFILES_UPSTREAM` | Set the URL of upstream distfiles. Defaults to `http://distcache.freebsd.org/ports-distfiles`. |
 | `FBSD_PORTS_JOBS`               | Defaults to `1`.                                                                               |
+
+### ghcup
+
+[![ghcup](https://img.shields.io/docker/image-size/ustcmirror/ghcup/latest)](https://hub.docker.com/r/ustcmirror/ghcup "ghcup")
+[![ghcup](https://img.shields.io/docker/pulls/ustcmirror/ghcup)](https://hub.docker.com/r/ustcmirror/ghcup "ghcup")
+
+ghcup does not have outstanding configuration options. See also [stackage](#stackage) on replacing the Hackage repository.
 
 ### github-release
 
