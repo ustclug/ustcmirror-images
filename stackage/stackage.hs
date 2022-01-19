@@ -139,7 +139,7 @@ download url path sha force = do
 
 updateChannels :: FilePath -> IO ()
 updateChannels  basePath =
-    mapM_ loadChannel ["lts-haskell", "stackage-nightly"]
+    mapM_ loadChannel ["lts-haskell", "stackage-nightly", "stackage-snapshots"]
         where loadChannel channel = do
                   let destPath = basePath </> channel
                   exists <- doesDirectoryExist destPath
