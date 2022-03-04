@@ -82,7 +82,7 @@ class RemoteSite:
             traceback.print_exc()
             # We should exit whole program, because incomplete file list may let script delete existing files!
             # sys.exit(1)
-            os.kill(os.getpid(), signal.SIGINT)  # suicide
+            os._exit(1)  # suicide
             return
         if not r.ok:
             return
