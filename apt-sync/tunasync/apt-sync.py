@@ -23,11 +23,10 @@ APTSYNC_USER_AGENT = os.getenv("APTSYNC_USER_AGENT", "APT-Mirror-Tool/1.0")
 requests.utils.default_user_agent = lambda: APTSYNC_USER_AGENT
 
 OS_TEMPLATE = {
-    'ubuntu-current': ["xenial", "bionic", "eoan", "focal"],
     'ubuntu-lts': ["xenial", "bionic", "focal"],
-    'debian-current': ["jessie", "stretch", "buster"],
-    'debian-latest2': ["stretch", "buster"],
-    'debian-latest': ["buster"],
+    'debian-current': ["jessie", "stretch", "buster", "bullseye"],
+    'debian-latest2': ["buster", "bullseye"],
+    'debian-latest': ["bullseye"],
 }
 MAX_RETRY=int(os.getenv('MAX_RETRY', '3'))
 DOWNLOAD_TIMEOUT=int(os.getenv('DOWNLOAD_TIMEOUT', '1800'))
