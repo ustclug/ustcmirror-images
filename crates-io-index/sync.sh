@@ -7,6 +7,8 @@
 # ENVS:
 # CRATES_PROXY=
 # CRATES_GITMSG=
+# CRATES_GITMAIL=
+# CRATES_GITNAME=
 
 is_empty() {
     [[ -z $(ls -A "$1" 2>/dev/null) ]]
