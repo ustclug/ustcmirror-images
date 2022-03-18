@@ -8,6 +8,10 @@
 # CRATES_PROXY=
 # CRATES_GITMSG=
 
+is_empty() {
+    [[ -z $(ls -A "$1" 2>/dev/null) ]]
+}
+
 set -e
 [[ -n $DEBUG ]] && set -x
 
@@ -34,7 +38,7 @@ EOF
 # crates.io-index has a custom ensure_redirect logic
 # so now we don't use gitsync here.
 
-if [[ -d $TO ]]; then
+if ! is_empty "$TO"; then
     cd "$TO"
     git fetch origin
     git reset --hard origin/master
