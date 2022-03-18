@@ -23,6 +23,7 @@
     - [ghcup](#ghcup)
     - [github-release](#github-release)
     - [gitsync](#gitsync)
+    - [google-repo](#google-repo)
     - [gsutil-rsync](#gsutil-rsync)
     - [hackage](#hackage)
     - [homebrew-bottles](#homebrew-bottles)
@@ -248,6 +249,17 @@ To specified the repo list to sync, you can:
 | `GITSYNC_BRANCH` | Defaults to `master:master`.              |
 | `GITSYNC_REMOTE` | Defaults to `origin`.                     |
 | `GITSYNC_BITMAP` | Enable bitmap index. Defaults to `false`. |
+
+### google-repo
+
+[![google-repo](https://img.shields.io/docker/image-size/ustcmirror/google-repo/latest)](https://hub.docker.com/r/ustcmirror/google-repo "google-repo")
+[![google-repo](https://img.shields.io/docker/pulls/ustcmirror/google-repo)](https://hub.docker.com/r/ustcmirror/google-repo "google-repo")
+
+A script for syncing projects (especially AOSP) using Google's `repo` tool.
+
+| Parameter  | Description                                                                  |
+| ---------- | ---------------------------------------------------------------------------- |
+| `UPSTREAM` | Upstream URL. Defaults to `https://android.googlesource.com/mirror/manifest` |
 
 ### gsutil-rsync
 
