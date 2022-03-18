@@ -18,7 +18,7 @@ set -e
 CRATES_PROXY="${CRATES_PROXY:-https://crates-io.proxy.ustclug.org/api/v1/crates}"
 CRATES_GITMSG="${CRATES_GITMSG:-Redirect to USTC Mirrors}"
 CRATES_GITMAIL="${CRATES_GITMAIL:-lug AT ustc.edu.cn}"
-CRATES_GITNAME="${CRATES_GITNAME:mirror}"
+CRATES_GITNAME="${CRATES_GITNAME:-mirror}"
 
 ensure_redirect() {
     pushd "$TO"
