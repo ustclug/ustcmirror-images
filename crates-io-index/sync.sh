@@ -32,7 +32,7 @@ ensure_redirect() {
 }
 EOF
         git add config.json
-        git -c user.name "$CRATES_GITNAME" -c user.email "$CRATES_GITMAIL" commit -qm "$CRATES_GITMSG"
+        git -c user.name="$CRATES_GITNAME" -c user.email="$CRATES_GITMAIL" commit -qm "$CRATES_GITMSG"
     fi
     popd
 }
