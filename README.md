@@ -14,6 +14,7 @@
     - [aptsync](#aptsync)
     - [apt-sync](#apt-sync)
     - [archvsync](#archvsync)
+    - [crates-io-index](#crates-io-index)
     - [debian-cd](#debian-cd)
     - [docker-ce](#docker-ce)
     - [fedora](#fedora)
@@ -129,6 +130,20 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | Parameter     | Description                                    |
 | ------------- | ---------------------------------------------- |
 | `IGNORE_LOCK` | Purge lockfiles at first. Defaults to `false`. |
+
+### crates-io-index
+
+[![crates-io-index](https://img.shields.io/docker/image-size/ustcmirror/crates-io-index/latest)](https://hub.docker.com/r/ustcmirror/crates-io-index "crates-io-index")
+[![crates-io-index](https://img.shields.io/docker/pulls/ustcmirror/crates-io-index)](https://hub.docker.com/r/ustcmirror/crates-io-index "crates-io-index")
+
+A dedicated script to sync <https://github.com/rust-lang/crates.io-index>.
+
+| Parameter        | Description                                                                                                |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| `CRATES_PROXY`   | The URL that crates will be redirected to. Defaults to `https://crates-io.proxy.ustclug.org/api/v1/crates` |
+| `CRATES_GITMSG`  | The commit message of `config.json`. Defaults to `Redirect to USTC Mirrors`                                |
+| `CRATES_GITMAIL` | `user.email` when committing `config.json`. Defaults to `lug AT ustc.edu.cn`                               |
+| `CRATES_GITNAME` | `user.name` when committing `config.json`. Defaults to `mirror`                                            |
 
 ### debian-cd
 
