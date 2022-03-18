@@ -138,10 +138,12 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 
 A dedicated script to sync <https://github.com/rust-lang/crates.io-index>.
 
-| Parameter       | Description                                                                                                |
-| --------------- | ---------------------------------------------------------------------------------------------------------- |
-| `CRATES_PROXY`  | The URL that crates will be redirected to. Defaults to `https://crates-io.proxy.ustclug.org/api/v1/crates` |
-| `CRATES_GITMSG` | The commit message of `config.json`. Defaults to `Redirect to USTC Mirrors`                                |
+| Parameter        | Description                                                                                                |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| `CRATES_PROXY`   | The URL that crates will be redirected to. Defaults to `https://crates-io.proxy.ustclug.org/api/v1/crates` |
+| `CRATES_GITMSG`  | The commit message of `config.json`. Defaults to `Redirect to USTC Mirrors`                                |
+| `CRATES_GITMAIL` | `user.email` when committing `config.json`. Defaults to `lug AT ustc.edu.cn`                               |
+| `CRATES_GITNAME` | `user.name` when committing `config.json`. Defaults to `mirror`                                            |
 
 ### debian-cd
 
