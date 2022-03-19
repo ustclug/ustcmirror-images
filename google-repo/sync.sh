@@ -10,8 +10,8 @@ PATH=/usr/local/bin:$PATH
 cd "$TO"
 
 # Check if repo has been initialized
-echo "initalizing repo"
 if [[ ! -d "$TO"/.repo ]]; then
+    echo "initalizing repo"
     repo init -u "$UPSTREAM" --mirror
 fi
 
