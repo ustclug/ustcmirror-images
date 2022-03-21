@@ -14,9 +14,13 @@ function pull_hackage () {
     cd $TO
 
     rm index.tar.gz || true &> /dev/null
+    rm index-00.tar.gz || true &> /dev/null
 
     echo "Download latest index ..."
     wget "$HACKAGE_BASE_URL/01-index.tar.gz" -O index.tar.gz &> /dev/null
+
+    echo "Download latest legacy (00-index) index ..."
+    wget "$HACKAGE_BASE_URL/00-index.tar.gz" -O index-00.tar.gz &> /dev/null
 
     # download extra json files
     extra_json=("mirrors.json" "root.json" "snapshot.json" "timestamp.json")
@@ -72,7 +76,7 @@ function pull_hackage () {
     done
 
     cp index.tar.gz 01-index.tar.gz
-    ln -sf 01-index.tar.gz 00-index.tar.gz
+    mv index-00.tar.gz 00-index.tar.gz
 }
 
 function download_pkg () {
