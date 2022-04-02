@@ -1,4 +1,6 @@
-remote-repo: mirrors.ustc.edu.cn:http://mirrors.ustc.edu.cn/hackage/
+repository mirrors.ustc.edu.cn
+  url: http://mirrors.ustc.edu.cn/hackage/
+  secure: True
 
 
 remote-repo-cache: /root/.cabal/packages
