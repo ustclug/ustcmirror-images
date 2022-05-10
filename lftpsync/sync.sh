@@ -12,6 +12,7 @@
 #LFTPSYNC_PATH=
 #LFTPSYNC_EXCLUDE=
 #LFTPSYNC_JOBS=
+#LFTPSYNC_EXTRA_SET=
 
 LFTPSYNC_MAX_JOBS=32  # count of processors on mirrors2
 
@@ -26,6 +27,7 @@ set -eu
 LFTPSYNC_PATH=${LFTPSYNC_PATH:-}
 LFTPSYNC_JOBS="${LFTPSYNC_JOBS:-$(getconf _NPROCESSORS_ONLN)}"
 LFTPSYNC_EXCLUDE="${LFTPSYNC_EXCLUDE:- -X .~tmp~/}"
+LFTPSYNC_EXTRA_SET=${LFTPSYNC_EXTRA_SET:-}
 BIND_ADDRESS="${BIND_ADDRESS:-}"
 
 if [ "$LFTPSYNC_JOBS" -gt "$LFTPSYNC_MAX_JOBS" ]; then
@@ -42,6 +44,12 @@ if [[ -n $BIND_ADDRESS ]]; then
         commands+="set net:socket-bind-ipv4 $BIND_ADDRESS;"
         commands+="set dns:order \"inet inet6\";"
     fi
+fi
+
+if [[ ! -z "$LFTPSYNC_EXTRA_SET" ]]; then
+  commands+=$LFTPSYNC_EXTRA_SET
+
+  [[ "${LFTPSYNC_EXTRA_SET: -1}" != ";" ]] && commands+=";"
 fi
 
 commands+="open $LFTPSYNC_HOST;"

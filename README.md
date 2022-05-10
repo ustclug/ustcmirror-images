@@ -309,12 +309,13 @@ A new solution to sync Julia general registry (using `StorageMirrorServer.jl`). 
 [![lftpsync](https://img.shields.io/docker/image-size/ustcmirror/lftpsync/latest)](https://hub.docker.com/r/ustcmirror/lftpsync "lftpsync")
 [![lftpsync](https://img.shields.io/docker/pulls/ustcmirror/lftpsync)](https://hub.docker.com/r/ustcmirror/lftpsync "lftpsync")
 
-| Parameter          | Description                                     |
-| ------------------ | ----------------------------------------------- |
-| `LFTPSYNC_HOST`    | The hostname of the remote server.              |
-| `LFTPSYNC_PATH`    | The destination path on the remote server.      |
-| `LFTPSYNC_EXCLUDE` | Files to be excluded. Defaults to `-X .~tmp~/`. |
-| `LFTPSYNC_JOBS`    | Defaults to `$(getconf _NPROCESSORS_ONLN)`.     |
+| Parameter            | Description                                                                             |
+|----------------------|-----------------------------------------------------------------------------------------|
+| `LFTPSYNC_HOST`      | The hostname of the remote server.                                                      |
+| `LFTPSYNC_PATH`      | The destination path on the remote server.                                              |
+| `LFTPSYNC_EXCLUDE`   | Files to be excluded. Defaults to `-X .~tmp~/`.                                         |
+| `LFTPSYNC_JOBS`      | Defaults to `$(getconf _NPROCESSORS_ONLN)`.                                             |
+| `LFTPSYNC_EXTRA_SET` | Extra `set` options for lftp (ie. `set sftp:connect-program "ssh -axi <keyfile>";`) |
 
 ### nix-channels
 
