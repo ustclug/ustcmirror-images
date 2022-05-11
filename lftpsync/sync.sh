@@ -12,7 +12,8 @@
 #LFTPSYNC_PATH=
 #LFTPSYNC_EXCLUDE=
 #LFTPSYNC_JOBS=
-#LFTPSYNC_EXTRA_SET=
+#LFTPSYNC_EXTRA_COMMANDS=
+#LFTPSYNC_EXTRA_MIRROR_ARGS=
 
 LFTPSYNC_MAX_JOBS=32  # count of processors on mirrors2
 
@@ -27,7 +28,8 @@ set -eu
 LFTPSYNC_PATH=${LFTPSYNC_PATH:-}
 LFTPSYNC_JOBS="${LFTPSYNC_JOBS:-$(getconf _NPROCESSORS_ONLN)}"
 LFTPSYNC_EXCLUDE="${LFTPSYNC_EXCLUDE:- -X .~tmp~/}"
-LFTPSYNC_EXTRA_SET=${LFTPSYNC_EXTRA_SET:-}
+LFTPSYNC_EXTRA_COMMANDS="${LFTPSYNC_EXTRA_COMMANDS:-}"
+LFTPSYNC_EXTRA_MIRROR_ARGS="${LFTPSYNC_EXTRA_MIRROR_ARGS:-}"
 BIND_ADDRESS="${BIND_ADDRESS:-}"
 
 if [ "$LFTPSYNC_JOBS" -gt "$LFTPSYNC_MAX_JOBS" ]; then
@@ -46,15 +48,13 @@ if [[ -n $BIND_ADDRESS ]]; then
     fi
 fi
 
-if [[ ! -z "$LFTPSYNC_EXTRA_SET" ]]; then
-  commands+=$LFTPSYNC_EXTRA_SET
-
-  [[ "${LFTPSYNC_EXTRA_SET: -1}" != ";" ]] && commands+=";"
+if [[ ! -z "$LFTPSYNC_EXTRA_COMMANDS" ]]; then
+  commands+="$LFTPSYNC_EXTRA_COMMANDS;"
 fi
 
 commands+="open $LFTPSYNC_HOST;"
 commands+="lcd $TO;"
-commands+="mirror --verbose --use-cache -aec --parallel=$LFTPSYNC_JOBS $LFTPSYNC_EXCLUDE"
+commands+="mirror --verbose --use-cache -aec $LFTPSYNC_EXTRA_MIRROR_ARGS --parallel=$LFTPSYNC_JOBS $LFTPSYNC_EXCLUDE"
 
 if [[ -n $LFTPSYNC_PATH ]]; then
     commands+=" $LFTPSYNC_PATH"
