@@ -504,7 +504,7 @@ sub find_translation_files_in_release
 
     unless ( open STREAM, "<$release_path" )
     {
-        warn( "Failed to open Release file from " . $release_uri );
+        warn( "Failed to open Release file from " . $release_uri . " ($release_path $!)" );
         return;
     }
 
@@ -650,7 +650,7 @@ sub find_dep11_files_in_release
 
     unless ( open STREAM, "<$release_path" )
     {
-        warn( "Failed to open Release file from " . $release_uri );
+        warn( "Failed to open Release file from " . $release_uri . " ($release_path $!)" );
         return;
     }
 
