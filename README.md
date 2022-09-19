@@ -290,13 +290,6 @@ A script for syncing projects (especially AOSP) using Google's `repo` tool.
 | `HOMEBREW_BOTTLES_JOBS` | Parallel jobs. Defaults to `1`      |
 | `TARGET_OS`             | `mac` or `linux`. Defaults to `mac` |
 
-### julia
-
-[![julia](https://img.shields.io/docker/image-size/ustcmirror/julia/latest)](https://hub.docker.com/r/ustcmirror/julia "julia")
-[![julia](https://img.shields.io/docker/pulls/ustcmirror/julia)](https://hub.docker.com/r/ustcmirror/julia "julia")
-
-Sync from official site. No parameters needed. (Deprecated)
-
 ### julia-storage
 
 [![julia-storage](https://img.shields.io/docker/image-size/ustcmirror/julia-storage/latest)](https://hub.docker.com/r/ustcmirror/julia-storage "julia-storage")
@@ -331,13 +324,6 @@ A new solution to sync Julia general registry (using `StorageMirrorServer.jl`). 
 | `NIX_MIRROR_THREADS`     | Number of threads to use to download in parallel. Defaults to 10                                                                                                  |
 | `NIX_MIRROR_RETAIN_DAYS` | Days to consider old versions as reachable. Defaults to 30. (The newest version of a release is always reachable)                                                 |
 | `NIX_MIRROR_DELETE_OLD`  | Whether to actually delete files in garbage collection. Set to `1` to delete and `0` to not delete. Defaults to `1`                                               |
-
-### nodesource
-
-[![nodesource](https://img.shields.io/docker/image-size/ustcmirror/nodesource/latest)](https://hub.docker.com/r/ustcmirror/nodesource "nodesource")
-[![nodesource](https://img.shields.io/docker/pulls/ustcmirror/nodesource)](https://hub.docker.com/r/ustcmirror/nodesource "nodesource")
-
-Sync from official site. No parameter needed.
 
 ### pypi
 
