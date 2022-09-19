@@ -1,5 +1,5 @@
 # Ref: https://github.com/tuna/tunasync-scripts/tree/master/dockerfiles/julia
-FROM ustcmirror/base:alpine-3.11
+FROM ustcmirror/base:alpine
 
 ENV JULIA_DEPOT_PATH="/opt/julia/depot"
 RUN apk update && apk add --no-cache curl python3 gnupg && \
