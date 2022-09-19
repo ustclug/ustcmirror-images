@@ -2,7 +2,7 @@
 FROM ustcmirror/base:alpine
 
 ENV JULIA_DEPOT_PATH="/opt/julia/depot"
-RUN apk update && apk add --no-cache curl python3 gnupg && \
+RUN apk update && apk add --no-cache curl python3 gnupg py3-pip && \
         pip3 install jill && jill install 1.5 --confirm && \
         ln -s /opt/julias/julia-1.5 /opt/julia && \
         julia -e 'using Pkg; pkg"add StorageMirrorServer@0.2.1"' && \
