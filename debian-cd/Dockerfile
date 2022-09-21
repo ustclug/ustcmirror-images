@@ -1,4 +1,4 @@
-FROM ustcmirror/base:alpine
+FROM ustcmirror/base:alpine-3.12
 LABEL maintainer "Jian Zeng <anonymousknight96 AT gmail.com>"
 VOLUME ["/debian"]
 ADD ["sync.sh", "pre-sync.sh", "prepare.sh", "/"]
