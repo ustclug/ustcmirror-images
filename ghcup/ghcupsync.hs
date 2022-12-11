@@ -1,5 +1,6 @@
 module Main where
 
+import           Control.Applicative
 import           Control.Concurrent
 import           Control.Concurrent.STM.TSem
 import           Control.Exception
@@ -69,7 +70,9 @@ minimumSupportedVersion = makeVersion [0, 0, 6]  -- Metadata format version
 
 parseVersionFromFileName :: FilePath -> Maybe Version
 parseVersionFromFileName filename = do
-  noPrefix <- stripPrefix "ghcup-" (takeBaseName filename)
+  let basename = takeBaseName filename
+  noPrefix <- stripPrefix "ghcup-prereleases-" basename
+          <|> stripPrefix "ghcup-" basename
   listToMaybe $ map fst . filter (\(_, rem) -> null rem) $ readP_to_S parseVersion noPrefix
 
 ------------------------------------------------------------------------
