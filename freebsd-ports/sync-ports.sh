@@ -36,7 +36,7 @@ download_and_check() {
 			fi
 		else
 			echo "[INFO] download $remote_url/$repopath"
-			$CURL_WRAP -m 600 -sSfRL -o $sum.tmp $remote_url/$repopath
+			$CURL_WRAP -m 600 -sSfRL -o $sum.tmp --globoff $remote_url/$repopath
 			if [[ $? -ne 0 ]]; then
 				echo "[WARN] download failed $remote_url/$repopath"
 				rm -f $sum.tmp
