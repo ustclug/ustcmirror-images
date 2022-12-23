@@ -243,12 +243,13 @@ To specified the repo list to sync, you can:
 [![gitsync](https://img.shields.io/docker/image-size/ustcmirror/gitsync/latest)](https://hub.docker.com/r/ustcmirror/gitsync "gitsync")
 [![gitsync](https://img.shields.io/docker/pulls/ustcmirror/gitsync)](https://hub.docker.com/r/ustcmirror/gitsync "gitsync")
 
-| Parameter        | Description                               |
-| ---------------- | ----------------------------------------- |
-| `GITSYNC_URL`    | Sets the url of upstream.                 |
-| `GITSYNC_BRANCH` | Defaults to `master:master`.              |
-| `GITSYNC_REMOTE` | Defaults to `origin`.                     |
-| `GITSYNC_BITMAP` | Enable bitmap index. Defaults to `false`. |
+| Parameter        | Description                                                                                                                               |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `GITSYNC_URL`    | Sets the url of upstream.                                                                                                                 |
+| `GITSYNC_BRANCH` | Defaults to `master:master`.                                                                                                              |
+| `GITSYNC_REMOTE` | Defaults to `origin`.                                                                                                                     |
+| `GITSYNC_BITMAP` | Enable bitmap index. Defaults to `false`.                                                                                                 |
+| `GITSYNC_MIRROR` | A shortcut to sync all branches and tags as if `GITSYNC_BRANCH='+refs/heads/*:refs/heads/*'`. `GITSYNC_BRANCH` is ignored when it is set. |
 
 ### google-repo
 
@@ -303,7 +304,7 @@ A new solution to sync Julia general registry (using `StorageMirrorServer.jl`). 
 [![lftpsync](https://img.shields.io/docker/pulls/ustcmirror/lftpsync)](https://hub.docker.com/r/ustcmirror/lftpsync "lftpsync")
 
 | Parameter                 | Description                                                                                                                |
-|---------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `LFTPSYNC_HOST`           | The hostname of the remote server.                                                                                         |
 | `LFTPSYNC_PATH`           | The destination path on the remote server.                                                                                 |
 | `LFTPSYNC_EXCLUDE`        | Files to be excluded. Defaults to `-X .~tmp~/`.                                                                            |
