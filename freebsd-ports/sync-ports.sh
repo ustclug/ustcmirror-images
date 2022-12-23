@@ -59,7 +59,7 @@ mkdir -p $TO/distfiles
 mkdir -p $BY_HASH || return 1
 
 # update meta
-TO=$TO/ports.git GITSYNC_URL=$FBSD_PORTS_INDEX_UPSTREAM GITSYNC_BRANCH=main:main /sync.sh
+TO=$TO/ports.git GITSYNC_URL=$FBSD_PORTS_INDEX_UPSTREAM GITSYNC_BRANCH=main:main GITSYNC_BITMAP=true /sync.sh
 if [[ $? -ne 0 ]]; then
 	echo "[FATAL] download meta-data failed."
 	exit 1
