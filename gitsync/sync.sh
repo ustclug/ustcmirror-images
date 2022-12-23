@@ -22,7 +22,7 @@ GITSYNC_REMOTE="${GITSYNC_REMOTE:-origin}"
 GITSYNC_BRANCH="${GITSYNC_BRANCH:-master:master}"
 GITSYNC_BITMAP="${GITSYNC_BITMAP:-false}"
 
-is_empty "$TO" && git clone -v --progress --bare "$GITSYNC_URL" "$TO"
+is_empty "$TO" && git clone -v --progress --mirror "$GITSYNC_URL" "$TO"
 
 cd "$TO" || exit 1
 git fetch "$GITSYNC_REMOTE" "$GITSYNC_BRANCH" -v --progress --tags
