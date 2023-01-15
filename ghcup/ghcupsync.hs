@@ -167,7 +167,7 @@ garbageCollect basedir mdpaths = do
   keep <- foldMap f mdpaths
 
   -- List all local files and remove unused files
-  let keepAnyway = ["ghcup-metadata.tmp", "ghcup-metadata", "sh"]
+  let keepAnyway = ["ghcup-metadata.tmp", "ghcup-metadata", "sh", "downloads.haskell.org/~ghcup", "downloads.haskell.org/ghcup"]
   files <- listDirectoryRecursive basedir
   for_ files $ \file ->
     unless (file `Set.member` keep || any (`isPrefixOf` file) keepAnyway) $ do
