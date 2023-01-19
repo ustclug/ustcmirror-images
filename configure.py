@@ -169,8 +169,16 @@ class Builder():
                     prev = 'origin/master'
             print('prev: {}'.format(prev))
             print('current: {}'.format(current))
-            differ = Differ(prev, current)
-            to_build = self._dep_tree.find_updated_images(differ.changed)
+            # check if we want to force rebuild all images
+            # for example: trigger emergency security upgrade
+            # or when we are trying to upgrade base images in a PR
+            # currently when base is not changed in commits_range, it will be fetched from DockerHub instead of being rebuilt in a PR
+            current_msg = subprocess.check_output(["git", "log", current, "--oneline", "-1"])
+            if b"force_rebuild" in current_msg:
+                to_build = self._dep_tree.enum_all()
+            else:
+                differ = Differ(prev, current)
+                to_build = self._dep_tree.find_updated_images(differ.changed)
 
         for dst, base in to_build:
             encoded_dst = encode_tag(dst)
