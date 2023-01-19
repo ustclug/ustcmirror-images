@@ -6,7 +6,7 @@ import Data.Aeson.Types     (ToJSON)
 import Data.Maybe           (isNothing, fromJust)
 import qualified Data.Map.Strict as M
 import qualified Data.ByteString.Lazy as BS
-import qualified Data.HashMap.Lazy as HM
+import qualified Data.Aeson.KeyMap as KM
 import qualified Data.Text as T
 import System.IO                (readFile, writeFile)
 import System.Exit              (ExitCode(..))
@@ -221,13 +221,13 @@ syncStack basePath = do
     let (Object latestInfo) = case A.decode text of
                          Just o -> o :: Value
                          _ -> error "decode latest fail!"
-    let (Just (Bool prerelease)) = HM.lookup "prerelease" latestInfo
-    let (Just (Array assets)) = HM.lookup "assets" latestInfo
+    let (Just (Bool prerelease)) = KM.lookup "prerelease" latestInfo
+    let (Just (Array assets)) = KM.lookup "assets" latestInfo
     unless prerelease (syncAssets assets)
     where syncAssets = mapM_ syncAsset
           syncAsset assetValue = do
               let (Object asset) = assetValue
-              let (Just (String url)) = HM.lookup "browser_download_url" asset
+              let (Just (String url)) = KM.lookup "browser_download_url" asset
               download (T.unpack url)
                        (basePath </> "stack")
                        ("", "")
