@@ -38,6 +38,10 @@ RETAIN_DAYS = float(os.getenv('NIX_MIRROR_RETAIN_DAYS', 30))
 STORE_DIR = 'store'
 RELEASES_DIR = 'releases'
 
+# Only fetching releases (step 1)
+# update_channels() and garbage_collect() will not be executed
+RELEASES_ONLY = os.getenv('NIX_MIRROR_RELEASES_ONLY', '0') == '1'
+
 # Channels that have not updated since migration to Netlify [1] are assumed to
 # be too old and defunct.
 #
@@ -435,7 +439,10 @@ def garbage_collect():
 
 if __name__ == '__main__':
     channels = clone_channels()
-    update_channels(channels)
-    garbage_collect()
+    if not RELEASES_ONLY:
+        update_channels(channels)
+        garbage_collect()
+    else:
+        logging.info("Mode set to 'Releases only', not updating binary cache and garbage collecting")
     if failure:
         sys.exit(1)

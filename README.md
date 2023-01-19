@@ -14,13 +14,16 @@
     - [aptsync](#aptsync)
     - [apt-sync](#apt-sync)
     - [archvsync](#archvsync)
+    - [crates-io-index](#crates-io-index)
     - [debian-cd](#debian-cd)
     - [docker-ce](#docker-ce)
     - [fedora](#fedora)
     - [freebsd-pkg](#freebsd-pkg)
     - [freebsd-ports](#freebsd-ports)
+    - [ghcup](#ghcup)
     - [github-release](#github-release)
     - [gitsync](#gitsync)
+    - [google-repo](#google-repo)
     - [gsutil-rsync](#gsutil-rsync)
     - [hackage](#hackage)
     - [homebrew-bottles](#homebrew-bottles)
@@ -129,6 +132,20 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 | ------------- | ---------------------------------------------- |
 | `IGNORE_LOCK` | Purge lockfiles at first. Defaults to `false`. |
 
+### crates-io-index
+
+[![crates-io-index](https://img.shields.io/docker/image-size/ustcmirror/crates-io-index/latest)](https://hub.docker.com/r/ustcmirror/crates-io-index "crates-io-index")
+[![crates-io-index](https://img.shields.io/docker/pulls/ustcmirror/crates-io-index)](https://hub.docker.com/r/ustcmirror/crates-io-index "crates-io-index")
+
+A dedicated script to sync <https://github.com/rust-lang/crates.io-index>.
+
+| Parameter        | Description                                                                                                |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| `CRATES_PROXY`   | The URL that crates will be redirected to. Defaults to `https://crates-io.proxy.ustclug.org/api/v1/crates` |
+| `CRATES_GITMSG`  | The commit message of `config.json`. Defaults to `Redirect to USTC Mirrors`                                |
+| `CRATES_GITMAIL` | `user.email` when committing `config.json`. Defaults to `lug AT ustc.edu.cn`                               |
+| `CRATES_GITNAME` | `user.name` when committing `config.json`. Defaults to `mirror`                                            |
+
 ### debian-cd
 
 [![debian-cd](https://img.shields.io/docker/image-size/ustcmirror/debian-cd/latest)](https://hub.docker.com/r/ustcmirror/debian-cd "debian-cd")
@@ -197,6 +214,13 @@ Notice: BIND_ADDRESS is only added for `curl` in freebsd-ports. Make sure that g
 | `FBSD_PORTS_DISTFILES_UPSTREAM` | Set the URL of upstream distfiles. Defaults to `http://distcache.freebsd.org/ports-distfiles`. |
 | `FBSD_PORTS_JOBS`               | Defaults to `1`.                                                                               |
 
+### ghcup
+
+[![ghcup](https://img.shields.io/docker/image-size/ustcmirror/ghcup/latest)](https://hub.docker.com/r/ustcmirror/ghcup "ghcup")
+[![ghcup](https://img.shields.io/docker/pulls/ustcmirror/ghcup)](https://hub.docker.com/r/ustcmirror/ghcup "ghcup")
+
+ghcup does not have outstanding configuration options. See also [stackage](#stackage) on replacing the Hackage repository.
+
 ### github-release
 
 [![github-release](https://img.shields.io/docker/image-size/ustcmirror/github-release/latest)](https://hub.docker.com/r/ustcmirror/github-release "github-release")
@@ -219,12 +243,24 @@ To specified the repo list to sync, you can:
 [![gitsync](https://img.shields.io/docker/image-size/ustcmirror/gitsync/latest)](https://hub.docker.com/r/ustcmirror/gitsync "gitsync")
 [![gitsync](https://img.shields.io/docker/pulls/ustcmirror/gitsync)](https://hub.docker.com/r/ustcmirror/gitsync "gitsync")
 
-| Parameter        | Description                               |
-| ---------------- | ----------------------------------------- |
-| `GITSYNC_URL`    | Sets the url of upstream.                 |
-| `GITSYNC_BRANCH` | Defaults to `master:master`.              |
-| `GITSYNC_REMOTE` | Defaults to `origin`.                     |
-| `GITSYNC_BITMAP` | Enable bitmap index. Defaults to `false`. |
+| Parameter        | Description                                                                                                                               |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `GITSYNC_URL`    | Sets the url of upstream.                                                                                                                 |
+| `GITSYNC_BRANCH` | Defaults to `master:master`.                                                                                                              |
+| `GITSYNC_REMOTE` | Defaults to `origin`.                                                                                                                     |
+| `GITSYNC_BITMAP` | Enable bitmap index. Defaults to `false`.                                                                                                 |
+| `GITSYNC_MIRROR` | A shortcut to sync all branches and tags as if `GITSYNC_BRANCH='+refs/heads/*:refs/heads/*'`. `GITSYNC_BRANCH` is ignored when it is set. |
+
+### google-repo
+
+[![google-repo](https://img.shields.io/docker/image-size/ustcmirror/google-repo/latest)](https://hub.docker.com/r/ustcmirror/google-repo "google-repo")
+[![google-repo](https://img.shields.io/docker/pulls/ustcmirror/google-repo)](https://hub.docker.com/r/ustcmirror/google-repo "google-repo")
+
+A script for syncing projects (especially AOSP) using Google's `repo` tool.
+
+| Parameter  | Description                                                                  |
+| ---------- | ---------------------------------------------------------------------------- |
+| `UPSTREAM` | Upstream URL. Defaults to `https://android.googlesource.com/mirror/manifest` |
 
 ### gsutil-rsync
 
@@ -255,13 +291,6 @@ To specified the repo list to sync, you can:
 | `HOMEBREW_BOTTLES_JOBS` | Parallel jobs. Defaults to `1`      |
 | `TARGET_OS`             | `mac` or `linux`. Defaults to `mac` |
 
-### julia
-
-[![julia](https://img.shields.io/docker/image-size/ustcmirror/julia/latest)](https://hub.docker.com/r/ustcmirror/julia "julia")
-[![julia](https://img.shields.io/docker/pulls/ustcmirror/julia)](https://hub.docker.com/r/ustcmirror/julia "julia")
-
-Sync from official site. No parameters needed. (Deprecated)
-
 ### julia-storage
 
 [![julia-storage](https://img.shields.io/docker/image-size/ustcmirror/julia-storage/latest)](https://hub.docker.com/r/ustcmirror/julia-storage "julia-storage")
@@ -274,12 +303,14 @@ A new solution to sync Julia general registry (using `StorageMirrorServer.jl`). 
 [![lftpsync](https://img.shields.io/docker/image-size/ustcmirror/lftpsync/latest)](https://hub.docker.com/r/ustcmirror/lftpsync "lftpsync")
 [![lftpsync](https://img.shields.io/docker/pulls/ustcmirror/lftpsync)](https://hub.docker.com/r/ustcmirror/lftpsync "lftpsync")
 
-| Parameter          | Description                                     |
-| ------------------ | ----------------------------------------------- |
-| `LFTPSYNC_HOST`    | The hostname of the remote server.              |
-| `LFTPSYNC_PATH`    | The destination path on the remote server.      |
-| `LFTPSYNC_EXCLUDE` | Files to be excluded. Defaults to `-X .~tmp~/`. |
-| `LFTPSYNC_JOBS`    | Defaults to `$(getconf _NPROCESSORS_ONLN)`.     |
+| Parameter                 | Description                                                                                                                |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `LFTPSYNC_HOST`           | The hostname of the remote server.                                                                                         |
+| `LFTPSYNC_PATH`           | The destination path on the remote server.                                                                                 |
+| `LFTPSYNC_EXCLUDE`        | Files to be excluded. Defaults to `-X .~tmp~/`.                                                                            |
+| `LFTPSYNC_JOBS`           | Defaults to `$(getconf _NPROCESSORS_ONLN)`.                                                                                |
+| `LFTPSYNC_MIRROR_ARGS`    | Parameters for mirror command. Defaults to `--verbose --use-cache -aec`                                                    |
+| `LFTPSYNC_EXTRA_COMMANDS` | Extra commands for lftp (ie. `set sftp:connect-program "ssh -axi <keyfile>";`). Will be executed before opening connection |
 
 ### nix-channels
 
@@ -294,13 +325,6 @@ A new solution to sync Julia general registry (using `StorageMirrorServer.jl`). 
 | `NIX_MIRROR_THREADS`     | Number of threads to use to download in parallel. Defaults to 10                                                                                                  |
 | `NIX_MIRROR_RETAIN_DAYS` | Days to consider old versions as reachable. Defaults to 30. (The newest version of a release is always reachable)                                                 |
 | `NIX_MIRROR_DELETE_OLD`  | Whether to actually delete files in garbage collection. Set to `1` to delete and `0` to not delete. Defaults to `1`                                               |
-
-### nodesource
-
-[![nodesource](https://img.shields.io/docker/image-size/ustcmirror/nodesource/latest)](https://hub.docker.com/r/ustcmirror/nodesource "nodesource")
-[![nodesource](https://img.shields.io/docker/pulls/ustcmirror/nodesource)](https://hub.docker.com/r/ustcmirror/nodesource "nodesource")
-
-Sync from official site. No parameter needed.
 
 ### pypi
 
@@ -349,6 +373,7 @@ ref:
 | `RSYNC_TIMEOUT`       | Defaults to `14400`.                                             |
 | `RSYNC_SPARSE`        | Defaults to `true`.                                              |
 | `RSYNC_DELAY_UPDATES` | Defaults to `true`.                                              |
+| `RSYNC_DELETE_DELAY`  | Defaults to `true`. Use `--delete-delay` rather than `--delete`  |
 | `RSYNC_MAXDELETE`     | Maximum number of files that can be removed. Defaults to `4000`. |
 | `RSYNC_RSH`           | Specify the remote shell, e.g. `ssh -i /path/to/key`.            |
 

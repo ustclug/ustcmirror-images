@@ -36,7 +36,7 @@ download_and_check() {
 			fi
 		else
 			echo "[INFO] download $remote_url/$repopath"
-			$CURL_WRAP -m 600 -sSfRL -o $sum.tmp $remote_url/$repopath
+			$CURL_WRAP -m 600 -sSfRL -o $sum.tmp --globoff $remote_url/$repopath
 			if [[ $? -ne 0 ]]; then
 				echo "[WARN] download failed $remote_url/$repopath"
 				rm -f $sum.tmp
@@ -59,7 +59,7 @@ mkdir -p $TO/distfiles
 mkdir -p $BY_HASH || return 1
 
 # update meta
-TO=$TO/ports.git GITSYNC_URL=$FBSD_PORTS_INDEX_UPSTREAM GITSYNC_BRANCH=main /sync.sh
+TO=$TO/ports.git GITSYNC_URL=$FBSD_PORTS_INDEX_UPSTREAM GITSYNC_MIRROR=true GITSYNC_BITMAP=true /sync.sh
 if [[ $? -ne 0 ]]; then
 	echo "[FATAL] download meta-data failed."
 	exit 1
@@ -68,7 +68,8 @@ fi
 # prepare meta list
 cd $tmpdir
 git -C $TO/ports.git archive HEAD | tar -xf -
-find . -name distinfo -print0 | parallel -j 8 -0 --xargs cat | awk '-F[() ]' '/^SHA256/ {print $NF,$3}' | sort -k 2 | uniq > $meta
+# remove tailing space each line to make awk correctly work
+find . -name distinfo -print0 | parallel -j 8 -0 --xargs cat | sed -E 's/\s+$//g' | awk '-F[() ]' '/^SHA256/ {print $NF,$3}' | sort -k 2 | uniq > $meta
 
 # clean unfinished downloads
 find $TO/distfiles -name '*.tmp' -delete
@@ -78,8 +79,16 @@ export PARALLEL_SHELL=/bin/bash
 export -f download_and_check
 remote_url=$FBSD_PORTS_DISTFILES_UPSTREAM local_dir=$TO/distfiles parallel --line-buffer -j $FBSD_PORTS_JOBS --pipepart -a $meta download_and_check
 
-# generate index arvhive
+# generate index archive
 git -C $TO/ports.git archive --format=tar.gz -o $TO/ports.tar.gz HEAD
+
+# sanity check before removing old distfiles
+awk '{print $2}' $meta > /tmp/check1
+awk '{print $2}' $meta | sort > /tmp/check2
+if ! cmp -s /tmp/check1 /tmp/check2; then
+	echo "[FATAL] sanity check failed: metafile is not correctly lexically sorted."
+	exit 1
+fi
 
 # remove old distfile
 cd $TO/distfiles
