@@ -38,12 +38,12 @@ class Git():
         return invoke(['git', 'rev-parse', '--verify', branch]) == 0
 
     @staticmethod
-    def fetch_master_branch():
+    def fetch_branch(branch):
         invoke([
             'git', 'config', 'remote.origin.fetch',
             '+refs/heads/*:refs/remotes/origin/*'
         ])
-        invoke(['git', 'fetch', 'origin', 'master:master'], fail_fast=True)
+        invoke(['git', 'fetch', 'origin', f'{branch}:{branch}'], fail_fast=True)
 
     @staticmethod
     def is_current_branch(branch):
@@ -72,6 +72,11 @@ class NaryTree():
             t = q.pop(0)
             encoded = encode_tag(t.name)
             img = encoded.split('.')[0]
+            if img == "base":
+                # special treatment of base images
+                # as they are the only images that contain multiple tags
+                # encoded names look like "base.alpine-edge", "base.debian", etc.
+                img = f"base/Dockerfile.{encoded.split('.')[1]}"
             if not check(img):
                 q.extend(t._children.values())
             else:
@@ -151,7 +156,10 @@ class Builder():
             commit_from = os.environ.get('COMMIT_FROM', '')
             commit_to = os.environ.get('COMMIT_TO', '')
             if event_name == "pull_request":
-                commit_from = os.environ.get('GITHUB_BASE_REF', 'origin/master')
+                commit_from = os.environ.get('GITHUB_BASE_REF', 'master')
+                if not Git.branch_exists(commit_from):
+                    print(f'fetching {commit_from} branch...')
+                    Git.fetch_branch(commit_from)
             if commit_from and commit_to:
                 commits_range = "{}...{}".format(commit_from, commit_to)
             else:
@@ -159,7 +167,7 @@ class Builder():
                 # need to add master branch back
                 if not Git.branch_exists('master'):
                     print('fetching master branch...')
-                    Git.fetch_master_branch()
+                    Git.fetch_branch('master')
                 commits_range = 'origin/master...HEAD'
             print('COMMITS_RANGE: {}'.format(commits_range))
             prev, current = commits_range.split('...')
