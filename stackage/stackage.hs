@@ -156,13 +156,12 @@ updateChannels  basePath =
 
 stackSetup :: FilePath -> FilePath -> IO ()
 stackSetup bp setupPath = do
-    jr <- catch (decodeFile setupPath)
-                (\e -> do putStrLn (prettyPrintParseException e)
-                          return Nothing) :: IO (Maybe StackSetup)
-
-    when (isNothing jr) (error "Parse setup yaml failure")
-
-    let r = fromJust jr
+    jr <- decodeFileEither setupPath :: IO (Either ParseException StackSetup)
+    r <- case jr of
+        Left err -> do
+            putStrLn (prettyPrintParseException err)
+            error "Parse setup yaml failure"
+        Right obj -> return obj
 
     let (StackSetup stack exe dll pgit msys2 ghc ghcjs) = r
 
