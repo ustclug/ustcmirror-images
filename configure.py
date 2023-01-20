@@ -128,9 +128,8 @@ class Builder():
     def finish(self):
         root = self._dep_tree
         self._build_tree(root)
-        is_cron = os.environ.get('GITHUB_EVENT_NAME', '') == 'schedule'
         date_tag = os.environ.get('DATE_TAG', '') != ''
-        self._generate(is_cron=is_cron, force_date_tag=date_tag)
+        self._generate(force_date_tag=date_tag)
 
     def _build_tree(self, root):
         for derived in self._bases[root.name]:
@@ -139,15 +138,20 @@ class Builder():
                 sub = root.get_child(derived)
                 self._build_tree(sub)
 
-    def _generate(self, *, is_cron, force_date_tag):
+    def _generate(self, *, force_date_tag):
         all_targets = set()
+        event_name = os.environ.get('GITHUB_EVENT_NAME', '')
+        is_cron = event_name == 'schedule'
 
-        if is_cron:
+        if is_cron or event_name == "workflow_dispatch":
+            # cron job, or manual "build all" trigger
             to_build = self._dep_tree.enum_all()
         else:
             # GitHub Actions ($COMMIT_FROM & $COMMIT_TO)
             commit_from = os.environ.get('COMMIT_FROM', '')
             commit_to = os.environ.get('COMMIT_TO', '')
+            if event_name == "pull_request":
+                commit_from = os.environ.get('GITHUB_BASE_REF', 'origin/master')
             if commit_from and commit_to:
                 commits_range = "{}...{}".format(commit_from, commit_to)
             else:
@@ -169,16 +173,8 @@ class Builder():
                     prev = 'origin/master'
             print('prev: {}'.format(prev))
             print('current: {}'.format(current))
-            # check if we want to force rebuild all images
-            # for example: trigger emergency security upgrade
-            # or when we are trying to upgrade base images in a PR
-            # currently when base is not changed in commits_range, it will be fetched from DockerHub instead of being rebuilt in a PR
-            current_msg = subprocess.check_output(["git", "log", current, "--oneline", "-1"])
-            if b"force_rebuild" in current_msg:
-                to_build = self._dep_tree.enum_all()
-            else:
-                differ = Differ(prev, current)
-                to_build = self._dep_tree.find_updated_images(differ.changed)
+            differ = Differ(prev, current)
+            to_build = self._dep_tree.find_updated_images(differ.changed)
 
         for dst, base in to_build:
             encoded_dst = encode_tag(dst)
