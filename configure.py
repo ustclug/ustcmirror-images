@@ -38,12 +38,12 @@ class Git():
         return invoke(['git', 'rev-parse', '--verify', branch]) == 0
 
     @staticmethod
-    def fetch_master_branch():
+    def fetch_branch(branch):
         invoke([
             'git', 'config', 'remote.origin.fetch',
             '+refs/heads/*:refs/remotes/origin/*'
         ])
-        invoke(['git', 'fetch', 'origin', 'master:master'], fail_fast=True)
+        invoke(['git', 'fetch', 'origin', f'{branch}:{branch}'], fail_fast=True)
 
     @staticmethod
     def is_current_branch(branch):
@@ -72,6 +72,11 @@ class NaryTree():
             t = q.pop(0)
             encoded = encode_tag(t.name)
             img = encoded.split('.')[0]
+            if img == "base":
+                # special treatment of base images
+                # as they are the only images that contain multiple tags
+                # encoded names look like "base.alpine-edge", "base.debian", etc.
+                img = f"base/Dockerfile.{encoded.split('.')[1]}"
             if not check(img):
                 q.extend(t._children.values())
             else:
@@ -128,9 +133,8 @@ class Builder():
     def finish(self):
         root = self._dep_tree
         self._build_tree(root)
-        is_cron = os.environ.get('GITHUB_EVENT_NAME', '') == 'schedule'
         date_tag = os.environ.get('DATE_TAG', '') != ''
-        self._generate(is_cron=is_cron, force_date_tag=date_tag)
+        self._generate(force_date_tag=date_tag)
 
     def _build_tree(self, root):
         for derived in self._bases[root.name]:
@@ -139,15 +143,23 @@ class Builder():
                 sub = root.get_child(derived)
                 self._build_tree(sub)
 
-    def _generate(self, *, is_cron, force_date_tag):
+    def _generate(self, *, force_date_tag):
         all_targets = set()
+        event_name = os.environ.get('GITHUB_EVENT_NAME', '')
+        is_cron = event_name == 'schedule'
 
-        if is_cron:
+        if is_cron or event_name == "workflow_dispatch":
+            # cron job, or manual "build all" trigger
             to_build = self._dep_tree.enum_all()
         else:
             # GitHub Actions ($COMMIT_FROM & $COMMIT_TO)
             commit_from = os.environ.get('COMMIT_FROM', '')
             commit_to = os.environ.get('COMMIT_TO', '')
+            if event_name == "pull_request":
+                commit_from = os.environ.get('GITHUB_BASE_REF', 'master')
+                if not Git.branch_exists(commit_from):
+                    print(f'fetching {commit_from} branch...')
+                    Git.fetch_branch(commit_from)
             if commit_from and commit_to:
                 commits_range = "{}...{}".format(commit_from, commit_to)
             else:
@@ -155,7 +167,7 @@ class Builder():
                 # need to add master branch back
                 if not Git.branch_exists('master'):
                     print('fetching master branch...')
-                    Git.fetch_master_branch()
+                    Git.fetch_branch('master')
                 commits_range = 'origin/master...HEAD'
             print('COMMITS_RANGE: {}'.format(commits_range))
             prev, current = commits_range.split('...')

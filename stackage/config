@@ -1,12 +1,124 @@
-remote-repo: mirrors.ustc.edu.cn:http://mirrors.ustc.edu.cn/hackage/
+-- This is the configuration file for the 'cabal' command line tool.
+--
+-- The available configuration options are listed below.
+-- Some of them have default values listed.
+--
+-- Lines (like this one) beginning with '--' are comments.
+-- Be careful with spaces and indentation because they are
+-- used to indicate layout for nested sections.
+--
+-- This config file was generated using the following versions
+-- of Cabal and cabal-install:
+-- Cabal library version: 3.0.1.0
+-- cabal-install version: 3.0.0.0
 
 
+repository mirrors.ustc.edu.cn
+  url: http://mirrors.ustc.edu.cn/hackage/
+  -- secure: True
+  -- root-keys:
+  -- key-threshold: 3
+
+-- default-user-config:
+-- require-sandbox: False
+-- ignore-sandbox: False
+-- ignore-expiry: False
+-- http-transport:
+-- nix: False
 remote-repo-cache: /root/.cabal/packages
+-- local-repo:
+-- logs-dir: /root/.cabal/logs
 world-file: /root/.cabal/world
+-- store-dir:
+-- verbose: 1
+-- compiler: ghc
+-- cabal-file:
+-- with-compiler:
+-- with-hc-pkg:
+-- program-prefix:
+-- program-suffix:
+-- library-vanilla: True
+-- library-profiling:
+-- shared:
+-- static:
+-- executable-dynamic: False
+-- executable-static: False
+-- profiling:
+-- executable-profiling:
+-- profiling-detail:
+-- library-profiling-detail:
+-- optimization: True
+-- debug-info: False
+-- library-for-ghci:
+-- split-sections: False
+-- split-objs: False
+-- executable-stripping:
+-- library-stripping:
+-- configure-option:
+-- user-install: True
+-- package-db:
+-- flags:
+-- extra-include-dirs:
+-- deterministic:
+-- cid:
+-- extra-lib-dirs:
+-- extra-framework-dirs:
 extra-prog-path: /root/.cabal/bin
+-- instantiate-with:
+-- tests: False
+-- coverage: False
+-- library-coverage:
+-- exact-configuration: False
+-- benchmarks: False
+-- relocatable: False
+-- response-files:
+-- allow-depending-on-private-libs:
+-- cabal-lib-version:
+-- constraint:
+-- preference:
+-- solver: modular
+-- allow-older: False
+-- allow-newer: False
+-- write-ghc-environment-files:
+-- documentation: False
+-- doc-index-file: $datadir/doc/$arch-$os-$compiler/index.html
+-- target-package-db:
+-- max-backjumps: 4000
+-- reorder-goals: False
+-- count-conflicts: True
+-- minimize-conflict-set: False
+-- independent-goals: False
+-- shadow-installed-packages: False
+-- strong-flags: False
+-- allow-boot-library-installs: False
+-- reject-unconstrained-dependencies: none
+-- reinstall: False
+-- avoid-reinstalls: False
+-- force-reinstalls: False
+-- upgrade-dependencies: False
+-- index-state:
+-- root-cmd:
+-- symlink-bindir:
 build-summary: /root/.cabal/logs/build.log
+-- build-log:
 remote-build-reporting: anonymous
+-- report-planning-failure: False
+-- per-component: True
+-- one-shot: False
+-- run-tests:
 jobs: $ncpus
+-- keep-going: False
+-- offline: False
+-- project-file:
+-- lib: False
+-- package-env:
+-- overwrite-policy:
+-- install-method:
+installdir: /root/.cabal/bin
+-- username:
+-- password:
+-- password-command:
+-- builddir:
 
 haddock
   -- keep-temp-files: False
@@ -21,8 +133,19 @@ haddock
   -- internal: False
   -- css:
   -- hyperlink-source: False
+  -- quickjump: False
   -- hscolour-css:
   -- contents-location:
+
+init
+  -- interactive: False
+  -- cabal-version: 1.10
+  -- license: BSD3
+  -- tests:
+  -- test-dir:
+  -- language: Haskell2010
+  -- application-dir:
+  -- source-dir:
 
 install-dirs user
   -- prefix: /root/.cabal
@@ -76,8 +199,6 @@ program-locations
   -- hscolour-location:
   -- jhc-location:
   -- ld-location:
-  -- lhc-location:
-  -- lhc-pkg-location:
   -- pkg-config-location:
   -- runghc-location:
   -- strip-location:
@@ -106,8 +227,6 @@ program-default-options
   -- hscolour-options:
   -- jhc-options:
   -- ld-options:
-  -- lhc-options:
-  -- lhc-pkg-options:
   -- pkg-config-options:
   -- runghc-options:
   -- strip-options:
