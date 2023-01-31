@@ -30,6 +30,29 @@ if [[ ! $repo_ret == 0 ]]; then
     echo "[warn]: repo sync returns an unzero exit code: $repo_ret"
 fi
 echo "start repacking git objects"
-find -name "*.git" -exec bash -c "pushd {} && git repack -abd" \;
+
+# Here, we tolerate the existence of some fragmented packs
+# to make AOSP sync faster.
+gc() {
+    pushd "$1"
+    object_num=$(find objects/ -name '*.pack' | wc -l)
+    if [[ $object_num -gt 4 ]]; then
+        object_size=$(du -sk objects/pack/ | awk '{print $1}')
+        if [[ $object_size -gt 100000 || $object_num -gt 20 ]]; then
+            # only pack when we have more than 4 packs and 
+            # the size of pack dir is larger than 100MB, or we have more than 20 packs
+            echo "repacking $1: $object_num packs, $object_size KB"
+            git repack -abd
+        else
+            echo "skipping $1: $object_num packs, $object_size KB"
+        fi
+    else
+        echo "skipping $1: $object_num packs"
+    fi
+};
+
+export -f gc;
+
+find . -name "*.git" -exec bash -c 'gc "$0"' {} \;
 
 exit $repo_ret
