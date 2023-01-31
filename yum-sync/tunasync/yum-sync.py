@@ -204,7 +204,7 @@ def main():
         for name, url, working_dir in combination_os_comp(arch):
             working_dir.mkdir(parents=True, exist_ok=True)
             conf = tempfile.NamedTemporaryFile("w", suffix=".conf")
-            conf.write('''
+            conf.write(f'''
 [main]
 keepcache=0
 cachedir={cache_dir}
