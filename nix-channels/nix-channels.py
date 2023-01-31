@@ -38,6 +38,10 @@ RETAIN_DAYS = float(os.getenv('NIX_MIRROR_RETAIN_DAYS', 30))
 STORE_DIR = 'store'
 RELEASES_DIR = 'releases'
 
+# Only fetching releases (step 1)
+# update_channels() and garbage_collect() will not be executed
+RELEASES_ONLY = os.getenv('NIX_MIRROR_RELEASES_ONLY', '0') == '1'
+
 # Channels that have not updated since migration to Netlify [1] are assumed to
 # be too old and defunct.
 #
@@ -287,7 +291,8 @@ def update_channels(channels):
 
         logging.info(f'    - {len(paths)} paths listed')
 
-        todo = {}
+        todo = []
+        seen_paths = set()
         channel_failure = False
 
         # Batch paths to avoid E2BIG
@@ -306,12 +311,19 @@ def update_channels(channels):
                 channel_failure = True
                 logging.info(f'    - Error status: {process.returncode}')
                 break
+            else:
+                infos = json.loads(process.stdout)
+                for info in infos:
+                    ha = hash_part(info['path'])
+                    one_todo = [
+                        name
+                        for name in [info['url'], f'{ha}.narinfo']
+                        if name not in seen_paths
+                    ]
+                    seen_paths.update(one_todo)
+                    if one_todo:
+                        todo.append(one_todo)
         else:
-            infos = json.loads(process.stdout)
-            for info in infos:
-                ha = hash_part(info['path'])
-                todo[ha] = (info['url'], f'{ha}.narinfo')
-
             logging.info(f'    - {len(todo)} paths to download')
 
             digits = len(str(len(todo)))
@@ -333,7 +345,7 @@ def update_channels(channels):
             with ThreadPoolExecutor(max_workers=THREADS) as executor:
                 results = executor.map(
                     lambda job: try_mirror(*job),
-                    enumerate(todo.values())
+                    enumerate(todo)
                 )
                 if not all(results):
                     channel_failure = True
@@ -361,6 +373,9 @@ def garbage_collect():
     alive = set()
 
     for release in (working_dir / RELEASES_DIR).iterdir():
+        # This release never finished downloading
+        if not (release / 'binary-cache-url').exists(): continue
+
         channel = release.name.split('@')[0]
         date_str = (release / '.released-time').read_text()
         released_date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
@@ -424,7 +439,10 @@ def garbage_collect():
 
 if __name__ == '__main__':
     channels = clone_channels()
-    update_channels(channels)
-    garbage_collect()
+    if not RELEASES_ONLY:
+        update_channels(channels)
+        garbage_collect()
+    else:
+        logging.info("Mode set to 'Releases only', not updating binary cache and garbage collecting")
     if failure:
         sys.exit(1)

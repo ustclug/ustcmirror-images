@@ -1,0 +1,7 @@
+ghcupsync 的工作流程:
+
+1. clone ghcup metadata git repo 到一个临时目录中.
+2. 过滤出所有受支持的元数据文件 (版本 >= 0.0.6)
+3. 下载这些元数据文件中的链接. 链接 schema://host/path 被转换成 https://mirrors.ustc.edu.cn/ghcup/host/path
+4. 遍历本地文件，删除元数据中没有引用的文件
+5. 将元数据中的链接按上述方式替换成镜像地址

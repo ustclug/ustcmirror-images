@@ -139,7 +139,7 @@ download url path sha force = do
 
 updateChannels :: FilePath -> IO ()
 updateChannels  basePath =
-    mapM_ loadChannel ["lts-haskell", "stackage-nightly"]
+    mapM_ loadChannel ["lts-haskell", "stackage-nightly", "stackage-snapshots", "stackage-content"]
         where loadChannel channel = do
                   let destPath = basePath </> channel
                   exists <- doesDirectoryExist destPath
@@ -149,7 +149,7 @@ updateChannels  basePath =
                              putStrLn $ printf "Pull %s finish" channel
                      else do putStrLn $ printf "%s channel doesn't exist, start first clone" channel
                              callProcess "git" ["clone", "--depth", "1",
-                                            "https://github.com/fpco/" ++ channel ++ ".git",
+                                            "https://github.com/commercialhaskell/" ++ channel ++ ".git",
                                             destPath]
                              putStrLn $ printf "Clone %s finish" channel
 

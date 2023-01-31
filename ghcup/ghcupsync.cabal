@@ -1,0 +1,23 @@
+cabal-version:      2.4
+name:               ghcupsync
+version:            0.1.0.0
+tested-with:
+    ghc == 9.0.2
+executable ghcupsync
+    main-is:          ghcupsync.hs
+    build-depends:    aeson
+                    , base
+                    , containers
+                    , directory
+                    , filepath
+                    , lens
+                    , lens-aeson
+                    , network-uri
+                    , split
+                    , stm
+                    , text
+                    , typed-process
+                    , unix
+                    , yaml
+    default-language: Haskell2010
+    default-extensions: ScopedTypeVariables OverloadedStrings

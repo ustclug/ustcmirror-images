@@ -1,0 +1,36 @@
+name: Build
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ '*' ]
+
+  workflow_dispatch: {}
+  schedule:
+    - cron: '30 23 1 * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+          fetch-depth: 50  # the same value as Travis CI
+
+      - name: Run build script
+        run: |
+          python3 ./configure.py
+          make all
+        env:
+          COMMIT_FROM: ${{ github.event.before }}
+          COMMIT_TO: ${{ github.event.after }}
+
+      - name: Deploy
+        if: "github.ref == 'refs/heads/master' && github.repository == 'ustclug/ustcmirror-images'"
+        run: ./push.sh
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
