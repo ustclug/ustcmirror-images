@@ -289,7 +289,6 @@ A script for syncing projects (especially AOSP) using Google's `repo` tool.
 | Parameter               | Description                         |
 | ----------------------- | ----------------------------------- |
 | `HOMEBREW_BOTTLES_JOBS` | Parallel jobs. Defaults to `1`      |
-| `TARGET_OS`             | `mac` or `linux`. Defaults to `mac` |
 
 ### julia-storage
 

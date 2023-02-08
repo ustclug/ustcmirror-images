@@ -1,20 +1,12 @@
 #!/usr/bin/env bash
 
 HOMEBREW_BOTTLES_JOBS=${HOMEBREW_BOTTLES_JOBS:-1}
-TARGET_OS=${TARGET_OS:-mac}
 
 source /curl-helper.sh
 
 FORMULA_JSON=$(mktemp)
 BOTTLES=$(mktemp)
-if [[ $TARGET_OS == mac ]]; then
-	URL_JSON=https://formulae.brew.sh/api/formula.json
-elif [[ $TARGET_OS == linux ]]; then
-	URL_JSON=https://formulae.brew.sh/api/formula-linux.json
-else
-	echo "[ERROR] unsupported target."
-	exit 2
-fi
+URL_JSON=https://formulae.brew.sh/api/formula.json
 
 curl_init
 
@@ -29,12 +21,6 @@ bottles-json < $FORMULA_JSON > $BOTTLES
 if [[ $? -ne 0 ]]; then
     echo "[FATAL] json parsing failed."
     exit 4
-fi
-
-# JSON API mixing linuxbrew bottles and homebrew bottles
-# we need to filtering linux one
-if [[ $TARGET_OS == linux ]]; then
-	sed -i '/x86_64_linux/!d' $BOTTLES
 fi
 
 # GitHub Packages auth info
