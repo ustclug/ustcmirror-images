@@ -48,13 +48,13 @@ enum Mode {
 
 #[derive(ValueEnum, Clone)]
 enum Type {
-    Forumla,
+    Formula,
     Cask,
 }
 
 #[derive(Parser)]
 struct Cli {
-    /// Choose from get-bottles-metadata (default) or extract-json
+    /// Parse metadata or extract json to api folder
     #[arg(long, value_enum, default_value_t=Mode::GetBottlesMetadata)]
     mode: Mode,
 
@@ -62,8 +62,8 @@ struct Cli {
     #[arg(long)]
     folder: Option<PathBuf>,
 
-    /// Choose from formula (default) or cask
-    #[arg(long, value_enum, default_value_t=Type::Forumla)]
+    /// Formula and cask json has different attribute for its name ("name" or "token")
+    #[arg(long, value_enum, default_value_t=Type::Formula)]
     type_: Type,
 }
 
@@ -141,7 +141,7 @@ fn main() {
                 .collect::<HashSet<_>>();
             for f in f.as_array().unwrap() {
                 let fname = match cli.type_ {
-                    Type::Forumla => &f["name"],
+                    Type::Formula => &f["name"],
                     Type::Cask => &f["token"],
                 };
                 let fname = fname.as_str().unwrap();
