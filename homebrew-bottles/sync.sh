@@ -68,7 +68,7 @@ parallel --line-buffer -j $HOMEBREW_BOTTLES_JOBS --pipepart -a $BOTTLES download
 # clean up outdated bottles
 removal_list=$(mktemp)
 cd $local_dir
-comm -23 <(find . -type f -not -path "$by_hash_pattern" | sed "s|^./||" | sort) <(awk '{print $3}' $BOTTLES | sort) | tee $removal_list | xargs rm -f
+comm -23 <(find . -type f -not -path "$by_hash_pattern" -not -path "./api/*" | sed "s|^./||" | sort) <(awk '{print $3}' $BOTTLES | sort) | tee $removal_list | xargs rm -f
 sed 's/^/[INFO] remove /g' $removal_list
 
 # clean empty dir. If enerything work as expect, this command would do nothing
