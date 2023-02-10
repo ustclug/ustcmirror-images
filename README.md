@@ -30,6 +30,7 @@
     - [julia](#julia)
     - [julia-storage](#julia-storage)
     - [lftpsync](#lftpsync)
+    - [misc](#misc)
     - [nix-channels](#nix-channels)
     - [nodesource](#nodesource)
     - [pypi](#pypi)
@@ -310,6 +311,24 @@ A new solution to sync Julia general registry (using `StorageMirrorServer.jl`). 
 | `LFTPSYNC_JOBS`           | Defaults to `$(getconf _NPROCESSORS_ONLN)`.                                                                                |
 | `LFTPSYNC_MIRROR_ARGS`    | Parameters for mirror command. Defaults to `--verbose --use-cache -aec`                                                    |
 | `LFTPSYNC_EXTRA_COMMANDS` | Extra commands for lftp (ie. `set sftp:connect-program "ssh -axi <keyfile>";`). Will be executed before opening connection |
+
+### misc
+
+[![misc](https://img.shields.io/docker/image-size/ustcmirror/misc/latest)](https://hub.docker.com/r/ustcmirror/misc "misc")
+[![misc](https://img.shields.io/docker/pulls/ustcmirror/misc)](https://hub.docker.com/r/ustcmirror/misc "misc")
+
+| Parameter | Description |
+| --------- | ----------- |
+| `DOWNLOAD_LINKS`    | Files to be downloaded by wget. Format is `filename.sh http://example.com/filename.sh` seperates by newlines |
+
+Download seperate, small files inconvenient for other sync containers.
+
+Example of `DOWNLOAD_LINKS`:
+
+```bash
+brew-install.sh https://github.com/Homebrew/install/raw/HEAD/install.sh
+rustup-install.sh https://sh.rustup.rs/
+```
 
 ### nix-channels
 
