@@ -17,18 +17,17 @@ from pathlib import Path
 from typing import List, Dict, Tuple
 
 # Set BindIP
-# https://stackoverflow.com/a/12590625
+# https://stackoverflow.com/a/70772914
 APTSYNC_BINDIP = os.getenv("BIND_ADDRESS", "")
 if APTSYNC_BINDIP:
-    import socket
-    real_create_conn = socket.create_connection
+    import urllib3
+    real_create_conn = urllib3.util.connection.create_connection
 
-    def set_src_addr(*args):
-        address, timeout = args[0], args[1]
+    def set_src_addr(address, timeout, *args, **kw):
         source_address = (APTSYNC_BINDIP, 0)
-        return real_create_conn(address, timeout, source_address)
-    
-    socket.create_connection = set_src_addr
+        return real_create_conn(address, timeout=timeout, source_address=source_address)
+
+    urllib3.util.connection.create_connection = set_src_addr
 
 import requests
 
