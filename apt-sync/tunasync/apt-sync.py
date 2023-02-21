@@ -14,11 +14,25 @@ import lzma
 import time
 from email.utils import parsedate_to_datetime
 from pathlib import Path
-from typing import List, Dict, Set, Tuple, IO
+from typing import List, Dict, Tuple
+
+# Set BindIP
+# https://stackoverflow.com/a/12590625
+APTSYNC_BINDIP = os.getenv("BIND_ADDRESS", "")
+if APTSYNC_BINDIP:
+    import socket
+    real_create_conn = socket.create_connection
+
+    def set_src_addr(*args):
+        address, timeout = args[0], args[1]
+        source_address = (APTSYNC_BINDIP, 0)
+        return real_create_conn(address, timeout, source_address)
+    
+    socket.create_connection = set_src_addr
 
 import requests
 
-
+# Set user agent
 APTSYNC_USER_AGENT = os.getenv("APTSYNC_USER_AGENT", "APT-Mirror-Tool/1.0")
 requests.utils.default_user_agent = lambda: APTSYNC_USER_AGENT
 
@@ -28,8 +42,8 @@ OS_TEMPLATE = {
     'debian-latest2': ["buster", "bullseye"],
     'debian-latest': ["bullseye"],
 }
-MAX_RETRY=int(os.getenv('MAX_RETRY', '3'))
-DOWNLOAD_TIMEOUT=int(os.getenv('DOWNLOAD_TIMEOUT', '1800'))
+MAX_RETRY = int(os.getenv('MAX_RETRY', '3'))
+DOWNLOAD_TIMEOUT = int(os.getenv('DOWNLOAD_TIMEOUT', '1800'))
 REPO_SIZE_FILE = os.getenv('REPO_SIZE_FILE', '')
 
 pattern_os_template = re.compile(r"@\{(.+)\}")
