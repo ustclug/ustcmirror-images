@@ -168,16 +168,16 @@ def main():
                         help='download repodata files instead of generating them')
     args = parser.parse_args()
 
-    if '-' in args.os_version:
+    if '@' == args.os_version[0]:
+        # current only allow to have one @-prefixed os version
+        os_list = OS_TEMPLATE[args.os_version[1:]]
+    elif '-' in args.os_version:
         dash = args.os_version.index('-')
         os_list = [ str(i) for i in range(
             int(args.os_version[:dash]),
             1+int(args.os_version[dash+1:])) ]
     elif ',' in args.os_version:
         os_list = args.os_version.split(",")
-    elif '@' == args.os_version[0]:
-        # current only allow to have one @-prefixed os version
-        os_list = OS_TEMPLATE[args.os_version[1:]]
     else:
         os_list = [args.os_version]
     check_args("os_version", os_list)
