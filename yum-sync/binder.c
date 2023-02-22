@@ -30,6 +30,16 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
     if (!BIND_ADDRESS || (addr->sa_family != AF_INET && addr->sa_family != AF_INET6)) {
         return orig_bind(sockfd, addr, addrlen);
     } else {
+        int type;
+        unsigned int len = sizeof(type);
+        if (getsockopt(sockfd, SOL_SOCKET, SO_TYPE, &type, &len)) {
+            // if getsockopt() failed, don't go further
+            return orig_bind(sockfd, addr, addrlen);
+        }
+        if (type != SOCK_STREAM) {
+            // here we only want to handle TCP sockets
+            return orig_bind(sockfd, addr, addrlen);
+        }
         if (is_ipv6) {
             struct sockaddr_in6 addr_in6;
 	        memset(&addr_in6, 0, sizeof(addr_in6));
