@@ -29,6 +29,15 @@ REPO_SIZE_FILE = os.getenv('REPO_SIZE_FILE', '')
 DOWNLOAD_TIMEOUT=int(os.getenv('DOWNLOAD_TIMEOUT', '1800'))
 REPO_STAT = {}
 
+OS_TEMPLATE = {
+    'centos-current': ["7"],
+    'rhel-current': ["7", "8", "9"],
+    # https://en.wikipedia.org/wiki/Fedora_Linux_release_history
+    'fedora-current': ["36", "37"],
+    # https://en.wikipedia.org/wiki/OpenSUSE#Version_history
+    'opensuse-current': ["15.4"],
+}
+
 def calc_repo_size(path: Path):
     dbfiles = path.glob('repodata/*primary.*')
     with tempfile.NamedTemporaryFile() as tmp:
@@ -166,6 +175,9 @@ def main():
             1+int(args.os_version[dash+1:])) ]
     elif ',' in args.os_version:
         os_list = args.os_version.split(",")
+    elif '@' == args.os_version[0]:
+        # current only allow to have one @-prefixed os version
+        os_list = OS_TEMPLATE[args.os_version[1:]]
     else:
         os_list = [args.os_version]
     check_args("os_version", os_list)
