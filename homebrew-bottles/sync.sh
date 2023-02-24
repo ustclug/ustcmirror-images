@@ -56,6 +56,8 @@ if [[ $? -ne 0 ]]; then
 fi
 mv "$FORMULA_JSON".tmp "$FORMULA_JSON"
 mv "$CASK_JSON".tmp "$CASK_JSON"
+mv "$FORMULA_JWS_JSON".tmp "$FORMULA_JWS_JSON"
+mv "$CASK_JWS_JSON".tmp "$CASK_JWS_JSON"
 
 # Step 2: Download bottles (formula only)
 # extract sha256, URL and file name from JSON result
