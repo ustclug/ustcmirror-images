@@ -27,6 +27,23 @@ if [[ $? -ne 0 ]]; then
 	echo "[FATAL] download cask meta-data failed."
 	exit 3
 fi
+
+# Why does homebrew enjoy introducing breaking changes again and again?
+FORMULA_JWS_JSON="$TO/api/formula.jws.json"
+CASK_JWS_JSON="$TO/api/cask.jws.json"
+FORMULA_JWS_URL_JSON=https://formulae.brew.sh/api/formula.jws.json
+CASK_JWS_URL_JSON=https://formulae.brew.sh/api/cask.jws.json
+$CURL_WRAP -sSL -o "$FORMULA_JWS_JSON".tmp "$FORMULA_JWS_URL_JSON"
+if [[ $? -ne 0 ]]; then
+	echo "[FATAL] download formula meta-data failed."
+	exit 7
+fi
+$CURL_WRAP -sSL -o "$CASK_JWS_JSON".tmp "$CASK_JWS_URL_JSON"
+if [[ $? -ne 0 ]]; then
+	echo "[FATAL] download cask meta-data failed."
+	exit 8
+fi
+
 bottles-json --mode extract-json --type formula --folder "$TO/api/formula" < "$FORMULA_JSON".tmp
 if [[ $? -ne 0 ]]; then
     echo "[FATAL] formula API json extracting failed."
