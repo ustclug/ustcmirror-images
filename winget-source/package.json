@@ -1,0 +1,15 @@
+{
+  "name": "winget-source",
+  "version": "1.0.0",
+  "description": "Sync with WinGet source repository.",
+  "main": "sync-repo.js",
+  "author": "YR Chen <stevapple@icloud.com>",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "async": "^3.2.4",
+    "jszip": "^3.10.1",
+    "node-fetch": "^3.3.0",
+    "sqlite3": "^5.1.4"
+  }
+}
