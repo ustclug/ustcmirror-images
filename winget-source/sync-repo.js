@@ -1,5 +1,6 @@
 import async from 'async'
 import sqlite3 from 'sqlite3'
+import { rm } from 'fs/promises'
 
 import {
     buildPathpartMap,
@@ -23,8 +24,13 @@ syncFile('source.msix').then(async _ => {
         db.all('SELECT pathpart FROM manifest', (error, rows) => {
             db.close();
             const uris = buildUriList(error, rows, pathparts);
-            const tasks = uris.map(uri => async () => { await syncFile(uri); return; });
-            async.parallelLimit(tasks, parallelLimit);
+            async.eachLimit(uris, parallelLimit, syncFile, (error) => {
+                rm(temp, { recursive: true });
+                if (error) {
+                    console.error(error);
+                    process.exit(-1);
+                }
+            });
         });
     });
 });
