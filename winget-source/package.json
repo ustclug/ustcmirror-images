@@ -1,7 +1,7 @@
 {
   "name": "winget-source",
   "version": "1.0.0",
-  "description": "Sync with WinGet source repository.",
+  "description": "Sync with pre-indexed WinGet source repository.",
   "main": "sync-repo.js",
   "author": "YR Chen <stevapple@icloud.com>",
   "license": "MIT",
