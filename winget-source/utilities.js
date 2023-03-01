@@ -1,15 +1,42 @@
-import crypto from 'crypto'
 import JSZip from 'jszip'
 import fetch from 'node-fetch'
 import os from 'os'
 import path from 'path'
 import process from 'process'
 import { existsSync } from 'fs'
-import { mkdir, mkdtemp, readFile, utimes, writeFile } from 'fs/promises'
+import { mkdir, mkdtemp, readFile, stat, utimes, writeFile } from 'fs/promises'
 
 const remote = process.env.WINGET_REPO_URL;
 const local = process.env.TO;
 const parallelLimit = parseInt(process.env.WINGET_REPO_JOBS ?? 8);
+
+/**
+ * @param {Response} response
+ *
+ * @returns {Date | undefined}
+ */
+function getLastModifiedDate(response) {
+    const lastModified = response.headers.get('Last-Modified');
+    if (lastModified) {
+        return new Date(Date.parse(lastModified));
+    } else {
+        return undefined;
+    }
+}
+
+/**
+ * @param {Response} response
+ *
+ * @returns {number}
+ */
+function getContentLength(response) {
+    const length = response.headers.get('Content-Length');
+    if (length) {
+        return parseInt(length);
+    } else {
+        return 0;
+    }
+}
 
 /**
  * @param {number} id
@@ -21,18 +48,6 @@ function resolvePathpart(id, pathparts) {
     const pathpart = pathparts.get(id);
     if (pathpart === undefined) return '';
     return path.posix.join(resolvePathpart(pathpart.parent, pathparts), pathpart.pathpart);
-}
-
-/**
- * @param {crypto.BinaryLike} buffer
- * @param {crypto.BinaryToTextEncoding} encoding
- *
- * @returns {string}
- */
-function computeMD5(buffer, encoding) {
-    const hash = crypto.createHash('md5');
-    hash.update(buffer, 'utf-8');
-    return hash.digest(encoding);
 }
 
 /**
@@ -127,11 +142,11 @@ export async function syncFile(uri) {
     await mkdir(path.dirname(localPath), { recursive: true });
     if (existsSync(localPath)) {
         const response = await fetch(remoteURL, { method: 'HEAD' });
-        const latestMD5 = response.headers.get('Content-MD5');
-        if (latestMD5) {
-            const buffer = await readFile(localPath);
-            const md5 = computeMD5(buffer, 'base64');
-            if (latestMD5 === md5) {
+        const lastModified = getLastModifiedDate(response);
+        const contentLength = getContentLength(response);
+        if (lastModified) {
+            const localFile = await stat(localPath);
+            if (localFile.mtime.getTime() == lastModified.getTime() && localFile.size == contentLength) {
                 console.info(`skipped ${uri} because it's up to date`);
                 return false;
             }
@@ -140,10 +155,9 @@ export async function syncFile(uri) {
     const response = await fetch(remoteURL);
     console.log(`downloaded ${uri}`);
     await writeFile(localPath, response.body);
-    const lastModified = response.headers.get('Last-Modified');
+    const lastModified = getLastModifiedDate(response);
     if (lastModified) {
-        const date = new Date(lastModified);
-        await utimes(localPath, date, date);
+        await utimes(localPath, lastModified, lastModified);
     }
     return true;
 }
