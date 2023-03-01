@@ -60,10 +60,10 @@ mv "$FORMULA_JWS_JSON".tmp "$FORMULA_JWS_JSON"
 mv "$CASK_JWS_JSON".tmp "$CASK_JWS_JSON"
 
 # create gz files to save bandwidth (with nginx gzip_static)
-gzip --keep "$FORMULA_JSON"
-gzip --keep "$CASK_JSON"
-gzip --keep "$FORMULA_JWS_JSON"
-gzip --keep "$CASK_JWS_JSON"
+gzip --keep --force "$FORMULA_JSON"
+gzip --keep --force "$CASK_JSON"
+gzip --keep --force "$FORMULA_JWS_JSON"
+gzip --keep --force "$CASK_JWS_JSON"
 
 # Step 2: Download bottles (formula only)
 # extract sha256, URL and file name from JSON result
