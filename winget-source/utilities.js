@@ -73,7 +73,7 @@ export function buildPathpartMap(error, rows) {
  *
  * @returns {string[]}
  */
-export function buildUriList(error, rows, pathparts) {
+export function buildURIList(error, rows, pathparts) {
     if (error) {
         console.error(error);
         process.exit(-1);
@@ -91,15 +91,15 @@ export function checkEnvironmentVariables() {
 
 /**
  * @param {fs.PathLike} msixPath
- * @param {fs.PathLike} tempDirectory
+ * @param {fs.PathLike} directory
  *
  * @returns {Promise<string>}
  */
-export async function exatractDBFromBundle(msixPath, tempDirectory) {
+export async function extractDatabaseFromBundle(msixPath, directory) {
     const bundle = await readFile(msixPath);
     const zip = await JSZip.loadAsync(bundle);
     const buffer = await zip.file(path.posix.join('Public', 'index.db')).async('Uint8Array');
-    const destination = path.join(tempDirectory, 'index.db');
+    const destination = path.join(directory, 'index.db');
     await writeFile(destination, buffer);
     return destination;
 }
