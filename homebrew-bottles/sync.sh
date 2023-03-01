@@ -17,12 +17,12 @@ CASK_URL_JSON=https://formulae.brew.sh/api/cask.json
 curl_init
 
 # Step 1: Download new API jsons and extract
-$CURL_WRAP -sSL -o "$FORMULA_JSON".tmp "$FORMULA_URL_JSON"
+$CURL_WRAP --compressed -sSL -o "$FORMULA_JSON".tmp "$FORMULA_URL_JSON"
 if [[ $? -ne 0 ]]; then
 	echo "[FATAL] download formula meta-data failed."
 	exit 2
 fi
-$CURL_WRAP -sSL -o "$CASK_JSON".tmp "$CASK_URL_JSON"
+$CURL_WRAP --compressed -sSL -o "$CASK_JSON".tmp "$CASK_URL_JSON"
 if [[ $? -ne 0 ]]; then
 	echo "[FATAL] download cask meta-data failed."
 	exit 3
@@ -33,12 +33,12 @@ FORMULA_JWS_JSON="$TO/api/formula.jws.json"
 CASK_JWS_JSON="$TO/api/cask.jws.json"
 FORMULA_JWS_URL_JSON=https://formulae.brew.sh/api/formula.jws.json
 CASK_JWS_URL_JSON=https://formulae.brew.sh/api/cask.jws.json
-$CURL_WRAP -sSL -o "$FORMULA_JWS_JSON".tmp "$FORMULA_JWS_URL_JSON"
+$CURL_WRAP --compressed -sSL -o "$FORMULA_JWS_JSON".tmp "$FORMULA_JWS_URL_JSON"
 if [[ $? -ne 0 ]]; then
 	echo "[FATAL] download formula meta-data failed."
 	exit 7
 fi
-$CURL_WRAP -sSL -o "$CASK_JWS_JSON".tmp "$CASK_JWS_URL_JSON"
+$CURL_WRAP --compressed -sSL -o "$CASK_JWS_JSON".tmp "$CASK_JWS_URL_JSON"
 if [[ $? -ne 0 ]]; then
 	echo "[FATAL] download cask meta-data failed."
 	exit 8
