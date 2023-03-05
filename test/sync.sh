@@ -12,4 +12,10 @@ if [[ -n $HAS_ERROR ]]; then
     exit 1
 fi
 
+if [[ -n $SLEEP_INFINITY ]]; then
+    echo Sleep forever
+    sleep infinity
+    exit 0
+fi
+
 exit 0
