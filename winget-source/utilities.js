@@ -119,7 +119,9 @@ export function getLocalPath(uri) {
  * @returns {URL}
  */
 export function getRemoteURL(uri) {
-    return new URL(`${remote}/${uri}`);
+    const remoteURL = new URL(remote);
+    remoteURL.pathname = path.posix.join(remoteURL.pathname, uri);
+    return remoteURL;
 }
 
 /**
