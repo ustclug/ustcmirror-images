@@ -12,12 +12,13 @@ import {
     syncFile
 } from './utilities.js'
 
-const { parallelLimit } = requireEnvironmentVariables();
+const { debugMode, parallelLimit } = requireEnvironmentVariables();
+const { Database } = debugMode ? sqlite3.verbose() : sqlite3;
 
 syncFile('source.msix').then(async _ => {
     const temp = await makeTempDirectory('winget-repo-');
     const database = await extractDatabaseFromBundle(getLocalPath('source.msix'), temp);
-    const db = new sqlite3.Database(database, sqlite3.OPEN_READONLY);
+    const db = new Database(database, sqlite3.OPEN_READONLY);
 
     db.all('SELECT * FROM pathparts', (error, rows) => {
         const pathparts = buildPathpartMap(error, rows);

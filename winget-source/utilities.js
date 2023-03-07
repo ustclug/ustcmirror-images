@@ -15,6 +15,9 @@ const local = process.env.TO;
 /** Maximum sync jobs to be executed in parallel. Defaults to 8. */
 const parallelLimit = parseInt(process.env.WINGET_REPO_JOBS ?? 8);
 
+/** Whether the debug mode is enabled. */
+const debugMode = process.env.DEBUG === 'true';
+
 /**
  * Get last modified date from HTTP response headers.
  *
@@ -102,11 +105,11 @@ export function buildURIList(error, rows, pathparts) {
  * @returns Environment variables to be used in the program.
  */
 export function requireEnvironmentVariables() {
-    if (!remote || !local || !parallelLimit) {
+    if (!local || !remote) {
         console.error("required environment variable(s) not set!");
         process.exit(-1);
     }
-    return { remote, local, parallelLimit };
+    return { debugMode, local, parallelLimit, remote };
 }
 
 /**

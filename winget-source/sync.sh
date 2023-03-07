@@ -11,8 +11,8 @@
 ## SET IN ENVIRONMENT VARIABLES
 #DEBUG=
 
-export NODE_ENV=production
-
 set -e
+
+[[ $DEBUG == true ]] && set -x
 
 exec node /sync-repo.js
