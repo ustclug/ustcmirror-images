@@ -38,6 +38,7 @@
     - [rsync](#rsync)
     - [rubygems](#rubygems)
     - [stackage](#stackage)
+    - [winget-source](#winget-source)
     - [yum-sync](#yum-sync)
   - [License](#license)
   - [Contributing](#contributing)
@@ -412,6 +413,18 @@ ref:
 Stackage doesn't need to specify upstream, but this mirror use cabal to install necessary Haskell packages. Replacing default mirror of cabal with faster one will speed up building process.
 
 Read the [user guide](https://www.haskell.org/cabal/users-guide/installing-packages.html#repository-specification) before writing preferred mirror to `config`
+
+### winget-source
+
+[![winget-source](https://img.shields.io/docker/image-size/ustcmirror/winget-source/latest)](https://hub.docker.com/r/ustcmirror/winget-source "winget-source")
+[![winget-source](https://img.shields.io/docker/pulls/ustcmirror/winget-source)](https://hub.docker.com/r/ustcmirror/winget-source "winget-source")
+
+A handy tool to sync pre-indexed [Windows Package Manager](https://github.com/microsoft/winget-cli) (aka. WinGet) sources.
+
+| Parameter             | Description                                                      |
+| --------------------- | ---------------------------------------------------------------- |
+| `WINGET_REPO_URL`     | Sets the URL of upstream.                                        |
+| `WINGET_REPO_JOBS`    | Parallel jobs. Defaults to 8.                                    |
 
 ### yum-sync
 
