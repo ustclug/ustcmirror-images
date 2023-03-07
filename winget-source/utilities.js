@@ -6,14 +6,21 @@ import process from 'process'
 import { existsSync } from 'fs'
 import { mkdir, mkdtemp, readFile, stat, utimes, writeFile } from 'fs/promises'
 
+/** The remote URL of a pre-indexed WinGet source repository. */
 const remote = process.env.WINGET_REPO_URL;
+
+/** The local path to serve as the root of WinGet source repository. */
 const local = process.env.TO;
+
+/** Maximum sync jobs to be executed in parallel. Defaults to 8. */
 const parallelLimit = parseInt(process.env.WINGET_REPO_JOBS ?? 8);
 
 /**
- * @param {Response} response
+ * Get last modified date from HTTP response headers.
  *
- * @returns {Date | undefined}
+ * @param {Response} response The HTTP `fetch` response to parse.
+ *
+ * @returns {Date | undefined} Last modified date derived from the response, if exists.
  */
 function getLastModifiedDate(response) {
     const lastModified = response.headers.get('Last-Modified');
@@ -25,9 +32,11 @@ function getLastModifiedDate(response) {
 }
 
 /**
- * @param {Response} response
+ * Get content length from HTTP response headers.
  *
- * @returns {number}
+ * @param {Response} response The HTTP `fetch` response to parse.
+ *
+ * @returns {number} Content length derived from the response, in bytes.
  */
 function getContentLength(response) {
     const length = response.headers.get('Content-Length');
@@ -39,10 +48,12 @@ function getContentLength(response) {
 }
 
 /**
- * @param {number} id
- * @param {Map<number, { parent: number, pathpart: string }>} pathparts
+ * Resolve path parts against the local storage.
  *
- * @returns {string}
+ * @param {number} id The ID of the target path part.
+ * @param {Map<number, { parent: number, pathpart: string }>} pathparts Path part storage built from the database.
+ *
+ * @returns {string} Full URI resolved from the given ID.
  */
 function resolvePathpart(id, pathparts) {
     const pathpart = pathparts.get(id);
@@ -51,10 +62,12 @@ function resolvePathpart(id, pathparts) {
 }
 
 /**
- * @param {Error?} error
- * @param {{ rowid: number, parent: number, pathpart: string }[]} rows
+ * Build a local storage for path parts from database query.
  *
- * @returns {Map<number, { parent: number, pathpart: string }>}
+ * @param {Error?} error Database error thrown from the query, if any.
+ * @param {{ rowid: number, parent: number, pathpart: string }[]} rows Rows returned by the query.
+ *
+ * @returns {Map<number, { parent: number, pathpart: string }>} In-memory path part storage to query against.
  */
 export function buildPathpartMap(error, rows) {
     if (error) {
@@ -67,11 +80,13 @@ export function buildPathpartMap(error, rows) {
 }
 
 /**
- * @param {Error?} error
- * @param {{ pathpart: string, [key: string]: string }[]} rows
- * @param {Map<number, { parent: number, pathpart: string }>} pathparts
+ * Build a list of all manifest URIs from database query.
  *
- * @returns {string[]}
+ * @param {Error?} error Database error thrown from the query, if any.
+ * @param {{ pathpart: string, [key: string]: string }[]} rows Rows returned by the query.
+ * @param {Map<number, { parent: number, pathpart: string }>} pathparts Path part storage built from the database.
+ *
+ * @returns {string[]} Manifest URIs to sync.
  */
 export function buildURIList(error, rows, pathparts) {
     if (error) {
@@ -81,19 +96,26 @@ export function buildURIList(error, rows, pathparts) {
     return rows.map(row => resolvePathpart(row.pathpart, pathparts));
 }
 
-export function checkEnvironmentVariables() {
+/**
+ * Check and return the required environment variables.
+ *
+ * @returns Environment variables to be used in the program.
+ */
+export function requireEnvironmentVariables() {
     if (!remote || !local || !parallelLimit) {
-        console.error("required envirenent variable(s) not set!");
+        console.error("required environment variable(s) not set!");
         process.exit(-1);
     }
     return { remote, local, parallelLimit };
 }
 
 /**
- * @param {fs.PathLike} msixPath
- * @param {fs.PathLike} directory
+ * Extract database file from the source bundle.
  *
- * @returns {Promise<string>}
+ * @param {fs.PathLike} msixPath Path of the MSIX bundle file.
+ * @param {fs.PathLike} directory Path of directory to save the file.
+ *
+ * @returns {Promise<string>} Path of the extracted `index.db` file.
  */
 export async function extractDatabaseFromBundle(msixPath, directory) {
     const bundle = await readFile(msixPath);
@@ -105,18 +127,22 @@ export async function extractDatabaseFromBundle(msixPath, directory) {
 }
 
 /**
- * @param {string} uri
+ * Get the local sync path of a manifest.
  *
- * @returns {string}
+ * @param {string} uri Manifest URI.
+ *
+ * @returns {string} Expected local path of the manifest file.
  */
 export function getLocalPath(uri) {
     return path.join(local, uri);
 }
 
 /**
- * @param {string} uri
+ * Get the remote URL of a manifest.
  *
- * @returns {URL}
+ * @param {string} uri Manifest URI.
+ *
+ * @returns {URL} Remote URL to get the manifest from.
  */
 export function getRemoteURL(uri) {
     const remoteURL = new URL(remote);
@@ -125,18 +151,22 @@ export function getRemoteURL(uri) {
 }
 
 /**
- * @param {string} prefix
+ * Create a unique temporary directory with given prefix.
  *
- * @returns {Promise<string>}
+ * @param {string} prefix Temporary directory name prefix. Must not contain path separators.
+ *
+ * @returns {Promise<string>} Path to the created temporary directory.
  */
 export async function makeTempDirectory(prefix) {
     return await mkdtemp(path.join(os.tmpdir(), prefix));
 }
 
 /**
- * @param {string} uri
+ * Sync a file with the remote server asynchronously.
  *
- * @returns {Promise<boolean>}
+ * @param {string} uri URI to sync.
+ *
+ * @returns {Promise<boolean>} If the file is new or updated.
  */
 export async function syncFile(uri) {
     const localPath = getLocalPath(uri);
@@ -155,7 +185,7 @@ export async function syncFile(uri) {
         }
     }
     const response = await fetch(remoteURL);
-    console.log(`downloaded ${uri}`);
+    console.log(`downloading ${uri}`);
     await writeFile(localPath, response.body);
     const lastModified = getLastModifiedDate(response);
     if (lastModified) {

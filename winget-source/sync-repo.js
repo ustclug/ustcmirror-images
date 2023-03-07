@@ -5,14 +5,14 @@ import { rm } from 'fs/promises'
 import {
     buildPathpartMap,
     buildURIList,
-    checkEnvironmentVariables,
     extractDatabaseFromBundle,
     getLocalPath,
     makeTempDirectory,
+    requireEnvironmentVariables,
     syncFile
 } from './utilities.js'
 
-const { parallelLimit } = checkEnvironmentVariables();
+const { parallelLimit } = requireEnvironmentVariables();
 
 syncFile('source.msix').then(async _ => {
     const temp = await makeTempDirectory('winget-repo-');
