@@ -1,8 +1,5 @@
 #!/bin/bash
 
-#WINGET_REPO_URL=
-#WINGET_REPO_JOBS=
-
 ## EXPORTED IN entry.sh
 #TO=
 #LOGDIR=
@@ -10,6 +7,8 @@
 
 ## SET IN ENVIRONMENT VARIABLES
 #DEBUG=
+#WINGET_REPO_URL=
+#WINGET_REPO_JOBS=
 
 set -e
 
