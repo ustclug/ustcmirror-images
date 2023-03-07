@@ -15,7 +15,12 @@ import {
 const { debugMode, parallelLimit } = requireEnvironmentVariables();
 const { Database } = debugMode ? sqlite3.verbose() : sqlite3;
 
-syncFile('source.msix').then(async _ => {
+syncFile('source.msix').then(async updated => {
+    if (!updated) {
+        console.info('nothing to update');
+        return;
+    }
+
     const temp = await makeTempDirectory('winget-repo-');
     const database = await extractDatabaseFromBundle(getLocalPath('source.msix'), temp);
     const db = new Database(database, sqlite3.OPEN_READONLY);
