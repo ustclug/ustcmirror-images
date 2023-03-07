@@ -7,7 +7,7 @@ import { existsSync } from 'fs'
 import { mkdir, mkdtemp, readFile, stat, utimes, writeFile } from 'fs/promises'
 
 /** The remote URL of a pre-indexed WinGet source repository. */
-const remote = process.env.WINGET_REPO_URL;
+const remote = process.env.WINGET_REPO_URL ?? 'https://cdn.winget.microsoft.com/cache';
 
 /** The local path to serve as the root of WinGet source repository. */
 const local = process.env.TO;

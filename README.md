@@ -423,7 +423,7 @@ A handy tool to sync pre-indexed [Windows Package Manager](https://github.com/mi
 
 | Parameter             | Description                                                      |
 | --------------------- | ---------------------------------------------------------------- |
-| `WINGET_REPO_URL`     | Sets the URL of upstream.                                        |
+| `WINGET_REPO_URL`     | Sets the URL of upstream. Defaults to [`https://cdn.winget.microsoft.com/cache`](https://cdn.winget.microsoft.com/cache) |
 | `WINGET_REPO_JOBS`    | Parallel jobs. Defaults to 8.                                    |
 
 ### yum-sync
