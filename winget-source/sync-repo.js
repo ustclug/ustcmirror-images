@@ -32,7 +32,7 @@ syncFile('source.msix').then(async updated => {
 
     db.all('SELECT * FROM pathparts', (error, rows) => {
         const pathparts = buildPathpartMap(error, rows);
-        db.all('SELECT pathpart FROM manifest', (error, rows) => {
+        db.all('SELECT pathpart FROM manifest ORDER BY rowid DESC', (error, rows) => {
             db.close();
             const uris = buildURIList(error, rows, pathparts);
             async.eachLimit(uris, parallelLimit, syncFile, (error) => {

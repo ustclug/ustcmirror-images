@@ -222,8 +222,8 @@ export async function syncFile(uri) {
             }
         }
     }
-    const response = await fetch(remoteURL);
     winston.verbose(`downloading from ${remoteURL}`);
+    const response = await fetch(remoteURL);
     await writeFile(localPath, response.body);
     const lastModified = getLastModifiedDate(response);
     if (lastModified) {
