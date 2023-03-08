@@ -1,5 +1,5 @@
 {
-  "name": "winget-source",
+  "name": "@ustcmirror/winget-source",
   "version": "1.0.0",
   "description": "Sync with pre-indexed WinGet source repository.",
   "main": "sync-repo.js",
