@@ -3,6 +3,7 @@ import fetch from 'node-fetch'
 import os from 'os'
 import path from 'path'
 import process from 'process'
+import sqlite3 from 'sqlite3'
 import winston from 'winston'
 import { existsSync } from 'fs'
 import { mkdir, mkdtemp, readFile, stat, utimes, writeFile } from 'fs/promises'
@@ -18,9 +19,6 @@ const parallelLimit = parseInt(process.env.WINGET_REPO_JOBS ?? 8);
 
 /** Whether the debug mode is enabled. */
 const debugMode = process.env.DEBUG === 'true';
-
-/** Path of the log file to write. */
-const logFile = process.env.LOGFILE;
 
 /**
  * Get last modified date from HTTP response headers.
@@ -66,6 +64,23 @@ function resolvePathpart(id, pathparts) {
     const pathpart = pathparts.get(id);
     if (pathpart === undefined) return '';
     return path.posix.join(resolvePathpart(pathpart.parent, pathparts), pathpart.pathpart);
+}
+
+/**
+ * Set up the default `winston` logger instance.
+ */
+function setupWinstonLogger() {
+    const { format, transports } = winston;
+    winston.add(new transports.Console({
+        level: debugMode ? 'debug' : 'info',
+        stderrLevels: ['error'],
+        format: format.combine(
+            format.timestamp(),
+            format.printf(({ timestamp, level, message }) => {
+                return `[${timestamp}][${level.toUpperCase()}] ${message}`;
+            })
+        )
+    }));
 }
 
 /**
@@ -156,47 +171,24 @@ export async function makeTempDirectory(prefix) {
 }
 
 /**
- * Check and return the required environment variables.
+ * Check and set up the environment.
  *
- * @returns Environment variables to be used in the program.
+ * @returns Values and objects to be used in the program.
  */
-export function requireEnvironmentVariables() {
-    if (!local || !logFile) {
-        console.error("[ERROR] required environment variable(s) not set!");
+export function setupEnvironment() {
+    setupWinstonLogger();
+    if (!local) {
+        winston.error("destination path $TO not set!");
         process.exit(-1);
     }
-    return { debugMode, local, logFile, parallelLimit, remote };
-}
-
-/**
- * Set up the default `winston` logger instance.
- *
- * @param {boolean} debugMode Whether the debug mode is enabled.
- * @param {fs.PathLike} logFile Path of the log file to write.
- *
- * @returns The shared `winston` logger.
- */
-export function setupWinstonLogger(debugMode, logFile) {
-    const { format, transports } = winston;
-    const logWithLevelPrefix = ({ level, message }) => `[${level.toUpperCase()}] ${message}`;
-    winston.configure({
-        transports: [
-            new transports.File({
-                level: 'verbose',
-                filename: logFile,
-                format: format.combine(
-                    format.timestamp(),
-                    format.printf((info) => `[${info.timestamp}]${logWithLevelPrefix(info)}`)
-                )
-            }),
-            new transports.Console({
-                level: debugMode ? 'debug' : 'info',
-                stderrLevels: ['error'],
-                format: format.printf(logWithLevelPrefix)
-            })
-        ]
-    });
-    return winston;
+    return {
+        debugMode,
+        local,
+        parallelLimit,
+        remote,
+        sqlite3: debugMode ? sqlite3.verbose() : sqlite3,
+        winston
+    };
 }
 
 /**
@@ -222,7 +214,7 @@ export async function syncFile(uri) {
             }
         }
     }
-    winston.verbose(`downloading from ${remoteURL}`);
+    winston.info(`downloading from ${remoteURL}`);
     const response = await fetch(remoteURL);
     await writeFile(localPath, response.body);
     const lastModified = getLastModifiedDate(response);
