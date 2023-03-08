@@ -1,3 +1,4 @@
+import https from 'https'
 import JSZip from 'jszip'
 import fetch from 'node-fetch'
 import os from 'os'
@@ -19,6 +20,9 @@ const parallelLimit = parseInt(process.env.WINGET_REPO_JOBS ?? 8);
 
 /** Whether the debug mode is enabled. */
 const debugMode = process.env.DEBUG === 'true';
+
+/** Local IP address to be bound to HTTPS requests. */
+const localAddress = process.env.BIND_ADDRESS;
 
 /**
  * Get last modified date from HTTP response headers.
@@ -180,6 +184,9 @@ export function setupEnvironment() {
     if (!local) {
         winston.error("destination path $TO not set!");
         process.exit(-1);
+    }
+    if (localAddress) {
+        https.globalAgent.options.localAddress = localAddress;
     }
     return {
         debugMode,
