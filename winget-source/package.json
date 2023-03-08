@@ -10,7 +10,8 @@
     "async": "^3.2.4",
     "jszip": "^3.10.1",
     "node-fetch": "^3.3.0",
-    "sqlite3": "^5.1.4"
+    "sqlite3": "^5.1.4",
+    "winston": "^3.8.2"
   },
   "scripts": {
     "start": "node sync-repo.js"

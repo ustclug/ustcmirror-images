@@ -9,15 +9,20 @@ import {
     getLocalPath,
     makeTempDirectory,
     requireEnvironmentVariables,
+    setupWinstonLogger,
     syncFile
 } from './utilities.js'
 
-const { debugMode, parallelLimit } = requireEnvironmentVariables();
+const { debugMode, logFile, parallelLimit, remote } = requireEnvironmentVariables();
+
 const { Database } = debugMode ? sqlite3.verbose() : sqlite3;
+const logger = setupWinstonLogger(debugMode, logFile);
+
+logger.info(`start syncing with ${remote}`);
 
 syncFile('source.msix').then(async updated => {
     if (!updated) {
-        console.info('nothing to update');
+        logger.info('nothing to update');
         return;
     }
 
@@ -33,9 +38,10 @@ syncFile('source.msix').then(async updated => {
             async.eachLimit(uris, parallelLimit, syncFile, (error) => {
                 rm(temp, { recursive: true });
                 if (error) {
-                    console.error(error);
+                    logger.error(error);
                     process.exit(-1);
                 }
+                logger.info(`successfully synced with ${remote}`);
             });
         });
     });

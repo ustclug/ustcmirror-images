@@ -3,6 +3,7 @@ import fetch from 'node-fetch'
 import os from 'os'
 import path from 'path'
 import process from 'process'
+import winston from 'winston'
 import { existsSync } from 'fs'
 import { mkdir, mkdtemp, readFile, stat, utimes, writeFile } from 'fs/promises'
 
@@ -17,6 +18,9 @@ const parallelLimit = parseInt(process.env.WINGET_REPO_JOBS ?? 8);
 
 /** Whether the debug mode is enabled. */
 const debugMode = process.env.DEBUG === 'true';
+
+/** Path of the log file to write. */
+const logFile = process.env.LOGFILE;
 
 /**
  * Get last modified date from HTTP response headers.
@@ -74,7 +78,7 @@ function resolvePathpart(id, pathparts) {
  */
 export function buildPathpartMap(error, rows) {
     if (error) {
-        console.error(error);
+        winston.error(error);
         process.exit(-1);
     }
     return new Map(rows.map(row =>
@@ -93,23 +97,10 @@ export function buildPathpartMap(error, rows) {
  */
 export function buildURIList(error, rows, pathparts) {
     if (error) {
-        console.error(error);
+        winston.error(error);
         process.exit(-1);
     }
     return rows.map(row => resolvePathpart(row.pathpart, pathparts));
-}
-
-/**
- * Check and return the required environment variables.
- *
- * @returns Environment variables to be used in the program.
- */
-export function requireEnvironmentVariables() {
-    if (!local || !remote) {
-        console.error("required environment variable(s) not set!");
-        process.exit(-1);
-    }
-    return { debugMode, local, parallelLimit, remote };
 }
 
 /**
@@ -165,6 +156,50 @@ export async function makeTempDirectory(prefix) {
 }
 
 /**
+ * Check and return the required environment variables.
+ *
+ * @returns Environment variables to be used in the program.
+ */
+export function requireEnvironmentVariables() {
+    if (!local || !logFile) {
+        console.error("[ERROR] required environment variable(s) not set!");
+        process.exit(-1);
+    }
+    return { debugMode, local, logFile, parallelLimit, remote };
+}
+
+/**
+ * Set up the default `winston` logger instance.
+ *
+ * @param {boolean} debugMode Whether the debug mode is enabled.
+ * @param {fs.PathLike} logFile Path of the log file to write.
+ *
+ * @returns The shared `winston` logger.
+ */
+export function setupWinstonLogger(debugMode, logFile) {
+    const { format, transports } = winston;
+    const logWithLevelPrefix = ({ level, message }) => `[${level.toUpperCase()}] ${message}`;
+    winston.configure({
+        transports: [
+            new transports.File({
+                level: 'verbose',
+                filename: logFile,
+                format: format.combine(
+                    format.timestamp(),
+                    format.printf((info) => `[${info.timestamp}]${logWithLevelPrefix(info)}`)
+                )
+            }),
+            new transports.Console({
+                level: debugMode ? 'debug' : 'info',
+                stderrLevels: ['error'],
+                format: format.printf(logWithLevelPrefix)
+            })
+        ]
+    });
+    return winston;
+}
+
+/**
  * Sync a file with the remote server asynchronously.
  *
  * @param {string} uri URI to sync.
@@ -182,13 +217,13 @@ export async function syncFile(uri) {
         if (lastModified) {
             const localFile = await stat(localPath);
             if (localFile.mtime.getTime() == lastModified.getTime() && localFile.size == contentLength) {
-                console.info(`skipped ${uri} because it's up to date`);
+                winston.verbose(`skipped ${uri} because it's up to date`);
                 return false;
             }
         }
     }
     const response = await fetch(remoteURL);
-    console.log(`downloading ${uri}`);
+    winston.verbose(`downloading from ${remoteURL}`);
     await writeFile(localPath, response.body);
     const lastModified = getLastModifiedDate(response);
     if (lastModified) {

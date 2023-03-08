@@ -12,6 +12,10 @@
 
 set -e
 
-[[ $DEBUG == true ]] && set -x
+if [[ $DEBUG = true ]]; then
+    set -x
+else
+    export NODE_ENV=production
+fi
 
 exec node /sync-repo.js
