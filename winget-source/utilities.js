@@ -217,7 +217,7 @@ export async function syncFile(uri) {
         if (lastModified) {
             const localFile = await stat(localPath);
             if (localFile.mtime.getTime() == lastModified.getTime() && localFile.size == contentLength) {
-                winston.verbose(`skipped ${uri} because it's up to date`);
+                winston.debug(`skipped ${uri} because it's up to date`);
                 return false;
             }
         }
