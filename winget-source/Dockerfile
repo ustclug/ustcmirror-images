@@ -5,8 +5,7 @@ ADD ["sync.sh", "sync-repo.js", "utilities.js", "package.json", "package-lock.js
 
 RUN apk add --no-cache nodejs
 
-RUN cd / && \
-    apk add --no-cache npm python3 && \
-    npm ci --only=production && \
+RUN apk add --no-cache npm python3 && \
+    npm ci --prefix / --only=production && \
     npm cache clean --force && \
     apk del --purge --no-cache npm python3
