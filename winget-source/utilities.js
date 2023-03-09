@@ -62,7 +62,7 @@ function getContentLength(response) {
  * @param {number} id The ID of the target path part.
  * @param {Map<number, { parent: number, pathpart: string }>} pathparts Path part storage built from the database.
  *
- * @returns {string} Full URI resolved from the given ID.
+ * @returns {string} Full URI resolved from the given path part ID.
  */
 function resolvePathpart(id, pathparts) {
     const pathpart = pathparts.get(id);
@@ -80,9 +80,9 @@ function setupWinstonLogger() {
         stderrLevels: ['error'],
         format: format.combine(
             format.timestamp(),
-            format.printf(({ timestamp, level, message }) => {
-                return `[${timestamp}][${level.toUpperCase()}] ${message}`;
-            })
+            format.printf(({ timestamp, level, message }) =>
+                `[${timestamp}][${level.toUpperCase()}] ${message}`
+            )
         )
     }));
 }
