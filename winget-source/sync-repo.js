@@ -17,12 +17,7 @@ const { parallelLimit, remote, sqlite3, winston } = setupEnvironment();
 
 winston.info(`start syncing with ${remote}`);
 
-syncFile('source.msix').catch(exitOnError(EX_UNAVAILABLE)).then(async updated => {
-    if (!updated) {
-        winston.info('nothing to update');
-        return;
-    }
-
+syncFile('source.msix').catch(exitOnError(EX_UNAVAILABLE)).then(async _ => {
     const temp = await makeTempDirectory('winget-repo-');
     const database = await extractDatabaseFromBundle(getLocalPath('source.msix'), temp);
     const db = new sqlite3.Database(database, sqlite3.OPEN_READONLY, exitOnError(EX_IOERR));
