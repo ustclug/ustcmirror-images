@@ -8,6 +8,7 @@ import sqlite3 from 'sqlite3'
 import winston from 'winston'
 import { existsSync } from 'fs'
 import { mkdir, mkdtemp, readFile, stat, utimes, writeFile } from 'fs/promises'
+import { EX_IOERR, EX_SOFTWARE, EX_USAGE } from './sysexits.js'
 
 /** The remote URL of a pre-indexed WinGet source repository. */
 const remote = process.env.WINGET_REPO_URL ?? 'https://cdn.winget.microsoft.com/cache';
@@ -102,7 +103,7 @@ function setupWinstonLogger() {
  * @returns {Map<number, { parent: number, pathpart: string }>} In-memory path part storage to query against.
  */
 export function buildPathpartMap(error, rows) {
-    exitOnError(70)(error);
+    exitOnError(EX_SOFTWARE)(error);
     return new Map(rows.map(row =>
         [row.rowid, { parent: row.parent, pathpart: row.pathpart }]
     ));
@@ -118,7 +119,7 @@ export function buildPathpartMap(error, rows) {
  * @returns {string[]} Manifest URIs to sync.
  */
 export function buildURIList(error, rows, pathparts) {
-    exitOnError(70)(error);
+    exitOnError(EX_SOFTWARE)(error);
     return rows.map(row => resolvePathpart(row.pathpart, pathparts));
 }
 
@@ -156,7 +157,7 @@ export async function extractDatabaseFromBundle(msixPath, directory) {
         await writeFile(destination, buffer);
         return destination;
     } catch (error) {
-        exitOnError(74)(error);
+        exitOnError(EX_IOERR)(error);
     }
 }
 
@@ -195,7 +196,7 @@ export async function makeTempDirectory(prefix) {
     try {
         return await mkdtemp(path.join(os.tmpdir(), prefix));
     } catch (error) {
-        exitOnError(74)(error);
+        exitOnError(EX_IOERR)(error);
     }
 }
 
@@ -207,7 +208,7 @@ export async function makeTempDirectory(prefix) {
 export function setupEnvironment() {
     setupWinstonLogger();
     if (!local) {
-        exitOnError(64)("destination path $TO not set!");
+        exitOnError(EX_USAGE)("destination path $TO not set!");
     }
     if (localAddress) {
         https.globalAgent.options.localAddress = localAddress;
