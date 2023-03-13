@@ -75,16 +75,22 @@ function resolvePathpart(id, pathparts) {
  */
 function setupWinstonLogger() {
     const { format, transports } = winston;
-    winston.add(new transports.Console({
-        level: debugMode ? 'debug' : 'info',
-        stderrLevels: ['error'],
-        format: format.combine(
-        format.timestamp(),
-        format.printf(({ timestamp, level, message }) =>
-            `[${timestamp}][${level.toUpperCase()}] ${message}`
-        )
-        )
-    }));
+    winston.configure({
+        format: format.errors({ stack: debugMode }),
+        transports: [
+            new transports.Console({
+                handleExceptions: true,
+                level: debugMode ? 'debug' : 'info',
+                stderrLevels: ['error'],
+                format: format.combine(
+                    format.timestamp(),
+                    format.printf(({ timestamp, level, message, stack }) =>
+                        `[${timestamp}][${level.toUpperCase()}] ${stack ?? message}`
+                    )
+                )
+            })
+        ]
+    });
 }
 
 /**
@@ -126,6 +132,7 @@ export function buildURIList(error, rows, pathparts) {
 export function exitOnError(code = 1) {
     return (error) => {
         if (error) {
+            winston.exitOnError = false;
             winston.error(error);
             process.exit(code);
         }
