@@ -9,4 +9,4 @@ RUN apk add --no-cache npm python3 && \
     npm cache clean --force && \
     apk del --purge --no-cache npm python3
 
-ADD ["sync.sh", "sync-repo.js", "utilities.js", "/"]
+ADD ["sync.sh", "sync-repo.js", "sysexits.js", "utilities.js", "/"]

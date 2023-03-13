@@ -9,6 +9,7 @@ import sqlite3 from 'sqlite3'
 import winston from 'winston'
 import { existsSync } from 'fs'
 import { mkdir, mkdtemp, readFile, stat, utimes, writeFile } from 'fs/promises'
+import { EX_IOERR, EX_SOFTWARE, EX_USAGE } from './sysexits.js'
 
 /**
  * `fetch` implementation with retry support.
@@ -83,16 +84,22 @@ function resolvePathpart(id, pathparts) {
  */
 function setupWinstonLogger() {
     const { format, transports } = winston;
-    winston.add(new transports.Console({
-        level: debugMode ? 'debug' : 'info',
-        stderrLevels: ['error'],
-        format: format.combine(
-            format.timestamp(),
-            format.printf(({ timestamp, level, message }) =>
-                `[${timestamp}][${level.toUpperCase()}] ${message}`
-            )
-        )
-    }));
+    winston.configure({
+        format: format.errors({ stack: debugMode }),
+        transports: [
+            new transports.Console({
+                handleExceptions: true,
+                level: debugMode ? 'debug' : 'info',
+                stderrLevels: ['error'],
+                format: format.combine(
+                    format.timestamp(),
+                    format.printf(({ timestamp, level, message, stack }) =>
+                        `[${timestamp}][${level.toUpperCase()}] ${stack ?? message}`
+                    )
+                )
+            })
+        ]
+    });
 }
 
 /**
@@ -104,10 +111,7 @@ function setupWinstonLogger() {
  * @returns {Map<number, { parent: number, pathpart: string }>} In-memory path part storage to query against.
  */
 export function buildPathpartMap(error, rows) {
-    if (error) {
-        winston.error(error);
-        process.exit(-1);
-    }
+    exitOnError(EX_SOFTWARE)(error);
     return new Map(rows.map(row =>
         [row.rowid, { parent: row.parent, pathpart: row.pathpart }]
     ));
@@ -123,11 +127,25 @@ export function buildPathpartMap(error, rows) {
  * @returns {string[]} Manifest URIs to sync.
  */
 export function buildURIList(error, rows, pathparts) {
-    if (error) {
-        winston.error(error);
-        process.exit(-1);
-    }
+    exitOnError(EX_SOFTWARE)(error);
     return rows.map(row => resolvePathpart(row.pathpart, pathparts));
+}
+
+/**
+ * Get an error handling function that logs an error and exits with given status if it occurs.
+ *
+ * @param {number} code Exit code to use if there's an error.
+ *
+ * @returns {(err: Error | string | null | undefined) => void} Function that handles a possible error.
+ */
+export function exitOnError(code = 1) {
+    return (error) => {
+        if (error) {
+            winston.exitOnError = false;
+            winston.error(error);
+            process.exit(code);
+        }
+    };
 }
 
 /**
@@ -139,12 +157,16 @@ export function buildURIList(error, rows, pathparts) {
  * @returns {Promise<string>} Path of the extracted `index.db` file.
  */
 export async function extractDatabaseFromBundle(msixPath, directory) {
-    const bundle = await readFile(msixPath);
-    const zip = await JSZip.loadAsync(bundle);
-    const buffer = await zip.file(path.posix.join('Public', 'index.db')).async('Uint8Array');
-    const destination = path.join(directory, 'index.db');
-    await writeFile(destination, buffer);
-    return destination;
+    try {
+        const bundle = await readFile(msixPath);
+        const zip = await JSZip.loadAsync(bundle);
+        const buffer = await zip.file(path.posix.join('Public', 'index.db')).async('Uint8Array');
+        const destination = path.join(directory, 'index.db');
+        await writeFile(destination, buffer);
+        return destination;
+    } catch (error) {
+        exitOnError(EX_IOERR)(error);
+    }
 }
 
 /**
@@ -179,7 +201,11 @@ export function getRemoteURL(uri) {
  * @returns {Promise<string>} Path to the created temporary directory.
  */
 export async function makeTempDirectory(prefix) {
-    return await mkdtemp(path.join(os.tmpdir(), prefix));
+    try {
+        return await mkdtemp(path.join(os.tmpdir(), prefix));
+    } catch (error) {
+        exitOnError(EX_IOERR)(error);
+    }
 }
 
 /**
@@ -190,8 +216,7 @@ export async function makeTempDirectory(prefix) {
 export function setupEnvironment() {
     setupWinstonLogger();
     if (!local) {
-        winston.error("destination path $TO not set!");
-        process.exit(-1);
+        exitOnError(EX_USAGE)("destination path $TO not set!");
     }
     if (localAddress) {
         https.globalAgent.options.localAddress = localAddress;
