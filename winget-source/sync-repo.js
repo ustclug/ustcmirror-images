@@ -34,7 +34,7 @@ syncFile('source.msix').then(async updated => {
                 rm(temp, { recursive: true });
                 if (error) {
                     winston.error(error);
-                    process.exit(-1);
+                    process.exit(69);
                 }
                 winston.info(`successfully synced with ${remote}`);
             });

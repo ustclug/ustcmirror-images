@@ -98,7 +98,7 @@ function setupWinstonLogger() {
 export function buildPathpartMap(error, rows) {
     if (error) {
         winston.error(error);
-        process.exit(-1);
+        process.exit(70);
     }
     return new Map(rows.map(row =>
         [row.rowid, { parent: row.parent, pathpart: row.pathpart }]
@@ -117,7 +117,7 @@ export function buildPathpartMap(error, rows) {
 export function buildURIList(error, rows, pathparts) {
     if (error) {
         winston.error(error);
-        process.exit(-1);
+        process.exit(70);
     }
     return rows.map(row => resolvePathpart(row.pathpart, pathparts));
 }
@@ -183,7 +183,7 @@ export function setupEnvironment() {
     setupWinstonLogger();
     if (!local) {
         winston.error("destination path $TO not set!");
-        process.exit(-1);
+        process.exit(64);
     }
     if (localAddress) {
         https.globalAgent.options.localAddress = localAddress;
