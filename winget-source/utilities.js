@@ -1,6 +1,7 @@
+import withRetry from 'fetch-retry'
 import https from 'https'
 import JSZip from 'jszip'
-import fetch from 'node-fetch'
+import originalFetch from 'node-fetch'
 import os from 'os'
 import path from 'path'
 import process from 'process'
@@ -8,6 +9,13 @@ import sqlite3 from 'sqlite3'
 import winston from 'winston'
 import { existsSync } from 'fs'
 import { mkdir, mkdtemp, readFile, stat, utimes, writeFile } from 'fs/promises'
+
+/**
+ * `fetch` implementation with retry support.
+ *
+ * Defaults to 3 retries with 1000ms delay, on network errors only.
+ */
+const fetch = withRetry(originalFetch);
 
 /** The remote URL of a pre-indexed WinGet source repository. */
 const remote = process.env.WINGET_REPO_URL ?? 'https://cdn.winget.microsoft.com/cache';
