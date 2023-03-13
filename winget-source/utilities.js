@@ -79,10 +79,10 @@ function setupWinstonLogger() {
         level: debugMode ? 'debug' : 'info',
         stderrLevels: ['error'],
         format: format.combine(
-            format.timestamp(),
-            format.printf(({ timestamp, level, message }) =>
-                `[${timestamp}][${level.toUpperCase()}] ${message}`
-            )
+        format.timestamp(),
+        format.printf(({ timestamp, level, message }) =>
+            `[${timestamp}][${level.toUpperCase()}] ${message}`
+        )
         )
     }));
 }
@@ -96,10 +96,7 @@ function setupWinstonLogger() {
  * @returns {Map<number, { parent: number, pathpart: string }>} In-memory path part storage to query against.
  */
 export function buildPathpartMap(error, rows) {
-    if (error) {
-        winston.error(error);
-        process.exit(70);
-    }
+    exitOnError(70)(error);
     return new Map(rows.map(row =>
         [row.rowid, { parent: row.parent, pathpart: row.pathpart }]
     ));
@@ -115,11 +112,24 @@ export function buildPathpartMap(error, rows) {
  * @returns {string[]} Manifest URIs to sync.
  */
 export function buildURIList(error, rows, pathparts) {
-    if (error) {
-        winston.error(error);
-        process.exit(70);
-    }
+    exitOnError(70)(error);
     return rows.map(row => resolvePathpart(row.pathpart, pathparts));
+}
+
+/**
+ * Get an error handling function that logs an error and exits with given status if it occurs.
+ *
+ * @param {number} code Exit code to use if there's an error.
+ *
+ * @returns {(err: Error | string | null | undefined) => void} Function that handles a possible error.
+ */
+export function exitOnError(code = 1) {
+    return (error) => {
+        if (error) {
+            winston.error(error);
+            process.exit(code);
+        }
+    };
 }
 
 /**
@@ -139,8 +149,7 @@ export async function extractDatabaseFromBundle(msixPath, directory) {
         await writeFile(destination, buffer);
         return destination;
     } catch (error) {
-        winston.error(error);
-        process.exit(74);
+        exitOnError(74)(error);
     }
 }
 
@@ -179,8 +188,7 @@ export async function makeTempDirectory(prefix) {
     try {
         return await mkdtemp(path.join(os.tmpdir(), prefix));
     } catch (error) {
-        winston.error(error);
-        process.exit(74);
+        exitOnError(74)(error);
     }
 }
 
@@ -192,8 +200,7 @@ export async function makeTempDirectory(prefix) {
 export function setupEnvironment() {
     setupWinstonLogger();
     if (!local) {
-        winston.error("destination path $TO not set!");
-        process.exit(64);
+        exitOnError(64)("destination path $TO not set!");
     }
     if (localAddress) {
         https.globalAgent.options.localAddress = localAddress;
