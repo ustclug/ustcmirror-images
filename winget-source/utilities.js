@@ -131,12 +131,17 @@ export function buildURIList(error, rows, pathparts) {
  * @returns {Promise<string>} Path of the extracted `index.db` file.
  */
 export async function extractDatabaseFromBundle(msixPath, directory) {
-    const bundle = await readFile(msixPath);
-    const zip = await JSZip.loadAsync(bundle);
-    const buffer = await zip.file(path.posix.join('Public', 'index.db')).async('Uint8Array');
-    const destination = path.join(directory, 'index.db');
-    await writeFile(destination, buffer);
-    return destination;
+    try {
+        const bundle = await readFile(msixPath);
+        const zip = await JSZip.loadAsync(bundle);
+        const buffer = await zip.file(path.posix.join('Public', 'index.db')).async('Uint8Array');
+        const destination = path.join(directory, 'index.db');
+        await writeFile(destination, buffer);
+        return destination;
+    } catch (error) {
+        winston.error(error);
+        process.exit(74);
+    }
 }
 
 /**
@@ -171,7 +176,12 @@ export function getRemoteURL(uri) {
  * @returns {Promise<string>} Path to the created temporary directory.
  */
 export async function makeTempDirectory(prefix) {
-    return await mkdtemp(path.join(os.tmpdir(), prefix));
+    try {
+        return await mkdtemp(path.join(os.tmpdir(), prefix));
+    } catch (error) {
+        winston.error(error);
+        process.exit(74);
+    }
 }
 
 /**
