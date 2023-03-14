@@ -27,7 +27,8 @@ syncFile('source.msix').catch(exitOnError(EX_UNAVAILABLE)).then(async _ => {
         db.all('SELECT pathpart FROM manifest ORDER BY rowid DESC', (error, rows) => {
             db.close();
             const uris = buildURIList(error, rows, pathparts);
-            async.eachLimit(uris, parallelLimit, syncFile, (error) => {
+            const download = (uri) => syncFile(uri, false);
+            async.eachLimit(uris, parallelLimit, download, (error) => {
                 rm(temp, { recursive: true });
                 exitOnError(EX_TEMPFAIL)(error);
                 winston.info(`successfully synced with ${remote}`);
