@@ -235,14 +235,19 @@ export function setupEnvironment() {
  * Sync a file with the remote server asynchronously.
  *
  * @param {string} uri URI to sync.
+ * @param {boolean} update Whether to allow updating an existing file.
  *
  * @returns {Promise<boolean>} If the file is new or updated.
  */
-export async function syncFile(uri) {
+export async function syncFile(uri, update = true) {
     const localPath = getLocalPath(uri);
     const remoteURL = getRemoteURL(uri);
     await mkdir(path.dirname(localPath), { recursive: true });
     if (existsSync(localPath)) {
+        if (!update) {
+            winston.debug(`skipped ${uri} because it already exists`);
+            return false;
+        }
         const response = await fetch(remoteURL, { method: 'HEAD' });
         const lastModified = getLastModifiedDate(response);
         const contentLength = getContentLength(response);
@@ -256,7 +261,8 @@ export async function syncFile(uri) {
     }
     winston.info(`downloading from ${remoteURL}`);
     const response = await fetch(remoteURL);
-    await writeFile(localPath, response.body);
+    const buffer = await response.arrayBuffer();
+    await writeFile(localPath, Buffer.from(buffer));
     const lastModified = getLastModifiedDate(response);
     if (lastModified) {
         await utimes(localPath, lastModified, lastModified);
