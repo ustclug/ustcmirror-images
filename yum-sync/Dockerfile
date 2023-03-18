@@ -1,9 +1,9 @@
-FROM ustcmirror/base:debian AS builder
+FROM ghcr.io/ustcmirror/base:debian AS builder
 COPY binder.c /tmp/binder.c
 RUN apt update && apt install -y build-essential && \
     gcc -Wall -fPIC -shared -o /tmp/binder.so /tmp/binder.c
 
-FROM ustcmirror/base:debian
+FROM ghcr.io/ustcmirror/base:debian
 LABEL maintainer="Keyu Tao <taoky@ustclug.org>"
 RUN echo 'deb http://deb.debian.org/debian bullseye-backports main' > /etc/apt/sources.list.d/backports.list && \
     apt update && apt install -y dnf createrepo-c dnf-plugins-core python3 python3-requests && \

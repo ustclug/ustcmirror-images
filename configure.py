@@ -229,7 +229,7 @@ def strip_prefix(s, prefix):
 
 
 def encode_tag(tag):
-    return strip_prefix(tag, 'ustcmirror/').replace(':', '.')
+    return strip_prefix(tag, 'ghcr.io/ustcmirror/').replace(':', '.')
 
 
 def get_dest_image(img, f):
@@ -237,9 +237,9 @@ def get_dest_image(img, f):
     # tag may contain a dot
     tag = strip_prefix(n, 'Dockerfile')
     if tag:
-        return 'ustcmirror/{}:{}'.format(img, tag[1:])
+        return 'ghcr.io/ustcmirror/{}:{}'.format(img, tag[1:])
     else:
-        return 'ustcmirror/{}:latest'.format(img)
+        return 'ghcr.io/ustcmirror/{}:latest'.format(img)
 
 
 def get_base_image(f):
@@ -281,7 +281,7 @@ def main():
 
     with Builder() as b:
         for dst, base in imgs.items():
-            if base.startswith('ustcmirror'):
+            if base.startswith('ghcr.io/ustcmirror'):
                 b.add(dst, base)
             else:
                 b.add(dst, '')

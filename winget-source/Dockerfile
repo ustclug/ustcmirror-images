@@ -1,4 +1,4 @@
-FROM ustcmirror/base:alpine
+FROM ghcr.io/ustcmirror/base:alpine
 LABEL maintainer "YR Chen <stevapple@icloud.com>"
 
 RUN apk add --no-cache nodejs

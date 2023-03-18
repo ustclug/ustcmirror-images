@@ -17,6 +17,7 @@ esac
 
 for image in $(docker images --filter=label=org.ustcmirror.images=true --format="{{.Repository}}:{{.Tag}}")
 do
-    docker push "$image" && echo "$image pushed"
+    docker push "$image" && echo "$image pushed to ghcr.io"
+    docker tag "$image" "docker.io/${image##ghcr.io/}" && docker push "docker.io/${image##ghcr.io/}" && echo "$image pushed to docker.io"
 done
 
