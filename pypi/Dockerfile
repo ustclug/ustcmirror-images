@@ -1,4 +1,4 @@
-FROM ustcmirror/base:alpine
+FROM ghcr.io/ustcmirror/base:alpine
 MAINTAINER Yifan Gao <docker@yfgao.com>
 ENV PYPI_MASTER=https://pypi.python.org \
     BANDERSNATCH_WORKERS=3 \

@@ -4,7 +4,7 @@ COPY bottles-json .
 RUN apk add --no-cache musl-dev
 RUN cargo build --release
 
-FROM ustcmirror/curl-helper
+FROM ghcr.io/ustcmirror/curl-helper
 LABEL maintainer="Yifan Gao docker@yfgao.com"
 RUN apk add --no-cache parallel bash sed gzip
 ADD sync.sh /

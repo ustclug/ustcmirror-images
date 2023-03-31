@@ -28,6 +28,14 @@ jobs:
           COMMIT_FROM: ${{ github.event.before }}
           COMMIT_TO: ${{ github.event.after }}
 
+      - name: Login to ghcr
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        if: "github.ref == 'refs/heads/master' && github.repository == 'ustclug/ustcmirror-images'"
+        with:
+            registry: "ghcr.io"
+            username: ${{ secrets.GH_USER }}
+            password: ${{ secrets.GH_TOKEN }}
+
       - name: Deploy
         if: "github.ref == 'refs/heads/master' && github.repository == 'ustclug/ustcmirror-images'"
         run: ./push.sh

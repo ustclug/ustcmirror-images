@@ -1,4 +1,4 @@
-FROM ustcmirror/base:alpine
+FROM ghcr.io/ustcmirror/base:alpine
 LABEL maintainer "Yao Wei (魏銘廷) <mwei@lxde.org>"
 
 RUN apk add --no-cache python3 py-setuptools openssl libffi && \

@@ -1,4 +1,4 @@
-FROM ustcmirror/base:alpine
+FROM ghcr.io/ustcmirror/base:alpine
 LABEL maintainer="Jian Zeng <anonymousknight96 AT gmail.com>"
 ENV APTSYNC_NTHREADS=20 \
     APTSYNC_CREATE_DIR=true \
