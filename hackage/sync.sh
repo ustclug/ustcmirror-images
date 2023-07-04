@@ -3,8 +3,9 @@ set -e
 set -o pipefail
 [[ $DEBUG = true ]] && set -x
 
-
 jobs_max=5
+
+curl_init
 
 function pull_hackage () {
     local_pkgs=`mktemp -t local_pkgs.XXXX`
@@ -17,15 +18,15 @@ function pull_hackage () {
     rm index-00.tar.gz || true &> /dev/null
 
     echo "Download latest index ..."
-    wget "$HACKAGE_BASE_URL/01-index.tar.gz" -O index.tar.gz &> /dev/null
+    $CURL_WRAP -sSL -o index.tar.gz "$HACKAGE_BASE_URL/01-index.tar.gz" &> /dev/null
 
     echo "Download latest legacy (00-index) index ..."
-    wget "$HACKAGE_BASE_URL/00-index.tar.gz" -O index-00.tar.gz &> /dev/null
+    $CURL_WRAP -sSL -o index-00.tar.gz "$HACKAGE_BASE_URL/00-index.tar.gz" &> /dev/null
 
     # download extra json files
     extra_json=("mirrors.json" "root.json" "snapshot.json" "timestamp.json")
     for json in "${extra_json[@]}"; do
-        wget "$HACKAGE_BASE_URL/$json" -O "$json" &> /dev/null
+        $CURL_WRAP -sSL -o "$json" "$HACKAGE_BASE_URL/$json" &> /dev/null
     done
 
     mkdir -p package
@@ -83,7 +84,7 @@ function download_pkg () {
     pkg=$1
     name="$pkg.tar.gz"
     echo "Download: $pkg.tar.gz ..."
-    wget "$HACKAGE_BASE_URL/package/$pkg/$name" -O "package/$name" &> /dev/null
+    $CURL_WRAP -sSL -o "package/$name" "$HACKAGE_BASE_URL/package/$pkg/$name" &> /dev/null
     echo "Finish:   $pkg.tar.gz" 
 }
 
