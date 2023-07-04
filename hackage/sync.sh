@@ -5,6 +5,7 @@ set -o pipefail
 
 jobs_max=5
 
+source /curl-helper.sh
 curl_init
 
 function pull_hackage () {
