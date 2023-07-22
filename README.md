@@ -420,7 +420,7 @@ Read the [user guide](https://www.haskell.org/cabal/users-guide/installing-packa
 [![tsumugu](https://img.shields.io/docker/image-size/ustcmirror/tsumugu/latest)](https://hub.docker.com/r/ustcmirror/tsumugu "tsumugu")
 [![stackage](https://img.shields.io/docker/pulls/ustcmirror/tsumugu)](https://hub.docker.com/r/ustcmirror/tsumugu "tsumugu")
 
-An alternative HTTP(S) syncing tool, replacing `rclone` and `lftp` in some cases.
+An alternative HTTP(S) syncing tool, replacing `rclone` and `lftp` in some cases. See [usage](https://github.com/taoky/tsumugu#usage).
 
 | Parameter              | Description                                                                                         |
 | ---------------------- | --------------------------------------------------------------------------------------------------- |
@@ -429,6 +429,7 @@ An alternative HTTP(S) syncing tool, replacing `rclone` and `lftp` in some cases
 | `TSUMUGU_TIMEZONEFILE` | The file URL for guessing remote server timezone.                                                   |
 | `TSUMUGU_EXCLUDE`      | Files to be excluded. Value example: `"--exclude '^temp'"`                                          |
 | `TSUMUGU_USERAGENT`    | The user agent of `tsumugu` syncing program. Defaults to `Tsumugu Syncing Tool/$(tsumugu_version)`. |
+| `TSUMUGU_PARSER`       | HTML parser used to parse index page. Defaults to `nginx`.                                          |
 | `TSUMUGU_EXTRA`        | Extra options. Defaults to empty.                                                                   |
 
 ### winget-source
