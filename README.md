@@ -27,7 +27,6 @@
     - [gsutil-rsync](#gsutil-rsync)
     - [hackage](#hackage)
     - [homebrew-bottles](#homebrew-bottles)
-    - [julia](#julia)
     - [julia-storage](#julia-storage)
     - [lftpsync](#lftpsync)
     - [misc](#misc)
