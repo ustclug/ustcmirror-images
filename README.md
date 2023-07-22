@@ -430,6 +430,7 @@ An alternative HTTP(S) syncing tool, replacing `rclone` and `lftp` in some cases
 | `TSUMUGU_EXCLUDE`      | Files to be excluded. Value example: `"--exclude '^temp'"`                                          |
 | `TSUMUGU_USERAGENT`    | The user agent of `tsumugu` syncing program. Defaults to `Tsumugu Syncing Tool/$(tsumugu_version)`. |
 | `TSUMUGU_PARSER`       | HTML parser used to parse index page. Defaults to `nginx`.                                          |
+| `TSUMUGU_THREADS`      | Number of threads to use to download in parallel. Defaults to 2.                                    |
 | `TSUMUGU_EXTRA`        | Extra options. Defaults to empty.                                                                   |
 
 ### winget-source
