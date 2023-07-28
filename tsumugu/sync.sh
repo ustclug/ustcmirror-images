@@ -21,7 +21,7 @@ BIND_ADDRESS=${BIND_ADDRESS:-}
 TSUMUGU_MAXDELETE=${TSUMUGU_MAXDELETE:-1000}
 TSUMUGU_TIMEZONEFILE=${TSUMUGU_TIMEZONEFILE:-}
 TSUMUGU_EXCLUDE=${TSUMUGU_EXCLUDE:-}
-TSUMUGU_USERAGENT=${TSUMUGU_USERAGENT:-"tsumugu HTTP Syncing Tool/"$(tsumugu --version | cut -d' ' -f2)}
+TSUMUGU_USERAGENT=${TSUMUGU_USERAGENT:-"Tsumugu HTTP Syncing Tool/"$(tsumugu --version | cut -d' ' -f2)}
 TSUMUGU_PARSER=${TSUMUGU_PARSER:-"nginx"}
 TSUMUGU_THREADS=${TSUMUGU_THREADS:-"2"}
 TSUMUGU_EXTRA=${TSUMUGU_EXTRA:-}
@@ -33,6 +33,8 @@ fi
 if [[ $DEBUG = true ]]; then
     export RUST_LOG="tsumugu=debug"
 fi
+
+export NO_COLOR=1
 
 exec tsumugu sync $TSUMUGU_TIMEZONEFILE \
     --user-agent "$TSUMUGU_USERAGENT" \
