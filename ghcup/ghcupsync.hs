@@ -115,8 +115,17 @@ download basedir (url, sha256) = do
                   "--quiet=true",
                   "--checksum=sha-256=" ++ Text.unpack sha256]
       createDirectoryIfMissing True dir
-      runProcess_ (proc "aria2c" args)
-      renameFile (dir </> filename ++ ".tmp") (dir </> filename)
+      exitCode <- runProcess (proc "aria2c" args)
+      case exitCode of
+        ExitSuccess -> do
+          -- Atomically make the file visible.
+          renameFile (dir </> filename ++ ".tmp") (dir </> filename)
+        ExitFailure code -> do
+          -- Probably due to Not Found errors.  Just ignore the error
+          -- so that the signalTSem can be reached, or there will be a
+          -- deadlock.
+          printf "! Couldn't download %s (exit code = %d)" url code
+          removePathForcibly (dir </> filename ++ ".tmp")
 
 readMetadata :: FilePath -> IO Aeson.Value
 readMetadata path = either throwIO pure =<< Yaml.decodeFileEither path
