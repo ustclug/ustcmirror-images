@@ -31,7 +31,6 @@
     - [lftpsync](#lftpsync)
     - [misc](#misc)
     - [nix-channels](#nix-channels)
-    - [nodesource](#nodesource)
     - [pypi](#pypi)
     - [rclone](#rclone)
     - [rsync](#rsync)
@@ -414,7 +413,7 @@ Stackage doesn't need to specify upstream, but this mirror use cabal to install 
 
 Read the [user guide](https://www.haskell.org/cabal/users-guide/installing-packages.html#repository-specification) before writing preferred mirror to `config`
 
-## tsumugu
+### tsumugu
 
 [![tsumugu](https://img.shields.io/docker/image-size/ustcmirror/tsumugu/latest)](https://hub.docker.com/r/ustcmirror/tsumugu "tsumugu")
 [![stackage](https://img.shields.io/docker/pulls/ustcmirror/tsumugu)](https://hub.docker.com/r/ustcmirror/tsumugu "tsumugu")
