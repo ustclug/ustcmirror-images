@@ -4,66 +4,51 @@ HOMEBREW_BOTTLES_JOBS=${HOMEBREW_BOTTLES_JOBS:-1}
 
 source /curl-helper.sh
 
-FORMULA_JSON="$TO/api/formula.json"
-CASK_JSON="$TO/api/cask.json"
 mkdir -p "$TO/api"
 mkdir -p "$TO/api/formula"
 mkdir -p "$TO/api/cask"
 
 BOTTLES=$(mktemp)
-FORMULA_URL_JSON=https://formulae.brew.sh/api/formula.json
-CASK_URL_JSON=https://formulae.brew.sh/api/cask.json
 
 curl_init
 
 # Step 1: Download new API jsons and extract
-$CURL_WRAP --compressed -sSL -o "$FORMULA_JSON".tmp "$FORMULA_URL_JSON"
-if [[ $? -ne 0 ]]; then
-	echo "[FATAL] download formula meta-data failed."
-	exit 2
-fi
-$CURL_WRAP --compressed -sSL -o "$CASK_JSON".tmp "$CASK_URL_JSON"
-if [[ $? -ne 0 ]]; then
-	echo "[FATAL] download cask meta-data failed."
-	exit 3
-fi
 
-# Why does homebrew enjoy introducing breaking changes again and again?
-FORMULA_JWS_JSON="$TO/api/formula.jws.json"
-CASK_JWS_JSON="$TO/api/cask.jws.json"
-FORMULA_JWS_URL_JSON=https://formulae.brew.sh/api/formula.jws.json
-CASK_JWS_URL_JSON=https://formulae.brew.sh/api/cask.jws.json
-$CURL_WRAP --compressed -sSL -o "$FORMULA_JWS_JSON".tmp "$FORMULA_JWS_URL_JSON"
-if [[ $? -ne 0 ]]; then
-	echo "[FATAL] download formula meta-data failed."
-	exit 7
-fi
-$CURL_WRAP --compressed -sSL -o "$CASK_JWS_JSON".tmp "$CASK_JWS_URL_JSON"
-if [[ $? -ne 0 ]]; then
-	echo "[FATAL] download cask meta-data failed."
-	exit 8
-fi
+# 2 special jsons for further processing
+FORMULA_JSON="$TO/api/formula.json"
+CASK_JSON="$TO/api/cask.json"
 
-bottles-json --mode extract-json --type formula --folder "$TO/api/formula" < "$FORMULA_JSON".tmp
+FILES=(
+	"formula.json"
+	"cask.json"
+	"formula.jws.json"
+	"cask.jws.json"
+	"formula_tap_migrations.jws.json"
+	"cask_tap_migrations.jws.json"
+)
+URL_BASE="https://formulae.brew.sh/api"
+
+for file in "${FILES[@]}"; do
+	$CURL_WRAP --compressed -sSL -o "$TO/api/$file".tmp "$URL_BASE/$file"
+	if [[ $? -ne 0 ]]; then
+		echo "[FATAL] download $file meta-data failed."
+		exit 2
+	fi
+	mv "$TO/api/$file".tmp "$TO/api/$file"
+	# create gz files to save bandwidth (with nginx gzip_static)
+	gzip --keep --force "$TO/api/$file"
+done
+
+bottles-json --mode extract-json --type formula --folder "$TO/api/formula" < "$FORMULA_JSON"
 if [[ $? -ne 0 ]]; then
     echo "[FATAL] formula API json extracting failed."
     exit 5
 fi
-bottles-json --mode extract-json --type cask --folder "$TO/api/cask" < "$CASK_JSON".tmp
+bottles-json --mode extract-json --type cask --folder "$TO/api/cask" < "$CASK_JSON"
 if [[ $? -ne 0 ]]; then
 	echo "[FATAL] cask API json extracting failed."
 	exit 6
 fi
-mv "$FORMULA_JSON".tmp "$FORMULA_JSON"
-mv "$CASK_JSON".tmp "$CASK_JSON"
-mv "$FORMULA_JWS_JSON".tmp "$FORMULA_JWS_JSON"
-mv "$CASK_JWS_JSON".tmp "$CASK_JWS_JSON"
-
-# create gz files to save bandwidth (with nginx gzip_static)
-gzip --keep --force "$FORMULA_JSON"
-gzip --keep --force "$CASK_JSON"
-gzip --keep --force "$FORMULA_JWS_JSON"
-gzip --keep --force "$CASK_JWS_JSON"
 
 # Step 2: Download bottles (formula only)
 # extract sha256, URL and file name from JSON result
