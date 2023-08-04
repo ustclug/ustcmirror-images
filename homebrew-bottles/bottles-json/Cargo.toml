@@ -1,5 +1,3 @@
-cargo-features = ["strip"]
-
 [package]
 name = "bottles-json"
 version = "0.1.0"

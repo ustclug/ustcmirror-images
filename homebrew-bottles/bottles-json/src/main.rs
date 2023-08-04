@@ -1,49 +1,26 @@
-// #![feature(try_trait)]
-
-use std::{collections::HashSet, fs::File, path::PathBuf};
+use std::{
+    collections::HashSet,
+    fs::File,
+    path::{Path, PathBuf},
+};
 
 use clap::{Parser, ValueEnum};
-use serde::Deserialize;
+
 use serde_json::Value;
 
-#[derive(Deserialize)]
-struct Versions {
-    stable: Option<String>,
-    bottle: bool,
-}
-
-#[derive(Deserialize)]
-struct Bottle {
-    stable: Option<BottleStable>,
-}
-
-#[derive(Deserialize)]
-struct BottleStable {
-    rebuild: u64,
-    files: serde_json::Value,
-}
-
-#[derive(Deserialize)]
-struct Formula {
-    name: String,
-    versions: Versions,
-    bottle: Bottle,
-    revision: u64,
-}
-
-#[derive(Deserialize)]
-struct Formulae(Vec<Formula>);
-
-#[derive(Deserialize)]
-struct BottleInfo {
-    url: String,
-    sha256: String,
-}
+mod structs;
+use structs::*;
 
 #[derive(ValueEnum, Clone)]
 enum Mode {
+    /// List all bottles that need to check and download
+    /// Output format: sha256 url bottle_file.tar.gz
     GetBottlesMetadata,
+    /// Extract cask/formula json files to folder
     ExtractJson,
+    /// List all cask source files that need to check and download
+    /// Output format: sha256 url cask_source_file.rb
+    ListCaskSource,
 }
 
 #[derive(ValueEnum, Clone)]
@@ -96,7 +73,7 @@ fn d(f: &Formula) -> Option<()> {
     Some(())
 }
 
-fn e(f: &Value, name: &str, target: &PathBuf) -> Option<()> {
+fn e(f: &Value, name: &str, target: &Path) -> Option<()> {
     let tmp_name = format!("{}.json.new", name);
     let final_name = format!("{}.json", name);
 
@@ -153,6 +130,20 @@ fn main() {
             // Clean unused jsons
             for fname in existing_jsons {
                 std::fs::remove_file(target_dir.join(format!("{}.json", fname))).unwrap();
+            }
+        }
+        Mode::ListCaskSource => {
+            let f: Casks = serde_json::from_reader(std::io::stdin()).unwrap();
+            for f in f.0 {
+                let filename = Path::new(&f.ruby_source_path)
+                    .file_name()
+                    .unwrap()
+                    .to_str()
+                    .unwrap();
+                println!(
+                    "{} https://formulae.brew.sh/api/cask-source/{} {}",
+                    f.ruby_source_checksum.sha256, filename, filename
+                );
             }
         }
     }
