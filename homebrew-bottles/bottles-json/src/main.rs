@@ -1,7 +1,7 @@
 use std::{
     collections::HashSet,
     fs::File,
-    io::Read,
+    io::{Read, Write},
     path::{Path, PathBuf},
 };
 
@@ -93,8 +93,8 @@ fn e(f: &Value, name: &str, target: &Path) -> Option<()> {
     }
 
     {
-        let file = File::create(target.join(tmp_name.clone())).unwrap();
-        serde_json::to_writer(file, f).unwrap();
+        let mut file = File::create(target.join(tmp_name.clone())).unwrap();
+        file.write_all(contents.as_bytes()).unwrap();
     }
     std::fs::rename(target.join(tmp_name), target.join(final_name)).unwrap();
     Some(())
