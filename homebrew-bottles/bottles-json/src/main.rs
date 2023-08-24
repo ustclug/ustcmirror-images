@@ -1,6 +1,7 @@
 use std::{
     collections::HashSet,
     fs::File,
+    io::Read,
     path::{Path, PathBuf},
 };
 
@@ -76,6 +77,20 @@ fn d(f: &Formula) -> Option<()> {
 fn e(f: &Value, name: &str, target: &Path) -> Option<()> {
     let tmp_name = format!("{}.json.new", name);
     let final_name = format!("{}.json", name);
+    let contents = serde_json::to_string(f).unwrap();
+
+    {
+        // is it the same as existing file?
+        // this is to avoid unnecessary file metadata modification
+        let mut existing = String::new();
+        if let Ok(mut file) = File::open(target.join(final_name.clone())) {
+            if let Err(e) = file.read_to_string(&mut existing) {
+                eprintln!("Failed to read existing file {}: {}", final_name, e);
+            } else if existing == contents {
+                return Some(());
+            }
+        }
+    }
 
     {
         let file = File::create(target.join(tmp_name.clone())).unwrap();
