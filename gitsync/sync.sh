@@ -29,7 +29,8 @@ GITSYNC_CHECKOUT="${GITSYNC_CHECKOUT:-false}"
 GITSYNC_TREELESS="${GITSYNC_TREELESS:-false}"
 
 is_empty "$TO" && git clone -v --progress \
-    $([ "$GITSYNC_CHECKOUT" = true ] && echo "--bare") \
+    $([ "$GITSYNC_CHECKOUT" = false ] && echo "--bare") \
+    $([ "$GITSYNC_CHECKOUT" = true ] && echo "--no-checkout") \
     $([ "$GITSYNC_TREELESS" = true ] && echo "--filter=tree:0") \
     "$GITSYNC_URL" "$TO"
 
@@ -43,8 +44,13 @@ if [[ $GITSYNC_MIRROR = true ]]; then
     GITSYNC_BRANCH='+refs/heads/*:refs/heads/*'
 fi
 
-git fetch "$GITSYNC_REMOTE" "$GITSYNC_BRANCH" -v --progress --tags
-git update-server-info
+if [[ $GITSYNC_CHECKOUT = true ]]; then
+    git fetch "$GITSYNC_REMOTE" "$GITSYNC_BRANCH" -u -v --progress
+    git reset --hard FETCH_HEAD
+else
+    git fetch "$GITSYNC_REMOTE" "$GITSYNC_BRANCH" -v --progress --tags
+    git update-server-info
+fi
 
 if [[ $GITSYNC_BITMAP = true ]]; then
     git repack -abd
