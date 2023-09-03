@@ -11,6 +11,8 @@
 #GITSYNC_REMOTE=
 #GITSYNC_BITMAP=
 #GITSYNC_MIRROR=
+#GITSYNC_CHECKOUT=
+#GITSYNC_TREELESS=
 
 is_empty() {
     [[ -z $(ls -A "$1" 2>/dev/null) ]]
@@ -23,8 +25,14 @@ GITSYNC_REMOTE="${GITSYNC_REMOTE:-origin}"
 GITSYNC_BRANCH="${GITSYNC_BRANCH:-master:master}"
 GITSYNC_BITMAP="${GITSYNC_BITMAP:-false}"
 GITSYNC_MIRROR="${GITSYNC_MIRROR:-false}"
+GITSYNC_CHECKOUT="${GITSYNC_CHECKOUT:-false}"
+GITSYNC_TREELESS="${GITSYNC_TREELESS:-false}"
 
-is_empty "$TO" && git clone -v --progress --bare "$GITSYNC_URL" "$TO"
+is_empty "$TO" && git clone -v --progress \
+    $([ "$GITSYNC_CHECKOUT" = false ] && echo "--bare") \
+    $([ "$GITSYNC_CHECKOUT" = true ] && echo "--no-checkout") \
+    $([ "$GITSYNC_TREELESS" = true ] && echo "--filter=tree:0") \
+    "$GITSYNC_URL" "$TO"
 
 cd "$TO" || exit 1
 if [[ $GITSYNC_MIRROR = true ]]; then
@@ -36,8 +44,13 @@ if [[ $GITSYNC_MIRROR = true ]]; then
     GITSYNC_BRANCH='+refs/heads/*:refs/heads/*'
 fi
 
-git fetch "$GITSYNC_REMOTE" "$GITSYNC_BRANCH" -v --progress --tags
-git update-server-info
+if [[ $GITSYNC_CHECKOUT = true ]]; then
+    git fetch "$GITSYNC_REMOTE" "$GITSYNC_BRANCH" -u -v --progress
+    git reset --hard FETCH_HEAD
+else
+    git fetch "$GITSYNC_REMOTE" "$GITSYNC_BRANCH" -v --progress --tags
+    git update-server-info
+fi
 
 if [[ $GITSYNC_BITMAP = true ]]; then
     git repack -abd
