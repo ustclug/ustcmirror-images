@@ -8,7 +8,6 @@ from pathlib import Path
 from email.utils import parsedate_to_datetime
 import re
 import traceback
-import signal
 
 import requests
 from pyquery import PyQuery as pq
@@ -19,12 +18,20 @@ BASE_URL = os.getenv("UPSTREAM", "https://download.docker.com/")
 WORKING_DIR = os.getenv("TO")
 WORKERS = os.getenv("SYNC_WORKERS", 1)
 
-# connect and read timeout value
-TIMEOUT_OPTION = (7, 10)
+# (connect, read) timeout value
+TIMEOUT_OPTION = (7, 30)
 # user agent
 requests.utils.default_user_agent = lambda: SYNC_USER_AGENT
-# retries
-requests.adapters.DEFAULT_RETRIES = 3
+# retries, see https://stackoverflow.com/a/39050757/8460426
+def set_retry(max_retries):
+    def decorate(func):
+        def wrapper(self, *args, **kwargs):
+            func(self, *args, **kwargs)
+            self.max_retries = max_retries
+        return wrapper
+    return decorate
+func = requests.adapters.HTTPAdapter.__init__
+requests.adapters.HTTPAdapter.__init__ = set_retry(3)(func)
 
 REL_URL_RE = re.compile(r"https?:\/\/.+?\/(.+?)(\/index\.html)?$")
 
@@ -112,7 +119,7 @@ class RemoteSite:
 
 def requests_download(remote_url: str, dst_file: Path):
     # NOTE the stream=True parameter below
-    with requests.get(remote_url, stream=True) as r:
+    with requests.get(remote_url, timeout=TIMEOUT_OPTION, stream=True) as r:
         r.raise_for_status()
         remote_ts = parsedate_to_datetime(
             r.headers['last-modified']).timestamp()
