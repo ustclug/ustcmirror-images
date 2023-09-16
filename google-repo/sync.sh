@@ -1,9 +1,14 @@
 #!/bin/bash
 
+## Env
+#UPSTREAM=
+#GEOMETRIC_REPACK=
+
 set -e
 [[ -n $DEBUG ]] && set -x
 
 UPSTREAM="${UPSTREAM:-https://android.googlesource.com/mirror/manifest}"
+GEOMETRIC_REPACK="${GEOMETRIC_REPACK:-false}"
 
 PATH=/usr/local/bin:$PATH
 
@@ -35,19 +40,24 @@ echo "start repacking git objects"
 # to make AOSP sync faster.
 gc() {
     pushd "$1"
-    object_num=$(find objects/ -name '*.pack' | wc -l)
-    if [[ $object_num -gt 4 ]]; then
-        object_size=$(du -sk objects/pack/ | awk '{print $1}')
-        if [[ $object_size -gt 100000 || $object_num -gt 20 ]]; then
-            # only pack when we have more than 4 packs and 
-            # the size of pack dir is larger than 100MB, or we have more than 20 packs
-            echo "repacking $1: $object_num packs, $object_size KB"
-            git repack -abd
-        else
-            echo "skipping $1: $object_num packs, $object_size KB"
-        fi
+    if [[ $GEOMETRIC_REPACK == true ]]; then
+        echo "repacking $1"
+        git repack --write-midx --write-bitmap-index -d --geometric=2
     else
-        echo "skipping $1: $object_num packs"
+        object_num=$(find objects/ -type f -not -path '*/pack/*' -not -path '*/info/*' | wc)
+        if [[ $object_num -gt 4 ]]; then
+            object_size=$(du -sk --exclude=pack/* --exclude=info/* objects/ | awk '{print $1}')
+            if [[ $object_size -gt 100000 || $object_num -gt 20 ]]; then
+                # only pack when we have more than 4 packs and 
+                # the size of pack dir is larger than 100MB, or we have more than 20 packs
+                echo "repacking $1: $object_num packs, $object_size KB"
+                git repack -abd
+            else
+                echo "skipping $1: $object_num packs, $object_size KB"
+            fi
+        else
+            echo "skipping $1: $object_num packs"
+        fi
     fi
 };
 

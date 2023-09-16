@@ -264,6 +264,7 @@ A script for syncing projects (especially AOSP) using Google's `repo` tool.
 | Parameter  | Description                                                                  |
 | ---------- | ---------------------------------------------------------------------------- |
 | `UPSTREAM` | Upstream URL. Defaults to `https://android.googlesource.com/mirror/manifest` |
+| `GEOMETRIC_REPACK` | Use geometric repacking to speed up repacking (requires `git >= 2.34` on server). See [GitHub Blog: Scaling monorepo maintenance](https://github.blog/2021-04-29-scaling-monorepo-maintenance/). Defaults to false. |
 
 ### gsutil-rsync
 
