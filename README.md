@@ -253,6 +253,7 @@ To specified the repo list to sync, you can:
 | `GITSYNC_MIRROR`   | A shortcut to sync all branches and tags as if `GITSYNC_BRANCH='+refs/heads/*:refs/heads/*'`. `GITSYNC_BRANCH` is ignored when it is set. |
 | `GITSYNC_CHECKOUT` | Checkout instead of bare cloning. Defaults to `false`.                                                                                    |
 | `GITSYNC_TREELESS` | Use [treeless clone](https://github.blog/2020-12-21-get-up-to-speed-with-partial-clone-and-shallow-clone/) to save disk space. Defaults to `false`. |
+| `GITSYNC_GEOMETRIC`| Use [geometric repacking](https://github.blog/2021-04-29-scaling-monorepo-maintenance/) to speed up repacking. Requires `GITSYNC_BITMAP`. Defaults to `false`. |
 
 ### google-repo
 

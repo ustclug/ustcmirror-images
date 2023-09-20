@@ -13,6 +13,7 @@
 #GITSYNC_MIRROR=
 #GITSYNC_CHECKOUT=
 #GITSYNC_TREELESS=
+#GITSYNC_GEOMETRIC=
 
 is_empty() {
     [[ -z $(ls -A "$1" 2>/dev/null) ]]
@@ -27,6 +28,7 @@ GITSYNC_BITMAP="${GITSYNC_BITMAP:-false}"
 GITSYNC_MIRROR="${GITSYNC_MIRROR:-false}"
 GITSYNC_CHECKOUT="${GITSYNC_CHECKOUT:-false}"
 GITSYNC_TREELESS="${GITSYNC_TREELESS:-false}"
+GITSYNC_GEOMETRIC="${GITSYNC_GEOMETRIC:-false}"
 
 is_empty "$TO" && git clone -v --progress \
     $([ "$GITSYNC_CHECKOUT" = false ] && echo "--bare") \
@@ -53,6 +55,10 @@ else
 fi
 
 if [[ $GITSYNC_BITMAP = true ]]; then
-    git repack -abd
+    if [[ $GITSYNC_GEOMETRIC = true ]]; then
+        git repack --write-midx --write-bitmap-index -d --geometric=2
+    else
+        git repack -abd
+    fi
     git gc --auto
 fi
