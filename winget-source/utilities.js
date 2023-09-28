@@ -14,9 +14,18 @@ import { EX_IOERR, EX_SOFTWARE, EX_USAGE } from './sysexits.js'
 /**
  * `fetch` implementation with retry support.
  *
- * Defaults to 3 retries with 1000ms delay, on network errors only.
+ * 3 retries with 1000ms delay, on network errors and HTTP code >= 400.
  */
-const fetch = withRetry(originalFetch);
+const fetch = withRetry(originalFetch, {
+    retryOn: (attempt, error, response) => {
+        if (attempt > 3) return false;
+
+        if (error || response.status >= 400) {
+            winston.warn(`retrying ${response.url} (${attempt})`);
+            return true;
+        }
+    }
+});
 
 /** The remote URL of a pre-indexed WinGet source repository. */
 const remote = process.env.WINGET_REPO_URL ?? 'https://cdn.winget.microsoft.com/cache';
