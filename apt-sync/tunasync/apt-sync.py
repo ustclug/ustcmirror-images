@@ -98,6 +98,7 @@ def check_and_download(url: str, dst_file: Path, caching = False)->int:
                 os.utime(dst_file, (remote_ts, remote_ts))
         return 0
     except BaseException as e:
+        print("Error when downloading", url, flush=True)
         print(e, flush=True)
         if dst_file.is_file(): dst_file.unlink()
         if url in download_cache: del download_cache[url]
