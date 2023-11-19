@@ -22,7 +22,8 @@ export PRE_SYNC_SCRIPT=${PRE_SYNC_SCRIPT:-"/pre-sync.sh"}
 export POST_SYNC_SCRIPT=${POST_SYNC_SCRIPT:-"/post-sync.sh"}
 export OWNER="${OWNER:-0:0}"
 export LOG_ROTATE_CYCLE="${LOG_ROTATE_CYCLE:-0}"
-export TO=/data/ LOGDIR=/log/
+export TO="${TO:-/data/}"
+export LOGDIR="${LOGDIR:-/log/}"
 export LOGFILE="$LOGDIR/result.log"
 declare -i RETRY
 export RETRY="${RETRY:-0}"
