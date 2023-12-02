@@ -5,12 +5,8 @@
 ## And the configuration is different from tunasync, too.
 ## Be careful when backporting changes (and read `main()` before that).
 
-import hashlib
 import traceback
-import json
 import os
-import re
-import shutil
 import subprocess as sp
 import tempfile
 import argparse
@@ -156,16 +152,17 @@ def substitute_vars(s: str, vardict: Dict[str, str]) -> str:
     return s
 
 def main():
-
     parser = argparse.ArgumentParser()
     parser.add_argument("base_url", type=str, help="base URL")
     parser.add_argument("os_version", type=str, help="e.g. 6-8")
     parser.add_argument("component", type=str, help="e.g. mysql56-community,mysql57-community")
-    parser.add_argument("arch", type=str, help="e.g. x86_64")
+    parser.add_argument("arch", type=str, help="e.g. x86_64,aarch64")
     parser.add_argument("repo_name", type=str, help="e.g. @{comp}-el@{os_ver}, usually the parent name of repodata")
     parser.add_argument("working_dir", type=str, help="working directory (with substitution support)")
     parser.add_argument("--download-repodata", action='store_true',
                         help='download repodata files instead of generating them')
+    parser.add_argument("--pass-arch-to-reposync", action='store_true',
+                        help='''pass --arch to reposync to further filter packages by 'arch' field in metadata (NOT recommended, prone to missing packages in some repositories, e.g. mysql)''')
     args = parser.parse_args()
 
     if '@' == args.os_version[0]:
@@ -241,8 +238,10 @@ enabled=1
             #     failed.append(('', arch))
             #     continue
 
-            cmd_args = ["dnf", "reposync", "-a", arch, "-c", conf.name, "--delete", "-p", dst]
-            print("Launching reposync", flush=True)
+            cmd_args = ["dnf", "reposync", "-c", conf.name, "--delete", "-p", dst]
+            if args.pass_arch_to_reposync:
+                cmd_args += ["--arch", arch]
+            print(f"Launching reposync with command: {cmd_args}", flush=True)
             # print(cmd_args)
             ret = sp.run(cmd_args)
             if ret.returncode != 0:
@@ -256,13 +255,14 @@ enabled=1
             else:
                 cmd_args = ["createrepo_c", "--update", "-v", "-c", cache_dir, "-o", str(working_dir), str(working_dir)]
                 # print(cmd_args)
+                print(f"Launching createrepo_c with command: {cmd_args}", flush=True)
                 ret = sp.run(cmd_args)
             calc_repo_size(dst)
 
             conf.close()
 
     if len(failed) > 0:
-        print("Failed YUM repos: ", failed)
+        print(f"Failed YUM repos: {failed}", flush=True)
         exit(len(failed))
     else:
         if len(REPO_SIZE_FILE) > 0:
