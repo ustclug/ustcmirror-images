@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import os
 import sys
 import threading
@@ -6,6 +7,7 @@ import traceback
 import queue
 from pathlib import Path
 from datetime import datetime
+
 
 # Set BindIP
 # https://stackoverflow.com/a/70772914
@@ -62,28 +64,35 @@ def sizeof_fmt(num, suffix='iB'):
         num /= 1024.0
     return "%.2f%s%s" % (num, 'Y', suffix)
 
+
 # wrap around requests.get to use token if available
-
-
 def github_get(*args, **kwargs):
-    headers = kwargs['headers'] if 'headers' in kwargs else {}
+    headers = kwargs.get('headers', {})
     if 'GITHUB_TOKEN' in os.environ:
-        headers['Authorization'] = 'token {}'.format(
-            os.environ['GITHUB_TOKEN'])
+        headers['Authorization'] = 'token {}'.format(os.environ['GITHUB_TOKEN'])
     kwargs['headers'] = headers
     return requests.get(*args, **kwargs)
 
 
 def do_download(remote_url: str, dst_file: Path, remote_ts: float):
-    # NOTE the stream=True parameter below
-    with github_get(remote_url, stream=True) as r:
-        r.raise_for_status()
-        with open(dst_file, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=1024**2):
-                if chunk:  # filter out keep-alive new chunks
-                    f.write(chunk)
-                    # f.flush()
-        os.utime(dst_file, (remote_ts, remote_ts))
+    tmpfile = dst_file.parent / (dst_file.name + '.downloading')
+    try:
+        # NOTE the stream=True parameter below
+        with github_get(remote_url, stream=True) as r:
+            r.raise_for_status()
+            with open(tmpfile, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=1024**2):
+                    if chunk:  # filter out keep-alive new chunks
+                        f.write(chunk)
+                        # f.flush()
+            os.utime(tmpfile, (remote_ts, remote_ts))
+    except Exception as e:
+        raise
+    else:
+        tmpfile.rename(dst_file)
+    finally:
+        if tmpfile.is_file():
+            tmpfile.unlink()
 
 
 def downloading_worker(q):
@@ -100,8 +109,6 @@ def downloading_worker(q):
             do_download(url, dst_file, updated)
         except Exception:
             print("Failed to download", url, flush=True)
-            if dst_file.is_file():
-                dst_file.unlink()
 
         q.task_done()
 
