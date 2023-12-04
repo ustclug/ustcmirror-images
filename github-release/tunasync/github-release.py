@@ -235,7 +235,7 @@ def main():
         print(f"syncing {repo} to {repo_dir}")
 
         try:
-            r = github_get(f"{args.base_url}{repo}/releases?per_page=100")
+            r = github_get(f"{args.base_url}{repo}/releases")
             r.raise_for_status()
             releases = r.json()
         except:
