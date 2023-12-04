@@ -111,9 +111,10 @@ def downloading_worker(q):
         print("downloading", url, "to",
               dst_file.relative_to(working_dir), flush=True)
         try:
-            do_download(url, dst_file, updated)
+            do_download(url, dst_file, updated, remote_size)
         except Exception:
-            print("Failed to download", url, flush=True)
+            print("Failed to download", url, "with this exception:",flush=True)
+            traceback.print_exc()
 
         q.task_done()
 
