@@ -443,6 +443,11 @@ if __name__ == '__main__':
         update_channels(channels)
         garbage_collect()
     else:
+        # Just update the symlinks
+        for channel in channels:
+            chan_path = working_dir / channel
+            chan_path_update = working_dir / f'.{channel}.update'
+            chan_path_update.rename(chan_path)
         logging.info("Mode set to 'Releases only', not updating binary cache and garbage collecting")
     if failure:
         sys.exit(1)
