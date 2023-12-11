@@ -308,9 +308,10 @@ def update_channels(channels):
                 stdout=subprocess.PIPE
             )
             if process.returncode != 0:
-                channel_failure = True
                 logging.info(f'    - Error status: {process.returncode}')
-                break
+                # ignore error for this batch: workaround https://github.com/ustclug/discussions/issues/440
+                # channel_failure = True
+                # break
             else:
                 infos = json.loads(process.stdout)
                 for info in infos:
