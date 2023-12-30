@@ -4,11 +4,9 @@
 
 import Control.Monad (unless)
 import Data.Aeson qualified as A
-import Data.Aeson.KeyMap qualified as KM
 import Data.ByteString.Lazy qualified as BS
 import Data.List.Split (splitOn)
 import Data.Map.Strict qualified as M
-import Data.Text qualified as T
 import Data.Yaml
 import System.Directory (createDirectory, doesDirectoryExist, doesFileExist)
 import System.Environment (getEnv)
@@ -56,6 +54,12 @@ data StackSetup = StackSetup
     msys2 :: M.Map Platform ResourceInfo,
     ghc :: M.Map Platform (M.Map Version ResourceInfo),
     ghcjs :: GhcJSInfo
+  }
+  deriving (Show)
+
+data GitHubReleases = GitHubReleases
+  { prerelease :: Bool,
+    urls :: [URL]
   }
   deriving (Show)
 
@@ -109,6 +113,12 @@ instance ToJSON StackSetup where
         "ghc" .= ghc,
         "ghcjs" .= ghcjs
       ]
+
+instance FromJSON GitHubReleases where
+  parseJSON = withObject "GitHubReleases" $ \o -> do
+    prerelease <- o .: "prerelease"
+    urls <- o .: "assets" >>= mapM (.: "browser_download_url")
+    return GitHubReleases {..}
 
 redirectToMirror :: Path -> ResourceInfo -> ResourceInfo
 redirectToMirror relPath (ResourceInfo ver url conLen s1 s256) =
@@ -236,18 +246,16 @@ syncStack basePath = do
   let filename = "/tmp/latest"
   text <- BS.readFile filename
   let latestInfo = case A.decode text of
-        Just (Object o) -> o
+        Just o -> o :: GitHubReleases
         _ -> error "decode latest fail!"
-  let (Just (Bool prerelease)) = KM.lookup "prerelease" latestInfo
-  let (Just (Array assets)) = KM.lookup "assets" latestInfo
-  unless prerelease (syncAssets assets)
+  let isPreRelease = prerelease latestInfo
+  let assetsURLs = urls latestInfo
+  unless isPreRelease (syncAssets assetsURLs)
   where
     syncAssets = mapM_ syncAsset
-    syncAsset assetValue = do
-      let (Object asset) = assetValue
-      let (Just (String url)) = KM.lookup "browser_download_url" asset
+    syncAsset urlValue = do
       download
-        (T.unpack url)
+        urlValue
         (basePath </> "stack")
         ("", "")
         False
