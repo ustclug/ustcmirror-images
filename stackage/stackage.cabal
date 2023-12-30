@@ -1,0 +1,30 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.36.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           stackage
+version:        0.0.0
+build-type:     Simple
+
+executable stackage
+  main-is: stackage.hs
+  other-modules:
+      Paths_stackage
+  default-extensions:
+      RecordWildCards
+      OverloadedStrings
+  ghc-options: -Wall -O2 -Wno-name-shadowing
+  build-depends:
+      aeson
+    , base
+    , bytestring
+    , containers
+    , directory
+    , filepath
+    , process
+    , split
+    , text
+    , yaml
+  default-language: GHC2021

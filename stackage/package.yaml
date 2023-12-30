@@ -1,0 +1,28 @@
+name: stackage
+
+dependencies:
+- base
+- yaml
+- process
+- containers
+- aeson
+- split
+- bytestring
+- text
+- filepath
+- directory
+
+executables:
+  stackage:
+    main: stackage.hs
+
+ghc-options:
+- -Wall
+- -O2
+- -Wno-name-shadowing
+
+language: GHC2021
+
+default-extensions:
+- RecordWildCards
+- OverloadedStrings
