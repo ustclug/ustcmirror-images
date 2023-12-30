@@ -1,6 +1,7 @@
+{-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE ImportQualifiedPost #-}
+
 import Control.Monad (unless)
 import Data.Aeson qualified as A
 import Data.Aeson.KeyMap qualified as KM
