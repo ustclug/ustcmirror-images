@@ -220,7 +220,7 @@ Notice: BIND_ADDRESS is only added for `curl` in freebsd-ports. Make sure that g
 [![ghcup](https://img.shields.io/docker/image-size/ustcmirror/ghcup/latest)](https://hub.docker.com/r/ustcmirror/ghcup "ghcup")
 [![ghcup](https://img.shields.io/docker/pulls/ustcmirror/ghcup)](https://hub.docker.com/r/ustcmirror/ghcup "ghcup")
 
-ghcup does not have outstanding configuration options. See also [stackage](#stackage) on replacing the Hackage repository.
+ghcup does not have outstanding configuration options.
 
 ### github-release
 
@@ -413,9 +413,7 @@ ref:
 [![stackage](https://img.shields.io/docker/image-size/ustcmirror/stackage/latest)](https://hub.docker.com/r/ustcmirror/stackage "stackage")
 [![stackage](https://img.shields.io/docker/pulls/ustcmirror/stackage)](https://hub.docker.com/r/ustcmirror/stackage "stackage")
 
-Stackage doesn't need to specify upstream, but this mirror use cabal to install necessary Haskell packages. Replacing default mirror of cabal with faster one will speed up building process.
-
-Read the [user guide](https://www.haskell.org/cabal/users-guide/installing-packages.html#repository-specification) before writing preferred mirror to `config`
+Stackage doesn't need to specify upstream.
 
 ### tsumugu
 
