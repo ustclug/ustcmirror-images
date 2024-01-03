@@ -1,10 +1,13 @@
 #!/bin/bash
 set -e
+
+HASKELL_DEPS="ghc libghc-yaml-dev libghc-process-extras-dev \
+              libghc-aeson-dev libghc-split-dev"
+# Please use ldd to check the dependencies of compiled binary
+HASKELL_KEEP="libyaml-0-2"
+
 apt-get update
-apt-get install -y aria2 ca-certificates git wget libghc-bzlib-dev xz-utils musl-dev apt-utils ghc cabal-install haskell-platform libghc-cabal-dev
-mkdir /root/.cabal
-mv config /root/.cabal/
-cabal update
-cabal install --lib yaml-0.11.8.0 process containers aeson-2.1.1.0
-ghc -O2 stackage.hs -package unordered-containers -package split
-rm -rf /root/.cabal && apt-get purge -y --auto-remove libghc-bzlib-dev xz-utils musl-dev apt-utils ghc cabal-install haskell-platform libghc-cabal-dev && rm -rf /var/lib/apt/lists/*
+apt-get install -y aria2 ca-certificates git $HASKELL_DEPS $HASKELL_KEEP
+ghc -O2 stackage.hs
+
+rm -rf stackage.* && apt-get purge --auto-remove -y $HASKELL_DEPS && rm -rf /var/lib/apt/lists/*
