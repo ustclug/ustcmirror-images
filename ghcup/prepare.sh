@@ -8,7 +8,7 @@ HASKELL_DEPS="ghc libghc-aeson-dev libghc-lens-dev libghc-lens-aeson-dev \
 HASKELL_KEEP="libyaml-0-2"
 
 apt-get update
-apt-get install -y aria2 ca-certificates git $HASKELL_DEPS $HASKELL_KEEP
+apt-get install -y aria2 ca-certificates git curl $HASKELL_DEPS $HASKELL_KEEP
 
 # compile with Haskell language extensions
 ghc -O2 -XScopedTypeVariables -XOverloadedStrings ghcupsync.hs
