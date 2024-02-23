@@ -91,7 +91,7 @@ index 7ac7977..f8e11ba 100644
 -    ) | /usr/sbin/sendmail -i -- "$@" || :
 -}
 diff --git a/bin/ftpsync b/bin/ftpsync
-index 25cefe5..e920f9f 100755
+index 25cefe5..2e51162 100755
 --- a/bin/ftpsync
 +++ b/bin/ftpsync
 @@ -1,6 +1,8 @@
@@ -180,10 +180,12 @@ index 25cefe5..e920f9f 100755
  
  # Open log and close stdin
  open_log $LOG
-@@ -753,37 +730,3 @@ fi
- rm -f "${LOCK}"
+@@ -751,39 +728,3 @@ fi
  
- declare -f -F send_mail_new_version > /dev/null && send_mail_new_version || :
+ # Remove the Archive-Update-in-Progress file before we push our downstreams.
+ rm -f "${LOCK}"
+-
+-declare -f -F send_mail_new_version > /dev/null && send_mail_new_version || :
 -
 -if [[ ${HUB} = true ]]; then
 -    # Trigger slave mirrors if we had a push for stage2 or all, or if its mhop
