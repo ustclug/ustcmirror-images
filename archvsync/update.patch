@@ -1,8 +1,8 @@
 diff --git a/bin/common b/bin/common
-index a6eac7f..09edbc8 100644
+index 7ac7977..f8e11ba 100644
 --- a/bin/common
 +++ b/bin/common
-@@ -206,7 +206,6 @@ log () {
+@@ -219,7 +219,6 @@ log() {
  error () {
      log "$@"
      LOG_ERROR=1
@@ -10,7 +10,7 @@ index a6eac7f..09edbc8 100644
  }
  
  # log the message using log() but then also send a mail
-@@ -216,7 +215,6 @@ error_mailf () {
+@@ -229,7 +228,6 @@ error_mailf () {
      shift
      log "$m"
      LOG_ERROR=1
@@ -18,7 +18,7 @@ index a6eac7f..09edbc8 100644
  }
  
  # run a hook
-@@ -271,7 +269,7 @@ savelog() {
+@@ -284,7 +282,7 @@ savelog() {
  # Return rsync version
  rsync_protocol() {
      RSYNC_VERSION="$(${RSYNC} --version)"
@@ -27,7 +27,7 @@ index a6eac7f..09edbc8 100644
      if [[ ${RSYNC_VERSION} =~ ${RSYNC_REGEX} ]]; then
          echo ${BASH_REMATCH[2]}
      fi
-@@ -331,62 +329,3 @@ join_by() {
+@@ -358,62 +356,3 @@ join_by() {
      shift
      echo $*
  }
@@ -62,7 +62,7 @@ index a6eac7f..09edbc8 100644
 -To: $(join_by ', ' "$@")
 -Auto-Submitted: auto-generated
 -MIME-Version: 1.0
--Content-Type: multipart/mixed; boundary=${boundary}
+-Content-Type: multipart/mixed; boundary="${boundary}"
 -
 -EOF
 -        if [[ ${body[@]:-} ]]; then
@@ -91,11 +91,11 @@ index a6eac7f..09edbc8 100644
 -    ) | /usr/sbin/sendmail -i -- "$@" || :
 -}
 diff --git a/bin/ftpsync b/bin/ftpsync
-index 151b6b6..3ea575a 100755
+index 25cefe5..e920f9f 100755
 --- a/bin/ftpsync
 +++ b/bin/ftpsync
 @@ -1,6 +1,8 @@
- #! /bin/bash
+ #!/usr/bin/env bash
  # No, we can not deal with sh alone.
  
 +[[ $DEBUG = true ]] && set -x
@@ -115,27 +115,30 @@ index 151b6b6..3ea575a 100755
 +LOCKDIR="${BASEDIR}/locks"
 +LOGDIR="${LOGDIR:-${BASEDIR}/log}"
 +
-+VERSION="g616e661"
++VERSION="65335777"
 +
 +. "${BINDIR}/common"
  
  ########################################################################
  ########################################################################
-@@ -100,38 +111,8 @@ cleanup() {
-     # all done. Mail the log, exit.
-     log "Mirrorsync done";
+@@ -84,41 +95,8 @@ cleanup() {
+         log "Mirrorsync done"
+     fi
  
 -    if [[ -n ${MAILTO} ]]; then
 -        local args=()
 -        local send=
 -        local subject="SUCCESS"
--        local rsync_error="${LOGDIR}/rsync-${NAME}.error"
--        local rsync_log="${LOGDIR}/rsync-${NAME}.log"
 -
 -        # In case rsync had something on stderr
--        if [[ -s $rsync_error ]]; then
--            args+=(-a $rsync_error -a $LOG)
+-        if [[ -s $LOG_RSYNC_ERROR ]]; then
+-            args+=(-a $LOG_RSYNC_ERROR -a $LOG)
 -            subject="ERROR: rsync errors"
+-            send=1
+-        # In case of direct errors
+-        elif [[ $rc -gt 0 ]]; then
+-            args+=(-a $LOG)
+-            subject="ERROR"
 -            send=1
 -        # In case admin want all logs
 -        elif [[ ${ERRORSONLY} = false ]]; then
@@ -148,37 +151,19 @@ index 151b6b6..3ea575a 100755
 -        if [[ $send ]]; then
 -            # Someone wants full logs including rsync
 -            if [[ ${FULLLOGS} = true ]]; then
--                args+=(-a $rsync_log)
+-                args+=(-a $LOG_RSYNC)
 -            fi
 -            mailf "${args[@]}" -s "[${PROGRAM}@$(hostname -s)] ${subject}" ${MAILTO}
 -        fi
 -    fi
 -
-     savelog "${LOGDIR}/rsync-${NAME}.log"
-     savelog "${LOGDIR}/rsync-${NAME}.error"
+     savelog "${LOG_RSYNC}"
+     savelog "${LOG_RSYNC_ERROR}"
 -    savelog "$LOG" > /dev/null
  
      rm -f "${LOCK}"
  
-@@ -217,7 +198,7 @@ tracefile() {
-         fi
- 
-         if [[ -d ${TO}/dists ]]; then
--            ARCH=$(find ${TO}/dists \( -name 'Packages.*' -o -name 'Sources.*' \) -printf '%h\n' 2>/dev/null |
-+            ARCH=$(find ${TO}/dists \( -name 'Packages.*' -o -name 'Sources.*' \) -exec dirname {} \; 2>/dev/null |
-                 sed -Ene 's#.*/binary-([^/]+)$#\1#p; s#.*/(source)$#\1#p' | sort -u | tr '\n' ' ')
-             if [[ $ARCH ]]; then
-                 echo "Architectures: ${ARCH}"
-@@ -261,7 +242,7 @@ tracefile() {
-     mv "${TO}/${TRACEHIERARCHY}".new "${TO}/${TRACEHIERARCHY}"
-     cp "${TO}/${TRACEHIERARCHY}" "${TO}/${TRACEHIERARCHY}.mirror"
- 
--    (cd "${TO}/${TRACEDIR}" && ls -1rt $(find . -type f \! -name "_*" -printf "%f\n")) > "${TO}/${TRACELIST}"
-+    (cd "${TO}/${TRACEDIR}" && ls -1rt $(find . -type f \! -name "_*" -exec basename {} \;)) > "${TO}/${TRACELIST}"
- }
- 
- arch_imexclude() {
-@@ -387,7 +368,6 @@ create_logdir
+@@ -381,7 +359,6 @@ create_logdir
  ########################################################################
  MIRRORNAME=${MIRRORNAME:-$(hostname -f)}
  TO=${TO:-"/srv/mirrors/debian/"}
@@ -186,25 +171,19 @@ index 151b6b6..3ea575a 100755
  HUB=${HUB:-"false"}
  
  # Connection options
-@@ -569,10 +549,10 @@ if ! ( set -o noclobber; echo "$$" > "${LOCK}") 2> /dev/null; then
+@@ -568,7 +545,7 @@ if ! ( set -o noclobber; echo "$$" > "${LOCK}") 2> /dev/null; then
  fi
  
  # We want to cleanup always
 -trap cleanup EXIT TERM HUP INT QUIT
 +trap cleanup EXIT
  
- # Start log by redirecting stdout and stderr there and closing stdin
--exec >"$LOG" 2>&1 <&-
-+exec 2>&1 <&-
- log "Mirrorsync start"
- 
- # Look who pushed us and note that in the log.
-@@ -743,39 +723,3 @@ fi
- 
- # Remove the Archive-Update-in-Progress file before we push our downstreams.
+ # Open log and close stdin
+ open_log $LOG
+@@ -753,37 +730,3 @@ fi
  rm -f "${LOCK}"
--
--declare -f -F send_mail_new_version > /dev/null && send_mail_new_version || :
+ 
+ declare -f -F send_mail_new_version > /dev/null && send_mail_new_version || :
 -
 -if [[ ${HUB} = true ]]; then
 -    # Trigger slave mirrors if we had a push for stage2 or all, or if its mhop
@@ -234,7 +213,7 @@ index 151b6b6..3ea575a 100755
 -
 -        HOOK=(
 -            HOOKNR=5
--            HOOKSCR=${HOOK5}
+-            HOOKSCR="${HOOK5}"
 -        )
 -        hook $HOOK
 -    fi
