@@ -347,6 +347,7 @@ rustup-install.sh https://sh.rustup.rs/
 | `NIX_MIRROR_THREADS`     | Number of threads to use to download in parallel. Defaults to 10                                                                                                  |
 | `NIX_MIRROR_RETAIN_DAYS` | Days to consider old versions as reachable. Defaults to 30. (The newest version of a release is always reachable)                                                 |
 | `NIX_MIRROR_DELETE_OLD`  | Whether to actually delete files in garbage collection. Set to `1` to delete and `0` to not delete. Defaults to `1`                                               |
+| `NIX_MIRROR_RELEASES_ONLY` | Don't download binary blobs. Defaults to 0 (false)                                                                                                                |
 
 ### pypi
 
