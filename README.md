@@ -38,6 +38,7 @@
     - [stackage](#stackage)
     - [tsumugu](#tsumugu)
     - [winget-source](#winget-source)
+    - [yukina](#yukina)
     - [yum-sync](#yum-sync)
   - [License](#license)
   - [Contributing](#contributing)
@@ -419,7 +420,7 @@ Stackage doesn't need to specify upstream.
 ### tsumugu
 
 [![tsumugu](https://img.shields.io/docker/image-size/ustcmirror/tsumugu/latest)](https://hub.docker.com/r/ustcmirror/tsumugu "tsumugu")
-[![stackage](https://img.shields.io/docker/pulls/ustcmirror/tsumugu)](https://hub.docker.com/r/ustcmirror/tsumugu "tsumugu")
+[![tsumugu](https://img.shields.io/docker/pulls/ustcmirror/tsumugu)](https://hub.docker.com/r/ustcmirror/tsumugu "tsumugu")
 
 An alternative HTTP(S) syncing tool, replacing `rclone` and `lftp` in some cases. See [usage](https://github.com/taoky/tsumugu#usage).
 
@@ -445,6 +446,22 @@ A handy tool to sync pre-indexed [Windows Package Manager](https://github.com/mi
 | --------------------- | ---------------------------------------------------------------- |
 | `WINGET_REPO_URL`     | Sets the URL of upstream. Defaults to [`https://cdn.winget.microsoft.com/cache`](https://cdn.winget.microsoft.com/cache) |
 | `WINGET_REPO_JOBS`    | Parallel jobs. Defaults to 8.                                    |
+
+### yukina
+
+[![yukina](https://img.shields.io/docker/image-size/ustcmirror/yukina/latest)](https://hub.docker.com/r/ustcmirror/yukina "yukina")
+[![yukina](https://img.shields.io/docker/pulls/ustcmirror/yukina)](https://hub.docker.com/r/ustcmirror/yukina "yukina")
+
+[yukina](https://github.com/taoky/yukina) analyses given nginx log, and maintains binary blobs (which does not modify once exist) state under given size limit.
+Usually this shall be used with another sync container that only downloads index files.
+
+Note that you shall bind necessary nginx log to `/nginx-log/` when syncing.
+
+| Parameter          | Description                                                                                           |
+| ------------------ | ----------------------------------------------------------------------------------------------------- |
+| `YUKINA_SIZE_LIMIT` | The size limit of binary blobs. Defaults to `512g`.                                                     |
+| `YUKINA_FILTER` | Accepts regex to filter out binary blobs. Defaults to empty. |
+| `YUKINA_EXTRA`  | Extra options. Defaults to empty.                                                                      |
 
 ### yum-sync
 
