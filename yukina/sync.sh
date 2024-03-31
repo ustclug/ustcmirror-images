@@ -25,6 +25,18 @@ fi
 
 export NO_COLOR=1
 
+# handling with xargs trick
+# https://github.com/ustclug/ustcmirror-images/issues/111
+
+filter_array=()
+while IFS= read -r -d '' arg; do
+    filter_array+=("$arg")
+done < <(echo "$YUKINA_FILTER" | xargs printf "%s\0")
+extra_array=()
+while IFS= read -r -d '' arg; do
+    extra_array+=("$arg")
+done < <(echo "$YUKINA_EXTRA" | xargs printf "%s\0")
+
 exec yukina --name "$REPO" \
     --log-path "/nginx-log" \
     --repo-path "$TO" \
@@ -32,4 +44,4 @@ exec yukina --name "$REPO" \
     --url "$UPSTREAM" \
     --remote-sizedb "$TO/.yukina-remote.db" \
     --local-sizedb "$TO/.yukina-local.db" \
-    $YUKINA_FILTER $YUKINA_EXTRA
+    "${filter_array[@]}" "${extra_array[@]}"
