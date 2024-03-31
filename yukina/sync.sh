@@ -6,6 +6,7 @@
 
 ## SET IN ENVIRONMENT VARIABLES
 #BIND_ADDRESS=
+#UPSTREAM=
 #YUKINA_SIZE_LIMIT=
 #YUKINA_FILTER=
 #YUKINA_EXTRA=
@@ -29,5 +30,6 @@ exec yukina --name "$REPO" \
     --repo-path "$TO" \
     --size-limit "$YUKINA_SIZE_LIMIT" \
     --url "$UPSTREAM" \
-    --size-database "$TO/.yukina-size.db" \
+    --remote-sizedb "$TO/.yukina-remote.db" \
+    --local-sizedb "$TO/.yukina-local.db" \
     $YUKINA_FILTER $YUKINA_EXTRA
