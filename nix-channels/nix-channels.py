@@ -17,6 +17,7 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 
 from urllib3.util.retry import Retry
+from urllib3 import PoolManager
 
 ### Config
 
@@ -139,7 +140,10 @@ def download(url, dest):
 
     download_dest.rename(dest)
 
-client = minio.Minio('s3.amazonaws.com')
+def minio_client_with_timeout(timeout):
+    return PoolManager(timeout=timeout, retries=retries)
+
+client = minio.Minio('s3.amazonaws.com', http_client=minio_client_with_timeout(TIMEOUT))
 
 def get_channels():
     return [
