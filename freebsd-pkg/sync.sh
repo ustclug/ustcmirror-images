@@ -13,6 +13,8 @@ export PARALLEL_SHELL=/bin/bash
 # for curl-helper
 export by_hash=$(realpath $TO/.by-hash)
 
+EXIT_CODE=0
+
 channel_sync() {
 	local baseurl=$1
 	local basedir=$2
@@ -38,6 +40,7 @@ channel_sync() {
 
 	if [[ $? -ne 0 ]]; then
 		echo "[FATAL] download meta-data failed."
+		EXIT_CODE=$((EXIT_CODE + 1))
 		return 1
 	fi
 
@@ -48,6 +51,7 @@ channel_sync() {
 	tar -C $tmpdir -xJf $tmpdir/packagesite.txz packagesite.yaml
 	if [[ $? -ne 0 ]]; then
 		echo '[FATAL] unzip packagesite.txz failed.'
+		EXIT_CODE=$((EXIT_CODE + 1))
 		return 1
 	fi
 	jq -r '"\(.sum) \(.repopath)"' $tmpdir/packagesite.yaml | sort -k2 > $meta
@@ -88,3 +92,5 @@ find $TO -type d -print0 | xargs -0 chmod 755
 rm $FBSD_PLATFORMS
 
 clean_hash_file
+
+exit $EXIT_CODE
