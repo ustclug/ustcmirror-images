@@ -46,6 +46,7 @@ channel_sync() {
 
 	# get pkg software
 	enable_mtime=true fail_to_exit=false download <<<"$(echo Latest/{pkg-devel.txz,pkg.txz,pkg.txz.sig} | tr ' ' '\n')"
+	enable_mtime=true fail_to_exit=false download <<<"$(echo Latest/{pkg-devel.pkg,pkg.pkg,pkg.pkg.sig} | tr ' ' '\n')"
 
 	# get packages
 	tar -C $tmpdir -xJf $tmpdir/packagesite.txz packagesite.yaml
