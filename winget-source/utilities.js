@@ -245,11 +245,12 @@ export function setupEnvironment() {
  *
  * @param {string} uri URI to sync.
  * @param {boolean} update Whether to allow updating an existing file.
+ * @param {boolean} saveAsTmp Whether to save with ".tmp" suffix 
  *
  * @returns {Promise<boolean>} If the file is new or updated.
  */
-export async function syncFile(uri, update = true) {
-    const localPath = getLocalPath(uri);
+export async function syncFile(uri, update = true, saveAsTmp = false) {
+    const localPath = getLocalPath(saveAsTmp ? uri + ".tmp" : uri);
     const remoteURL = getRemoteURL(uri);
     await mkdir(path.dirname(localPath), { recursive: true });
     if (existsSync(localPath)) {

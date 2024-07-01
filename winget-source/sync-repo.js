@@ -1,5 +1,5 @@
 import async from 'async'
-import { rm } from 'fs/promises'
+import { rm, rename } from 'fs/promises'
 import { EX_IOERR, EX_TEMPFAIL, EX_UNAVAILABLE } from './sysexits.js';
 
 import {
@@ -17,9 +17,12 @@ const { parallelLimit, remote, sqlite3, winston } = setupEnvironment();
 
 winston.info(`start syncing with ${remote}`);
 
-syncFile('source.msix').catch(exitOnError(EX_UNAVAILABLE)).then(async _ => {
+const tmpSourceFilename = 'source.msix.tmp';
+const sourceFilename = 'source.msix';
+
+syncFile(sourceFilename, false, true).catch(exitOnError(EX_UNAVAILABLE)).then(async _ => {
     const temp = await makeTempDirectory('winget-repo-');
-    const database = await extractDatabaseFromBundle(getLocalPath('source.msix'), temp);
+    const database = await extractDatabaseFromBundle(getLocalPath(tmpSourceFilename), temp);
     const db = new sqlite3.Database(database, sqlite3.OPEN_READONLY, exitOnError(EX_IOERR));
 
     db.all('SELECT * FROM pathparts', (error, rows) => {
@@ -31,6 +34,7 @@ syncFile('source.msix').catch(exitOnError(EX_UNAVAILABLE)).then(async _ => {
             async.eachLimit(uris, parallelLimit, download, (error) => {
                 rm(temp, { recursive: true });
                 exitOnError(EX_TEMPFAIL)(error);
+                rename(getLocalPath(tmpSourceFilename), getLocalPath(sourceFilename));
                 winston.info(`successfully synced with ${remote}`);
             });
         });
