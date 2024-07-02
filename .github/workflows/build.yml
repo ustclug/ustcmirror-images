@@ -28,6 +28,17 @@ jobs:
           COMMIT_FROM: ${{ github.event.before }}
           COMMIT_TO: ${{ github.event.after }}
 
+      - name: Test Rsync container
+        run: |
+          docker run --rm -t \
+            --name=syncing-ubuntu \
+            -e RSYNC_HOST=rsync.archive.ubuntu.com \
+            -e RSYNC_PATH=ubuntu/ \
+            -e RSYNC_EXTRA='--dry-run --no-r --dirs' \
+            --tmpfs /data \
+            --tmpfs /log \
+            ustcmirror/rsync
+
       - name: Deploy
         if: "github.ref == 'refs/heads/master' && github.repository == 'ustclug/ustcmirror-images'"
         run: ./push.sh
