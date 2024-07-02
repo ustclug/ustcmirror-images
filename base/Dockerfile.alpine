@@ -4,5 +4,6 @@ LABEL maintainer="Jian Zeng <anonymousknight96 AT gmail.com>" \
 RUN apk add --no-cache bash tzdata su-exec && \
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
+ADD ["pip.conf", "/etc/"]
 VOLUME ["/data", "/log"]
 CMD ["/entry.sh"]
