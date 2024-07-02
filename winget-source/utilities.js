@@ -21,7 +21,10 @@ const fetch = withRetry(originalFetch, {
         if (attempt > 3) return false;
 
         if (error || response.status >= 400) {
-            winston.warn(`retrying ${response.url} (${attempt})`);
+            if (response)
+                winston.warn(`retrying ${response.url} (${attempt})`);
+            else
+                winston.warn(`retrying (${attempt}, error: ${error})`);
             return true;
         }
     }
