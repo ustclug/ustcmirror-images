@@ -22,7 +22,7 @@ jobs:
 
       - name: Run build script
         run: |
-          python3 ./configure.py
+          python3 configure.py
           make all
         env:
           COMMIT_FROM: ${{ github.event.before }}

@@ -1,5 +1,5 @@
-#!/usr/bin/env python -O
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3 -O
+
 import os
 from os import path
 import sys
