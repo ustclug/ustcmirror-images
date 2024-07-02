@@ -1,11 +1,11 @@
 FROM debian:bookworm-slim
 LABEL maintainer="Jian Zeng <anonymousknight96 AT gmail.com>" \
       org.ustcmirror.images=true
-ADD ["entry.sh", "savelog", "/usr/local/bin/"]
-VOLUME ["/data", "/log"]
-ENTRYPOINT ["entry.sh"]
 RUN echo 'Asia/Shanghai' > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata && \
     apt-get update && apt-get install -y wget && \
     wget -O /usr/local/bin/su-exec https://ftp.ustclug.org/misc/su-exec && chmod +x /usr/local/bin/su-exec && \
     echo "592f25c51d0e4c90945ece8c4fa35018d20a1091ac109c98b66eb95deef211c7 /usr/local/bin/su-exec" | sha256sum -c - && \
     apt-get purge -y --auto-remove wget && rm -rf /var/lib/apt/lists/*
+ADD ["entry.sh", "savelog", "/usr/local/bin/"]
+VOLUME ["/data", "/log"]
+CMD ["/entry.sh"]
