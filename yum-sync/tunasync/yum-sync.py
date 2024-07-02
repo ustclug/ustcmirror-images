@@ -26,12 +26,14 @@ DOWNLOAD_TIMEOUT=int(os.getenv('DOWNLOAD_TIMEOUT', '1800'))
 REPO_STAT = {}
 
 OS_TEMPLATE = {
-    'centos-current': ["7"],
-    'rhel-current': ["7", "8", "9"],
-    # https://en.wikipedia.org/wiki/Fedora_Linux_release_history
-    'fedora-current': ["36", "37"],
-    # https://en.wikipedia.org/wiki/OpenSUSE#Version_history
-    'opensuse-current': ["15.4"],
+    # keep for compatibility only
+    'centos-current': ["NONEXIST!"],
+    # https://endoflife.date/rhel (excluding ELCS)
+    'rhel-current': ["8", "9"],
+    # https://endoflife.date/fedora
+    'fedora-current': ["39", "40"],
+    # https://endoflife.date/opensuse
+    'opensuse-current': ["15.5", "15.6"],
 }
 
 def calc_repo_size(path: Path):

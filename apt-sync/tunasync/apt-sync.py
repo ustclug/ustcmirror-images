@@ -37,7 +37,7 @@ requests.utils.default_user_agent = lambda: APTSYNC_USER_AGENT
 
 OS_TEMPLATE = {
     'ubuntu-lts': ["focal", "jammy", "noble"],
-    'debian-current': ["buster", "bullseye", "bookworm"],
+    'debian-current': ["bullseye", "bookworm"],
     'debian-latest2': ["bullseye", "bookworm"],
     'debian-latest': ["bookworm"],
 }
@@ -287,7 +287,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("base_url", type=str, help="base URL")
-    parser.add_argument("os_version", type=str, help="e.g. buster,@ubuntu-lts")
+    parser.add_argument("os_version", type=str, help="e.g. bookworm,@ubuntu-lts")
     parser.add_argument("component", type=str, help="e.g. multiverse,contrib")
     parser.add_argument("arch", type=str, help="e.g. i386,amd64")
     parser.add_argument("working_dir", type=Path, help="working directory")
