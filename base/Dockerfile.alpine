@@ -6,4 +6,4 @@ RUN apk add --no-cache bash tzdata su-exec && \
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
 ADD ["pip.conf", "/etc/"]
 VOLUME ["/data", "/log"]
-CMD ["/usr/local/bin/entry.sh"]
+CMD ["entry.sh"]
