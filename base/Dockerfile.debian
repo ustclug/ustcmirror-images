@@ -8,4 +8,4 @@ RUN echo 'Asia/Shanghai' > /etc/timezone && dpkg-reconfigure -f noninteractive t
     apt-get purge -y --auto-remove wget && rm -rf /var/lib/apt/lists/*
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
 VOLUME ["/data", "/log"]
-CMD ["/entry.sh"]
+CMD ["/usr/local/bin/entry.sh"]

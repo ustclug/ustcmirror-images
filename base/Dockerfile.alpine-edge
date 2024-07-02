@@ -5,4 +5,4 @@ RUN apk add --no-cache bash tzdata su-exec && \
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
 VOLUME ["/data", "/log"]
-CMD ["/entry.sh"]
+CMD ["/usr/local/bin/entry.sh"]
