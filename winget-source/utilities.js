@@ -46,6 +46,26 @@ const debugMode = process.env.DEBUG === 'true';
 const localAddress = process.env.BIND_ADDRESS;
 
 /**
+ * Get whether the given string is IPv4, v6 or neither, to workaround Node.js limitation
+ * 
+ * @param {address} string The address
+ * 
+ * @returns {int} 4 (IPv4), 6 (IPv6), or 0 (neither)
+ */
+function isIP(address) {
+    const ipv4Pattern = /^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)$/;
+    const ipv6Pattern = /^(([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}|:)|(([0-9a-fA-F]{1,4}:){1,7}|:):(([0-9a-fA-F]{1,4}:){1,7}|:))$/;
+
+    if (ipv4Pattern.test(address)) {
+        return 4;
+    } else if (ipv6Pattern.test(address)) {
+        return 6;
+    } else {
+        return 0;
+    }
+}
+
+/**
  * Get last modified date from HTTP response headers.
  *
  * @param {Response} response The HTTP `fetch` response to parse.
@@ -232,6 +252,7 @@ export function setupEnvironment() {
     }
     if (localAddress) {
         https.globalAgent.options.localAddress = localAddress;
+        https.globalAgent.options.family = isIP(localAddress);
     }
     return {
         debugMode,
