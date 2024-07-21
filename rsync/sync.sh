@@ -5,24 +5,6 @@
 #LOGDIR=
 #LOGFILE=
 
-## SET IN ENVIRONMENT VARIABLES
-#BIND_ADDRESS=
-
-#RSYNC_PATH=
-#RSYNC_HOST=
-
-#RSYNC_USER=
-#RSYNC_PASSWORD=
-#RSYNC_RSH=
-#RSYNC_BW=
-#RSYNC_EXCLUDE=
-#RSYNC_MAXDELETE=
-#RSYNC_TIMEOUT=
-#RSYNC_BLKSIZE=
-#RSYNC_EXTRA=
-#RSYNC_DELAY_UPDATES=
-#RSYNC_SPARSE=
-
 set -eu
 [[ $DEBUG = true ]] && set -x
 
@@ -31,6 +13,7 @@ BIND_ADDRESS=${BIND_ADDRESS:-''}
 RSYNC_USER=${RSYNC_USER:-''}
 RSYNC_BW=${RSYNC_BW:-0}
 RSYNC_EXCLUDE=${RSYNC_EXCLUDE:-' --exclude .~tmp~/'}
+RSYNC_FILTER=${RSYNC_FILTER:-}
 RSYNC_MAXDELETE=${RSYNC_MAXDELETE:-4000}
 RSYNC_TIMEOUT="${RSYNC_TIMEOUT:-14400}"
 RSYNC_BLKSIZE="${RSYNC_BLKSIZE:-8192}"
@@ -55,6 +38,11 @@ if [[ -n $BIND_ADDRESS ]]; then
     else
         opts+=" -4 --address $BIND_ADDRESS"
     fi
+fi
+
+if [ -n "$RSYNC_FILTER" ]; then
+  echo "$RSYNC_FILTER" > /tmp/rsync-filter.txt
+  opts+=" --filter='merge /tmp/rsync-filter.txt'"
 fi
 
 if [[ -n $RSYNC_RSH ]]; then

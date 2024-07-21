@@ -35,6 +35,7 @@ jobs:
             -e RSYNC_HOST=rsync.archive.ubuntu.com \
             -e RSYNC_PATH=ubuntu/ \
             -e RSYNC_EXTRA='--dry-run --no-r --dirs' \
+            -e RSYNC_FILTER='- .trace' \
             --tmpfs /data \
             --tmpfs /log \
             ustcmirror/rsync

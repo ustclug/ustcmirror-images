@@ -393,6 +393,7 @@ ref:
 | `RSYNC_BW`            | Bandwidth limit. Defaults to `0`.                                |
 | `RSYNC_EXTRA`         | Extra options. Defaults to empty.                                |
 | `RSYNC_EXCLUDE`       | Files to be excluded. Defaults to `--exclude .~tmp~/`.           |
+| `RSYNC_FILTER`        | Filter rules. More convenient for larger lists.                  |
 | `RSYNC_BLKSIZE`       | Defaults to `8192`.                                              |
 | `RSYNC_TIMEOUT`       | Defaults to `14400`.                                             |
 | `RSYNC_SPARSE`        | Defaults to `true`.                                              |
