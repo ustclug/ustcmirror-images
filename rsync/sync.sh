@@ -40,13 +40,16 @@ if [[ -n $BIND_ADDRESS ]]; then
     fi
 fi
 
+filter_file=/tmp/rsync-filter.txt
+echo '- .~tmp~/' > "$filter_file"
 if [ -n "$RSYNC_FILTER" ]; then
-  echo "$RSYNC_FILTER" > /tmp/rsync-filter.txt
-  opts+=" --filter='merge /tmp/rsync-filter.txt'"
+  echo "$RSYNC_FILTER" >> "$filter_file"
 fi
 
 if [[ -n $RSYNC_RSH ]]; then
-    exec rsync $RSYNC_EXCLUDE --bwlimit "$RSYNC_BW" --max-delete "$RSYNC_MAXDELETE" $opts $RSYNC_EXTRA "$RSYNC_HOST:$RSYNC_PATH" "$TO"
+  RSYNC_URL="$RSYNC_HOST:$RSYNC_PATH"
 else
-    exec rsync $RSYNC_EXCLUDE --bwlimit "$RSYNC_BW" --max-delete "$RSYNC_MAXDELETE" $opts $RSYNC_EXTRA "$RSYNC_HOST::$RSYNC_PATH" "$TO"
+  RSYNC_URL="rsync://$RSYNC_HOST/$RSYNC_PATH"
 fi
+
+exec rsync $RSYNC_EXCLUDE --filter="merge $filter_file" --bwlimit "$RSYNC_BW" --max-delete "$RSYNC_MAXDELETE" $opts $RSYNC_EXTRA "$RSYNC_URL" "$TO"
