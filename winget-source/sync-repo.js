@@ -14,6 +14,7 @@ import {
     syncFile
 } from './utilities.js'
 
+
 const { parallelLimit, remote, sqlite3, winston } = setupEnvironment();
 
 winston.info(`start syncing with ${remote}`);
