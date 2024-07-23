@@ -28,6 +28,7 @@
 * 如果您的 `sync.sh` 最终只需要调用一个外部程序的话，应该以 `exec program` 的方式调用，方便接收 signal。
 * 同步时产生的日志应该都输出到 `stdout` 或 `stderr`。
 * 在不会过分麻烦您的前提下，请让构建出来的镜像尽可能小，构建的时间尽可能短。
+* 如果 image 添加了对 `BIND_ADDRESS` 的支持，在 `Dockerfile` 中添加 `LABEL bind_support=true`（反之不需要）。
 
 如果您对整个项目是如何构建的感兴趣的话，可以继续往下阅读。
 

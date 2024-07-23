@@ -6,6 +6,7 @@ RUN gcc -Wall -fPIC -shared -o lchmod.so lchmod.c
 
 FROM ustcmirror/base:alpine
 LABEL maintainer="Jian Zeng <anonymousknight96 AT gmail.com>"
+LABEL bind_support=true
 RUN apk add --no-cache rsync openssh-client
 ADD sync.sh /
 COPY --from=builder /tmp/lchmod.so /usr/local/lib/lchmod.so
