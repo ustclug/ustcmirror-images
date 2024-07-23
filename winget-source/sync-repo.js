@@ -81,7 +81,6 @@ await syncIndex(2, async (db) => {
                 try {
                     return metadataBuffer ? await buildManifestURIsFromPackageMetadata(metadataBuffer) : [];
                 } catch (error) {
-                    winston.error(`inspecting ${uri}`)
                     exitWithCode(EX_SOFTWARE, error);
                 }
             });
