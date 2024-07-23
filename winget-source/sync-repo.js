@@ -1,7 +1,6 @@
 import assert from 'assert'
 import async from 'async'
-import { writeFileSync } from 'fs'
-import { rm } from 'fs/promises'
+import { rm, writeFile } from 'fs/promises'
 import { EX_IOERR, EX_TEMPFAIL, EX_UNAVAILABLE } from './sysexits.js'
 
 import {
@@ -19,9 +18,10 @@ const { parallelLimit, remote, sqlite3, winston } = setupEnvironment();
 
 winston.info(`start syncing with ${remote}`);
 
-const sourceFilename = 'source.msix';
+const sourceV1Filename = 'source.msix';
+const sourceV2Filename = 'source2.msix';
 
-syncFile(sourceFilename, true, false).catch(exitOnError(EX_UNAVAILABLE)).then(async result => {
+syncFile(sourceV1Filename, true, false).catch(exitOnError(EX_UNAVAILABLE)).then(async result => {
     assert(result, "Failed to catch error when syncing source index!");
     const [buffer, synced] = result;
     if (synced) {
@@ -39,8 +39,11 @@ syncFile(sourceFilename, true, false).catch(exitOnError(EX_UNAVAILABLE)).then(as
                 async.eachLimit(uris, parallelLimit, download, (error) => {
                     rm(temp, { recursive: true });
                     exitOnError(EX_TEMPFAIL)(error);
-                    writeFileSync(getLocalPath(sourceFilename), buffer);
-                    winston.info(`successfully synced with ${remote}`);
+                    writeFile(getLocalPath(sourceV1Filename), buffer).then(_ =>
+                        syncFile(sourceV2Filename, true)
+                    ).then(_ => {
+                        winston.info(`successfully synced with ${remote}`);
+                    });
                 });
             });
         });
