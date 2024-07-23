@@ -9,7 +9,9 @@ import sqlite3 from 'sqlite3'
 import winston from 'winston'
 import { existsSync } from 'fs'
 import { mkdir, mkdtemp, readFile, stat, utimes, writeFile } from 'fs/promises'
+import { isIP } from 'net'
 import { EX_IOERR, EX_SOFTWARE, EX_USAGE } from './sysexits.js'
+
 
 /**
  * `fetch` implementation with retry support.
@@ -44,26 +46,6 @@ const debugMode = process.env.DEBUG === 'true';
 
 /** Local IP address to be bound to HTTPS requests. */
 const localAddress = process.env.BIND_ADDRESS;
-
-/**
- * Get whether the given string is IPv4, v6 or neither, to workaround Node.js limitation
- * 
- * @param {address} string The address
- * 
- * @returns {int} 4 (IPv4), 6 (IPv6), or 0 (neither)
- */
-function isIP(address) {
-    const ipv4Pattern = /^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)$/;
-    const ipv6Pattern = /^(([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}|:)|(([0-9a-fA-F]{1,4}:){1,7}|:):(([0-9a-fA-F]{1,4}:){1,7}|:))$/;
-
-    if (ipv4Pattern.test(address)) {
-        return 4;
-    } else if (ipv6Pattern.test(address)) {
-        return 6;
-    } else {
-        return 0;
-    }
-}
 
 /**
  * Get last modified date from HTTP response headers.
@@ -183,14 +165,14 @@ export function exitOnError(code = 1) {
 /**
  * Extract database file from the source bundle.
  *
- * @param {fs.PathLike} msixPath Path of the MSIX bundle file.
+ * @param {fs.PathLike | Buffer} msixFile Path or buffer of the MSIX bundle file.
  * @param {fs.PathLike} directory Path of directory to save the file.
  *
  * @returns {Promise<string>} Path of the extracted `index.db` file.
  */
-export async function extractDatabaseFromBundle(msixPath, directory) {
+export async function extractDatabaseFromBundle(msixFile, directory) {
     try {
-        const bundle = await readFile(msixPath);
+        const bundle = (msixFile instanceof Buffer) ? msixFile : await readFile(msixFile);
         const zip = await JSZip.loadAsync(bundle);
         const buffer = await zip.file(path.posix.join('Public', 'index.db')).async('Uint8Array');
         const destination = path.join(directory, 'index.db');
@@ -265,22 +247,38 @@ export function setupEnvironment() {
 }
 
 /**
+ * Save a file with specific modified date.
+ *
+ * @param {string} path File path to write to.
+ * @param {Buffer} buffer Whether to save the file to disk.
+ * @param {Date | null | undefined} modifiedAt Modified date of the file, if applicable.
+ *
+ * @returns {Promise<void>} Fulfills with `undefined` with upon success.
+ */
+export async function saveFile(path, buffer, modifiedAt) {
+    await writeFile(path, buffer);
+    if (modifiedAt) {
+        await utimes(path, modifiedAt, modifiedAt);
+    }
+}
+
+/**
  * Sync a file with the remote server asynchronously.
  *
  * @param {string} uri URI to sync.
  * @param {boolean} update Whether to allow updating an existing file.
- * @param {boolean} saveAsTmp Whether to save with ".tmp" suffix 
+ * @param {boolean} save Whether to save the file to disk.
  *
- * @returns {Promise<boolean>} If the file is new or updated.
+ * @returns {Promise<[?Buffer, ?Date, boolean]>} File buffer, last modified date and if the file is updated.
  */
-export async function syncFile(uri, update = true, saveAsTmp = false) {
-    const localPath = getLocalPath(saveAsTmp ? uri + ".tmp" : uri);
+export async function syncFile(uri, update = true, save = true) {
+    const localPath = getLocalPath(uri);
     const remoteURL = getRemoteURL(uri);
     await mkdir(path.dirname(localPath), { recursive: true });
     if (existsSync(localPath)) {
         if (!update) {
             winston.debug(`skipped ${uri} because it already exists`);
-            return false;
+            return [null, null, false];
         }
         const response = await fetch(remoteURL, { method: 'HEAD' });
         const lastModified = getLastModifiedDate(response);
@@ -289,17 +287,17 @@ export async function syncFile(uri, update = true, saveAsTmp = false) {
             const localFile = await stat(localPath);
             if (localFile.mtime.getTime() == lastModified.getTime() && localFile.size == contentLength) {
                 winston.debug(`skipped ${uri} because it's up to date`);
-                return false;
+                return [null, lastModified, false];
             }
         }
     }
     winston.info(`downloading from ${remoteURL}`);
     const response = await fetch(remoteURL);
-    const buffer = await response.arrayBuffer();
-    await writeFile(localPath, Buffer.from(buffer));
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
     const lastModified = getLastModifiedDate(response);
-    if (lastModified) {
-        await utimes(localPath, lastModified, lastModified);
+    if (save) {
+        await saveFile(localPath, buffer, lastModified);
     }
-    return true;
+    return [buffer, lastModified ?? null, true];
 }
