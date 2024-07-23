@@ -1,6 +1,7 @@
 import assert from 'assert'
 import async from 'async'
-import { rm, writeFile } from 'fs/promises'
+
+import { rm } from 'fs/promises'
 import { EX_IOERR, EX_TEMPFAIL, EX_UNAVAILABLE } from './sysexits.js'
 
 import {
@@ -10,6 +11,7 @@ import {
     extractDatabaseFromBundle,
     getLocalPath,
     makeTempDirectory,
+    saveFile,
     setupEnvironment,
     syncFile
 } from './utilities.js'
@@ -24,11 +26,11 @@ const sourceV2Filename = 'source2.msix';
 
 syncFile(sourceV1Filename, true, false).catch(exitOnError(EX_UNAVAILABLE)).then(async result => {
     assert(result, "Failed to catch error when syncing source index!");
-    const [buffer, synced] = result;
+    const [indexBuffer, modifiedDate, synced] = result;
     if (synced) {
-        assert(buffer !== null, "Failed to get the source index buffer!");
+        assert(indexBuffer !== null, "Failed to get the source index buffer!");
         const temp = await makeTempDirectory('winget-repo-');
-        const database = await extractDatabaseFromBundle(buffer, temp);
+        const database = await extractDatabaseFromBundle(indexBuffer, temp);
         const db = new sqlite3.Database(database, sqlite3.OPEN_READONLY, exitOnError(EX_IOERR));
 
         db.all('SELECT * FROM pathparts', (error, rows) => {
@@ -40,7 +42,7 @@ syncFile(sourceV1Filename, true, false).catch(exitOnError(EX_UNAVAILABLE)).then(
                 async.eachLimit(uris, parallelLimit, download, (error) => {
                     rm(temp, { recursive: true });
                     exitOnError(EX_TEMPFAIL)(error);
-                    writeFile(getLocalPath(sourceV1Filename), buffer).then(_ =>
+                    saveFile(getLocalPath(sourceV1Filename), indexBuffer, modifiedDate).then(_ =>
                         syncFile(sourceV2Filename, true)
                     ).then(_ => {
                         winston.info(`successfully synced with ${remote}`);

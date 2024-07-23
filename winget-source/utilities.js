@@ -247,13 +247,29 @@ export function setupEnvironment() {
 }
 
 /**
+ * Save a file with specific modified date.
+ *
+ * @param {string} path File path to write to.
+ * @param {Buffer} buffer Whether to save the file to disk.
+ * @param {Date | null | undefined} modifiedAt Modified date of the file, if applicable.
+ *
+ * @returns {Promise<void>} Fulfills with `undefined` with upon success.
+ */
+export async function saveFile(path, buffer, modifiedAt) {
+    await writeFile(path, buffer);
+    if (modifiedAt) {
+        await utimes(path, modifiedAt, modifiedAt);
+    }
+}
+
+/**
  * Sync a file with the remote server asynchronously.
  *
  * @param {string} uri URI to sync.
  * @param {boolean} update Whether to allow updating an existing file.
  * @param {boolean} save Whether to save the file to disk.
  *
- * @returns {Promise<[?Buffer, boolean]>} File buffer and if the file is new or updated.
+ * @returns {Promise<[?Buffer, ?Date, boolean]>} File buffer, last modified date and if the file is updated.
  */
 export async function syncFile(uri, update = true, save = true) {
     const localPath = getLocalPath(uri);
@@ -262,7 +278,7 @@ export async function syncFile(uri, update = true, save = true) {
     if (existsSync(localPath)) {
         if (!update) {
             winston.debug(`skipped ${uri} because it already exists`);
-            return [null, false];
+            return [null, null, false];
         }
         const response = await fetch(remoteURL, { method: 'HEAD' });
         const lastModified = getLastModifiedDate(response);
@@ -271,7 +287,7 @@ export async function syncFile(uri, update = true, save = true) {
             const localFile = await stat(localPath);
             if (localFile.mtime.getTime() == lastModified.getTime() && localFile.size == contentLength) {
                 winston.debug(`skipped ${uri} because it's up to date`);
-                return [null, false];
+                return [null, lastModified, false];
             }
         }
     }
@@ -279,12 +295,9 @@ export async function syncFile(uri, update = true, save = true) {
     const response = await fetch(remoteURL);
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    const lastModified = getLastModifiedDate(response);
     if (save) {
-        await writeFile(localPath, buffer);
-        const lastModified = getLastModifiedDate(response);
-        if (lastModified) {
-            await utimes(localPath, lastModified, lastModified);
-        }
+        await saveFile(localPath, buffer, lastModified);
     }
-    return [buffer, true];
+    return [buffer, lastModified ?? null, true];
 }
