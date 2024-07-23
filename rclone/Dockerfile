@@ -1,5 +1,5 @@
 FROM ustcmirror/base:alpine
-LABEL maintainer "Jian Zeng <anonymousknight96 AT gmail.com>"
+LABEL maintainer="Jian Zeng <anonymousknight96 AT gmail.com>"
 
 ARG RCLONE_VERSION=v1.50.2
 ENV RCLONE_DELETE_AFTER=true \

@@ -1,5 +1,5 @@
 FROM ustcmirror/base:alpine
-LABEL maintainer "YR Chen <stevapple@icloud.com>"
+LABEL maintainer="YR Chen <stevapple@icloud.com>"
 
 RUN apk add --no-cache nodejs
 

@@ -1,5 +1,5 @@
 FROM ustcmirror/base:alpine
-LABEL maintainer "Keyu Tao <taoky AT ustclug.org>"
+LABEL maintainer="Keyu Tao <taoky AT ustclug.org>"
 ARG YUKINA_VERSION=20240715
 
 RUN apk add --no-cache wget ca-certificates zstd && \
