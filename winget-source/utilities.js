@@ -270,18 +270,18 @@ export function setupEnvironment() {
  *
  * @param {string} uri URI to sync.
  * @param {boolean} update Whether to allow updating an existing file.
- * @param {boolean} saveAsTmp Whether to save with ".tmp" suffix 
+ * @param {boolean} save Whether to save the file to disk.
  *
- * @returns {Promise<boolean>} If the file is new or updated.
+ * @returns {Promise<[?Buffer, boolean]>} File buffer and if the file is new or updated.
  */
-export async function syncFile(uri, update = true, saveAsTmp = false) {
-    const localPath = getLocalPath(saveAsTmp ? uri + ".tmp" : uri);
+export async function syncFile(uri, update = true, save = true) {
+    const localPath = getLocalPath(uri);
     const remoteURL = getRemoteURL(uri);
     await mkdir(path.dirname(localPath), { recursive: true });
     if (existsSync(localPath)) {
         if (!update) {
             winston.debug(`skipped ${uri} because it already exists`);
-            return false;
+            return [null, false];
         }
         const response = await fetch(remoteURL, { method: 'HEAD' });
         const lastModified = getLastModifiedDate(response);
@@ -290,17 +290,20 @@ export async function syncFile(uri, update = true, saveAsTmp = false) {
             const localFile = await stat(localPath);
             if (localFile.mtime.getTime() == lastModified.getTime() && localFile.size == contentLength) {
                 winston.debug(`skipped ${uri} because it's up to date`);
-                return false;
+                return [null, false];
             }
         }
     }
     winston.info(`downloading from ${remoteURL}`);
     const response = await fetch(remoteURL);
-    const buffer = await response.arrayBuffer();
-    await writeFile(localPath, Buffer.from(buffer));
-    const lastModified = getLastModifiedDate(response);
-    if (lastModified) {
-        await utimes(localPath, lastModified, lastModified);
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    if (save) {
+        await writeFile(localPath, buffer);
+        const lastModified = getLastModifiedDate(response);
+        if (lastModified) {
+            await utimes(localPath, lastModified, lastModified);
+        }
     }
-    return true;
+    return [buffer, true];
 }
