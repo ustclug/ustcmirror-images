@@ -40,7 +40,7 @@ async function syncIndex(version, handler) {
             return;
         }
         assert(indexBuffer !== null, "Failed to get the source index buffer!");
-    
+
         // unpack, extract and load index database
         try {
             const databaseFilePath = await extractDatabaseFromBundle(indexBuffer, tempDirectory);
@@ -56,7 +56,7 @@ async function syncIndex(version, handler) {
         } catch (error) {
             exitWithCode(EX_IOERR, error);
         }
-    
+
         // update index package
         await cacheFileWithURI(sourceFilename, indexBuffer, modifiedDate);
     } catch (error) {

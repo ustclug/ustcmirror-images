@@ -233,7 +233,7 @@ export function exitWithCode(code = 0, error = undefined) {
 
 /**
  * Build a list of all manifest URIs from compressed package metadata.
- * 
+ *
  * Reference: https://github.com/kyz/libmspack/blob/master/libmspack/mspack/mszipd.c
  *
  * @param {fs.PathLike | Buffer} mszymlMetadata Path or buffer of the MSZYML metadata file.
