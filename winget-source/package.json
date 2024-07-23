@@ -11,6 +11,7 @@
     "fetch-retry": "^5.0.4",
     "jszip": "^3.10.1",
     "node-fetch": "^3.3.1",
+    "promised-sqlite3": "^2.1.0",
     "sqlite3": "^5.1.5",
     "winston": "^3.8.2"
   },
