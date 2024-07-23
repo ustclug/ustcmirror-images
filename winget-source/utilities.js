@@ -7,10 +7,13 @@ import path from 'path'
 import process from 'process'
 import sqlite3 from 'sqlite3'
 import winston from 'winston'
+import YAML from 'yaml'
+import Zlib from 'zlib'
 
 import { existsSync } from 'fs'
 import { mkdir, mkdtemp, readFile, stat, utimes, writeFile } from 'fs/promises'
 import { isIP } from 'net'
+import { promisify } from 'util'
 
 import { EX_IOERR, EX_USAGE } from './sysexits.js'
 
@@ -48,6 +51,23 @@ const debugMode = process.env.DEBUG === 'true';
 
 /** Local IP address to be bound to HTTPS requests. */
 const localAddress = process.env.BIND_ADDRESS;
+
+/** Decompress a deflated stream asynchronously. */
+const inflateRaw = promisify(Zlib.inflateRaw);
+
+/**
+ * Decompress a MSZIP-compressed buffer.
+ *
+ * @param {Buffer} buffer Compressed buffer using MSZIP.
+ *
+ * @returns {Buffer} The decompressed buffer.
+ */
+async function decompressMSZIP(buffer) {
+    if (buffer.toString('ascii', 28, 30) != 'CK') {
+        throw new Error('Invalid MSZIP format');
+    }
+    return await inflateRaw(buffer.subarray(30));
+}
 
 /**
  * Get last modified date from HTTP response headers.
@@ -98,6 +118,19 @@ function resolvePathpart(id, pathparts) {
 }
 
 /**
+ * Resolve manifest URIs against package metadata.
+ *
+ * Reference: https://github.com/microsoft/winget-cli/blob/master/src/AppInstallerCommonCore/PackageVersionDataManifest.cpp
+ *
+ * @param {{ sV: string, vD: { v: string, rP: string, s256H: string }[], [key: string]: any }} metadata The parsed package metadata object.
+ *
+ * @returns {string[]} URIs resolved from the given metadata.
+ */
+function resolvePackageManifestURIs(metadata) {
+    return metadata.vD.map((version) => version.rP);
+}
+
+/**
  * Set up the default `winston` logger instance.
  */
 function setupWinstonLogger() {
@@ -141,8 +174,21 @@ export function buildPathpartMap(rows) {
  *
  * @returns {string[]} Manifest URIs to sync.
  */
-export function buildURIList(rows, pathparts) {
+export function buildManifestURIs(rows, pathparts) {
     return rows.map(row => resolvePathpart(row.pathpart, pathparts));
+}
+
+/**
+ * Build a list of all package metadata URIs from database query.
+ *
+ * @param {{ id: string, hash: Buffer, [key: string]: string }[]} rows Rows returned by the query.
+ *
+ * @returns {string[]} Package metadata URIs to sync.
+ */
+export function buildPackageMetadataURIs(rows) {
+    return rows.map(row =>
+        path.posix.join('packages', row.id, row.hash.toString('hex').slice(0, 8), 'versionData.mszyml')
+    );
 }
 
 /**
@@ -162,6 +208,22 @@ export function exitWithCode(code = 0, error = undefined) {
 }
 
 /**
+ * Build a list of all manifest URIs from compressed package metadata.
+ * 
+ * Reference: https://github.com/kyz/libmspack/blob/master/libmspack/mspack/mszipd.c
+ *
+ * @param {fs.PathLike | Buffer} mszymlMetadata Path or buffer of the MSZYML metadata file.
+ *
+ * @returns {Promise<string[]>} Manifest URIs to sync.
+ */
+export async function buildManifestURIsFromPackageMetadata(mszymlMetadata) {
+    const compressedBuffer = Buffer.isBuffer(mszymlMetadata) ? mszymlMetadata : await readFile(mszymlMetadata);
+    const buffer = await decompressMSZIP(compressedBuffer);
+    const metadata = YAML.parse(buffer.toString());
+    return resolvePackageManifestURIs(metadata);
+}
+
+/**
  * Extract database file from the source bundle.
  *
  * @param {fs.PathLike | Buffer} msixFile Path or buffer of the MSIX bundle file.
@@ -170,7 +232,7 @@ export function exitWithCode(code = 0, error = undefined) {
  * @returns {Promise<string>} Path of the extracted `index.db` file.
  */
 export async function extractDatabaseFromBundle(msixFile, directory) {
-    const bundle = (msixFile instanceof Buffer) ? msixFile : await readFile(msixFile);
+    const bundle = Buffer.isBuffer(msixFile) ? msixFile : await readFile(msixFile);
     const zip = await JSZip.loadAsync(bundle);
     const buffer = await zip.file(path.posix.join('Public', 'index.db')).async('Uint8Array');
     const destination = path.join(directory, 'index.db');
