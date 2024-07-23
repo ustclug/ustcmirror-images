@@ -146,12 +146,12 @@ function resolvePathpart(id, pathparts) {
  *
  * Reference: https://github.com/microsoft/winget-cli/blob/master/src/AppInstallerCommonCore/PackageVersionDataManifest.cpp
  *
- * @param {{ sV: string, vD: { v: string, rP: string, s256H: string }[], [key: string]: any }} metadata The parsed package metadata object.
+ * @param {{ sV: string, vD: { v: string, rP: string | undefined, s256H: string | undefined }[], [key: string]: any }} metadata The parsed package metadata object.
  *
  * @returns {string[]} URIs resolved from the given metadata.
  */
 function resolvePackageManifestURIs(metadata) {
-    return metadata.vD.map((version) => version.rP);
+    return metadata.vD.map((version) => version.rP).filter(Boolean);
 }
 
 /**
