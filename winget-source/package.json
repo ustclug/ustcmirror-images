@@ -1,6 +1,6 @@
 {
   "name": "@ustcmirror/winget-source",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Sync with pre-indexed WinGet source repository.",
   "main": "sync-repo.js",
   "author": "YR Chen <stevapple@icloud.com>",
@@ -13,7 +13,8 @@
     "node-fetch": "^3.3.1",
     "promised-sqlite3": "^2.1.0",
     "sqlite3": "^5.1.5",
-    "winston": "^3.8.2"
+    "winston": "^3.8.2",
+    "yaml": "^2.4.5"
   },
   "scripts": {
     "start": "node sync-repo.js"

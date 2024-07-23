@@ -7,10 +7,13 @@ import path from 'path'
 import process from 'process'
 import sqlite3 from 'sqlite3'
 import winston from 'winston'
+import YAML from 'yaml'
+import Zlib from 'zlib'
 
 import { existsSync } from 'fs'
 import { mkdir, mkdtemp, readFile, stat, utimes, writeFile } from 'fs/promises'
 import { isIP } from 'net'
+import { promisify } from 'util'
 
 import { EX_IOERR, EX_USAGE } from './sysexits.js'
 
@@ -48,6 +51,47 @@ const debugMode = process.env.DEBUG === 'true';
 
 /** Local IP address to be bound to HTTPS requests. */
 const localAddress = process.env.BIND_ADDRESS;
+
+/** Decompress a deflated stream asynchronously. */
+const inflateRaw = promisify(Zlib.inflateRaw);
+
+/**
+ * Get the local sync path of a manifest.
+ *
+ * @param {string} uri Manifest URI.
+ *
+ * @returns {string} Expected local path of the manifest file.
+ */
+function getLocalPath(uri) {
+    return path.join(local, uri);
+}
+
+/**
+ * Get the remote URL of a manifest.
+ *
+ * @param {string} uri Manifest URI.
+ *
+ * @returns {URL} Remote URL to get the manifest from.
+ */
+function getRemoteURL(uri) {
+    const remoteURL = new URL(remote);
+    remoteURL.pathname = path.posix.join(remoteURL.pathname, uri);
+    return remoteURL;
+}
+
+/**
+ * Decompress a MSZIP-compressed buffer.
+ *
+ * @param {Buffer} buffer Compressed buffer using MSZIP.
+ *
+ * @returns {Buffer} The decompressed buffer.
+ */
+async function decompressMSZIP(buffer) {
+    if (buffer.toString('ascii', 28, 30) != 'CK') {
+        throw new Error('Invalid MSZIP format');
+    }
+    return await inflateRaw(buffer.subarray(30));
+}
 
 /**
  * Get last modified date from HTTP response headers.
@@ -98,6 +142,19 @@ function resolvePathpart(id, pathparts) {
 }
 
 /**
+ * Resolve manifest URIs against package metadata.
+ *
+ * Reference: https://github.com/microsoft/winget-cli/blob/master/src/AppInstallerCommonCore/PackageVersionDataManifest.cpp
+ *
+ * @param {{ sV: string, vD: { v: string, rP: string | undefined, s256H: string | undefined }[], [key: string]: any }} metadata The parsed package metadata object.
+ *
+ * @returns {string[]} URIs resolved from the given metadata.
+ */
+function resolvePackageManifestURIs(metadata) {
+    return metadata.vD.map((version) => version.rP).filter(Boolean);
+}
+
+/**
  * Set up the default `winston` logger instance.
  */
 function setupWinstonLogger() {
@@ -141,8 +198,21 @@ export function buildPathpartMap(rows) {
  *
  * @returns {string[]} Manifest URIs to sync.
  */
-export function buildURIList(rows, pathparts) {
+export function buildManifestURIs(rows, pathparts) {
     return rows.map(row => resolvePathpart(row.pathpart, pathparts));
+}
+
+/**
+ * Build a list of all package metadata URIs from database query.
+ *
+ * @param {{ id: string, hash: Buffer, [key: string]: string }[]} rows Rows returned by the query.
+ *
+ * @returns {string[]} Package metadata URIs to sync.
+ */
+export function buildPackageMetadataURIs(rows) {
+    return rows.map(row =>
+        path.posix.join('packages', row.id, row.hash.toString('hex').slice(0, 8), 'versionData.mszyml')
+    );
 }
 
 /**
@@ -162,6 +232,22 @@ export function exitWithCode(code = 0, error = undefined) {
 }
 
 /**
+ * Build a list of all manifest URIs from compressed package metadata.
+ *
+ * Reference: https://github.com/kyz/libmspack/blob/master/libmspack/mspack/mszipd.c
+ *
+ * @param {fs.PathLike | Buffer} mszymlMetadata Path or buffer of the MSZYML metadata file.
+ *
+ * @returns {Promise<string[]>} Manifest URIs to sync.
+ */
+export async function buildManifestURIsFromPackageMetadata(mszymlMetadata) {
+    const compressedBuffer = Buffer.isBuffer(mszymlMetadata) ? mszymlMetadata : await readFile(mszymlMetadata);
+    const buffer = await decompressMSZIP(compressedBuffer);
+    const metadata = YAML.parse(buffer.toString());
+    return resolvePackageManifestURIs(metadata);
+}
+
+/**
  * Extract database file from the source bundle.
  *
  * @param {fs.PathLike | Buffer} msixFile Path or buffer of the MSIX bundle file.
@@ -170,36 +256,12 @@ export function exitWithCode(code = 0, error = undefined) {
  * @returns {Promise<string>} Path of the extracted `index.db` file.
  */
 export async function extractDatabaseFromBundle(msixFile, directory) {
-    const bundle = (msixFile instanceof Buffer) ? msixFile : await readFile(msixFile);
+    const bundle = Buffer.isBuffer(msixFile) ? msixFile : await readFile(msixFile);
     const zip = await JSZip.loadAsync(bundle);
     const buffer = await zip.file(path.posix.join('Public', 'index.db')).async('Uint8Array');
     const destination = path.join(directory, 'index.db');
     await writeFile(destination, buffer);
     return destination;
-}
-
-/**
- * Get the local sync path of a manifest.
- *
- * @param {string} uri Manifest URI.
- *
- * @returns {string} Expected local path of the manifest file.
- */
-export function getLocalPath(uri) {
-    return path.join(local, uri);
-}
-
-/**
- * Get the remote URL of a manifest.
- *
- * @param {string} uri Manifest URI.
- *
- * @returns {URL} Remote URL to get the manifest from.
- */
-export function getRemoteURL(uri) {
-    const remoteURL = new URL(remote);
-    remoteURL.pathname = path.posix.join(remoteURL.pathname, uri);
-    return remoteURL;
 }
 
 /**
@@ -242,15 +304,16 @@ export function setupEnvironment() {
 }
 
 /**
- * Save a file with specific modified date.
+ * Cache a file with specific modified date.
  *
- * @param {string} path File path to write to.
+ * @param {string} uri File URI to cache.
  * @param {Buffer} buffer Whether to save the file to disk.
  * @param {Date | null | undefined} modifiedAt Modified date of the file, if applicable.
  *
- * @returns {Promise<void>} Fulfills with `undefined` with upon success.
+ * @returns {Promise<void>} Fulfills with `undefined` upon success.
  */
-export async function saveFile(path, buffer, modifiedAt) {
+export async function cacheFileWithURI(uri, buffer, modifiedAt) {
+    const path = getLocalPath(uri);
     await writeFile(path, buffer);
     if (modifiedAt) {
         await utimes(path, modifiedAt, modifiedAt);
@@ -292,7 +355,7 @@ export async function syncFile(uri, update = true, save = true) {
     const buffer = Buffer.from(arrayBuffer);
     const lastModified = getLastModifiedDate(response);
     if (save) {
-        await saveFile(localPath, buffer, lastModified);
+        await cacheFileWithURI(uri, buffer, lastModified);
     }
     return [buffer, lastModified ?? null, true];
 }
