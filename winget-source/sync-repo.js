@@ -31,6 +31,7 @@ try {
     // download V1 index package to buffer
     const [indexBuffer, modifiedDate, updated] = await syncFile(sourceV1Filename, true, false);
     if (!updated) {
+        winston.info(`nothing to sync from ${remote}`);
         exitWithCode(EX_OK);
     }
     assert(indexBuffer !== null, "Failed to get the source index buffer!");
