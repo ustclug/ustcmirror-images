@@ -66,6 +66,7 @@ async function syncIndex(version, handler) {
             exitWithCode(EX_UNAVAILABLE, error);
         }
     }
+    winston.info(`successfully synced version ${version} from ${remote}`);
     await rm(tempDirectory, { recursive: true });
 }
 
