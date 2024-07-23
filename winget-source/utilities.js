@@ -11,6 +11,7 @@ import { existsSync } from 'fs'
 import { mkdir, mkdtemp, readFile, stat, utimes, writeFile } from 'fs/promises'
 import { EX_IOERR, EX_SOFTWARE, EX_USAGE } from './sysexits.js'
 
+
 /**
  * `fetch` implementation with retry support.
  *
@@ -183,14 +184,14 @@ export function exitOnError(code = 1) {
 /**
  * Extract database file from the source bundle.
  *
- * @param {fs.PathLike} msixPath Path of the MSIX bundle file.
+ * @param {fs.PathLike | Buffer} msixFile Path or buffer of the MSIX bundle file.
  * @param {fs.PathLike} directory Path of directory to save the file.
  *
  * @returns {Promise<string>} Path of the extracted `index.db` file.
  */
-export async function extractDatabaseFromBundle(msixPath, directory) {
+export async function extractDatabaseFromBundle(msixFile, directory) {
     try {
-        const bundle = await readFile(msixPath);
+        const bundle = (msixFile instanceof Buffer) ? msixFile : await readFile(msixFile);
         const zip = await JSZip.loadAsync(bundle);
         const buffer = await zip.file(path.posix.join('Public', 'index.db')).async('Uint8Array');
         const destination = path.join(directory, 'index.db');
