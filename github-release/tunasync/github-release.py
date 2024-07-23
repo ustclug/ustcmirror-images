@@ -12,13 +12,13 @@ from datetime import datetime
 
 # Set BindIP
 # https://stackoverflow.com/a/70772914
-APTSYNC_BINDIP = os.getenv("BIND_ADDRESS", "")
-if APTSYNC_BINDIP:
+BINDIP = os.getenv("BIND_ADDRESS", "")
+if BINDIP:
     import urllib3
     real_create_conn = urllib3.util.connection.create_connection
 
     def set_src_addr(address, timeout, *args, **kw):
-        source_address = (APTSYNC_BINDIP, 0)
+        source_address = (BINDIP, 0)
         return real_create_conn(address, timeout=timeout, source_address=source_address)
 
     urllib3.util.connection.create_connection = set_src_addr
