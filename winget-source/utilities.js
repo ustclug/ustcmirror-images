@@ -56,6 +56,30 @@ const localAddress = process.env.BIND_ADDRESS;
 const inflateRaw = promisify(Zlib.inflateRaw);
 
 /**
+ * Get the local sync path of a manifest.
+ *
+ * @param {string} uri Manifest URI.
+ *
+ * @returns {string} Expected local path of the manifest file.
+ */
+function getLocalPath(uri) {
+    return path.join(local, uri);
+}
+
+/**
+ * Get the remote URL of a manifest.
+ *
+ * @param {string} uri Manifest URI.
+ *
+ * @returns {URL} Remote URL to get the manifest from.
+ */
+function getRemoteURL(uri) {
+    const remoteURL = new URL(remote);
+    remoteURL.pathname = path.posix.join(remoteURL.pathname, uri);
+    return remoteURL;
+}
+
+/**
  * Decompress a MSZIP-compressed buffer.
  *
  * @param {Buffer} buffer Compressed buffer using MSZIP.
@@ -241,30 +265,6 @@ export async function extractDatabaseFromBundle(msixFile, directory) {
 }
 
 /**
- * Get the local sync path of a manifest.
- *
- * @param {string} uri Manifest URI.
- *
- * @returns {string} Expected local path of the manifest file.
- */
-export function getLocalPath(uri) {
-    return path.join(local, uri);
-}
-
-/**
- * Get the remote URL of a manifest.
- *
- * @param {string} uri Manifest URI.
- *
- * @returns {URL} Remote URL to get the manifest from.
- */
-export function getRemoteURL(uri) {
-    const remoteURL = new URL(remote);
-    remoteURL.pathname = path.posix.join(remoteURL.pathname, uri);
-    return remoteURL;
-}
-
-/**
  * Create a unique temporary directory with given prefix.
  *
  * @param {string} prefix Temporary directory name prefix. Must not contain path separators.
@@ -304,15 +304,16 @@ export function setupEnvironment() {
 }
 
 /**
- * Save a file with specific modified date.
+ * Cache a file with specific modified date.
  *
- * @param {string} path File path to write to.
+ * @param {string} uri File URI to cache.
  * @param {Buffer} buffer Whether to save the file to disk.
  * @param {Date | null | undefined} modifiedAt Modified date of the file, if applicable.
  *
- * @returns {Promise<void>} Fulfills with `undefined` with upon success.
+ * @returns {Promise<void>} Fulfills with `undefined` upon success.
  */
-export async function saveFile(path, buffer, modifiedAt) {
+export async function cacheFileWithURI(uri, buffer, modifiedAt) {
+    const path = getLocalPath(uri);
     await writeFile(path, buffer);
     if (modifiedAt) {
         await utimes(path, modifiedAt, modifiedAt);
@@ -354,7 +355,7 @@ export async function syncFile(uri, update = true, save = true) {
     const buffer = Buffer.from(arrayBuffer);
     const lastModified = getLastModifiedDate(response);
     if (save) {
-        await saveFile(localPath, buffer, lastModified);
+        await cacheFileWithURI(uri, buffer, lastModified);
     }
     return [buffer, lastModified ?? null, true];
 }

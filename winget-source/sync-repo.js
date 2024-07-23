@@ -3,121 +3,111 @@ import async from 'async'
 
 import { rm } from 'fs/promises'
 import { AsyncDatabase } from 'promised-sqlite3'
-import { EX_IOERR, EX_OK, EX_SOFTWARE, EX_TEMPFAIL, EX_UNAVAILABLE } from './sysexits.js'
+import { EX_IOERR, EX_SOFTWARE, EX_TEMPFAIL, EX_UNAVAILABLE } from './sysexits.js'
 
 import {
-    buildPathpartMap,
     buildManifestURIs,
+    buildManifestURIsFromPackageMetadata,
+    buildPackageMetadataURIs,
+    buildPathpartMap,
+    cacheFileWithURI,
     exitWithCode,
     extractDatabaseFromBundle,
-    getLocalPath,
     makeTempDirectory,
-    saveFile,
     setupEnvironment,
     syncFile,
-    buildPackageMetadataURIs,
-    buildManifestURIsFromPackageMetadata
 } from './utilities.js'
 
 
-const sourceV1Filename = 'source.msix';
-const sourceV2Filename = 'source2.msix';
-
-// set up configs and temp directory
 const { parallelLimit, remote, sqlite3, winston } = setupEnvironment();
-const tempDirectory = await makeTempDirectory('winget-repo-');
+
+/**
+ * Sync with the official WinGet repository index.
+ *
+ * @param {number} version WinGet index version to sync.
+ * @param {(db: AsyncDatabase) => Promise<void>} handler Handler function that reads the index database and syncs necessary files.
+ *
+ * @returns {Promise<void>} Fulfills with `undefined` upon success.
+ */
+async function syncIndex(version, handler) {
+    const tempDirectory = await makeTempDirectory('winget-repo-');
+    const sourceFilename = version > 1 ? `source${version}.msix` : 'source.msix';
+    try {
+        // download index package to buffer
+        const [indexBuffer, modifiedDate, updated] = await syncFile(sourceFilename, true, false);
+        if (!updated) {
+            winston.info(`skip syncing version ${version} from ${remote}`);
+            return;
+        }
+        assert(indexBuffer !== null, "Failed to get the source index buffer!");
+    
+        // unpack, extract and load index database
+        try {
+            const databaseFilePath = await extractDatabaseFromBundle(indexBuffer, tempDirectory);
+            const database = new sqlite3.Database(databaseFilePath, sqlite3.OPEN_READONLY);
+            try {
+                // sync files with handler
+                const asyncDatabase = new AsyncDatabase(database);
+                await handler(asyncDatabase);
+                await asyncDatabase.close();
+            } catch (error) {
+                exitWithCode(EX_SOFTWARE, error);
+            }
+        } catch (error) {
+            exitWithCode(EX_IOERR, error);
+        }
+    
+        // update index package
+        await cacheFileWithURI(sourceFilename, indexBuffer, modifiedDate);
+    } catch (error) {
+        try {
+            await rm(tempDirectory, { recursive: true });
+        } finally {
+            exitWithCode(EX_UNAVAILABLE, error);
+        }
+    }
+    await rm(tempDirectory, { recursive: true });
+}
 
 winston.info(`start syncing with ${remote}`);
 
-try {
-    // download V1 index package to buffer
-    const [indexBuffer, modifiedDate, updated] = await syncFile(sourceV1Filename, true, false);
-    if (!updated) {
-        winston.info(`nothing to sync from ${remote}`);
-        exitWithCode(EX_OK);
-    }
-    assert(indexBuffer !== null, "Failed to get the source index buffer!");
-
-    // unpack, extract and load V1 index database
+await syncIndex(2, async (db) => {
     try {
-        const databaseFilePath = await extractDatabaseFromBundle(indexBuffer, tempDirectory);
-        const rawDatabase = new sqlite3.Database(databaseFilePath, sqlite3.OPEN_READONLY);
-
-        // read manifest URIs from index database
+        const packageURIs = buildPackageMetadataURIs(await db.all('SELECT id, hash FROM packages'));
         try {
-            const db = new AsyncDatabase(rawDatabase)
-            const pathparts = buildPathpartMap(await db.all('SELECT * FROM pathparts'));
-            const uris = buildManifestURIs(await db.all('SELECT pathpart FROM manifest ORDER BY rowid DESC'), pathparts);
-            await db.close();
-
+            // sync latest package metadata in parallel
+            const manifestURIs = await async.concatLimit(packageURIs, parallelLimit, async (uri) => {
+                const [metadataBuffer] = await syncFile(uri, false);
+                try {
+                    return metadataBuffer ? await buildManifestURIsFromPackageMetadata(metadataBuffer) : [];
+                } catch (error) {
+                    winston.error(`inspecting ${uri}`)
+                    exitWithCode(EX_SOFTWARE, error);
+                }
+            });
             // sync latest manifests in parallel
-            try {
-                await async.eachLimit(uris, parallelLimit, async (uri) => await syncFile(uri, false));
-            } catch (error) {
-                exitWithCode(EX_TEMPFAIL, error);
-            }
+            await async.eachLimit(manifestURIs, parallelLimit, async (uri) => await syncFile(uri, false));
         } catch (error) {
-            exitWithCode(EX_SOFTWARE, error);
+            exitWithCode(EX_TEMPFAIL, error);
         }
     } catch (error) {
-        exitWithCode(EX_IOERR, error);
+        exitWithCode(EX_SOFTWARE, error);
     }
+});
 
-    // update index package
-    await saveFile(getLocalPath(sourceV1Filename), indexBuffer, modifiedDate);
-} catch (error) {
-    exitWithCode(EX_UNAVAILABLE, error);
-}
-
-try {
-    // download V2 index package to buffer
-    const [indexBuffer, modifiedDate, updated] = await syncFile(sourceV2Filename, true, false);
-    if (!updated) {
-        winston.info(`skip syncing V2 from ${remote}`);
-        exitWithCode(EX_OK);
-    }
-    assert(indexBuffer !== null, "Failed to get the source index buffer!");
-
-    // unpack, extract and load V2 index database
+await syncIndex(1, async (db) => {
     try {
-        const databaseFilePath = await extractDatabaseFromBundle(indexBuffer, tempDirectory);
-        const rawDatabase = new sqlite3.Database(databaseFilePath, sqlite3.OPEN_READONLY);
-
-        // read package URIs from index database
+        const pathparts = buildPathpartMap(await db.all('SELECT * FROM pathparts'));
+        const uris = buildManifestURIs(await db.all('SELECT pathpart FROM manifest ORDER BY rowid DESC'), pathparts);
+        // sync latest manifests in parallel
         try {
-            const db = new AsyncDatabase(rawDatabase)
-            const packageURIs = buildPackageMetadataURIs(await db.all('SELECT id, hash FROM packages'));
-            await db.close();
-
-            // sync latest package metadata and manifests in parallel
-            try {
-                const manifestURIs = await async.concatLimit(packageURIs, parallelLimit, async (uri) => {
-                    const [metadataBuffer] = await syncFile(uri, false);
-                    try {
-                        return metadataBuffer ? await buildManifestURIsFromPackageMetadata(metadataBuffer) : [];
-                    } catch (error) {
-                        winston.error(`inspecting ${uri}`)
-                        exitWithCode(EX_SOFTWARE, error);
-                    }
-                });
-                await async.eachLimit(manifestURIs, parallelLimit, async (uri) => await syncFile(uri, false));
-            } catch (error) {
-                exitWithCode(EX_TEMPFAIL, error);
-            }
+            await async.eachLimit(uris, parallelLimit, async (uri) => await syncFile(uri, false));
         } catch (error) {
-            exitWithCode(EX_SOFTWARE, error);
+            exitWithCode(EX_TEMPFAIL, error);
         }
     } catch (error) {
-        exitWithCode(EX_IOERR, error);
+        exitWithCode(EX_SOFTWARE, error);
     }
-
-    // update index package
-    await saveFile(getLocalPath(sourceV2Filename), indexBuffer, modifiedDate);
-} catch (error) {
-    exitWithCode(EX_UNAVAILABLE, error);
-}
+});
 
 winston.info(`successfully synced with ${remote}`);
-
-// clean up temp directory
-await rm(tempDirectory, { recursive: true });
