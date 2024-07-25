@@ -19,7 +19,7 @@ import {
 } from './utilities.js'
 
 
-const { parallelLimit, remote, sqlite3, winston } = setupEnvironment();
+const { forceSync, parallelLimit, remote, sqlite3, winston } = setupEnvironment();
 
 /**
  * Sync with the official WinGet repository index.
@@ -34,11 +34,12 @@ async function syncIndex(version, handler) {
     const sourceFilename = version > 1 ? `source${version}.msix` : 'source.msix';
     try {
         // download index package to buffer
-        const [indexBuffer, modifiedDate] = await syncFile(sourceFilename, true, false);
-        if (!indexBuffer) {
+        const [indexBuffer, modifiedDate, updated] = await syncFile(sourceFilename, true, false);
+        if (!updated && !forceSync) {
             winston.info(`skip syncing version ${version} from ${remote}`);
             return;
         }
+        assert(Buffer.isBuffer(indexBuffer), 'Failed to get the source index buffer!');
 
         // unpack, extract and load index database
         try {
@@ -77,10 +78,10 @@ await syncIndex(2, async (db) => {
         try {
             // sync latest package metadata and manifests in parallel
             await async.eachLimit(packageURIs, parallelLimit, async (uri) => {
-                const [metadataBuffer, modifiedDate] = await syncFile(uri, false, false);
+                const [metadataBuffer, modifiedDate] = await syncFile(uri, forceSync, false);
                 if (metadataBuffer) {
                     const manifestURIs = await buildManifestURIsFromPackageMetadata(metadataBuffer);
-                    await async.eachSeries(manifestURIs, async (uri) => await syncFile(uri, false));
+                    await async.eachSeries(manifestURIs, async (uri) => await syncFile(uri, forceSync));
                     await cacheFileWithURI(uri, metadataBuffer, modifiedDate);
                 }
             });
@@ -98,7 +99,7 @@ await syncIndex(1, async (db) => {
         const uris = buildManifestURIs(await db.all('SELECT pathpart FROM manifest ORDER BY rowid DESC'), pathparts);
         // sync latest manifests in parallel
         try {
-            await async.eachLimit(uris, parallelLimit, async (uri) => await syncFile(uri, false));
+            await async.eachLimit(uris, parallelLimit, async (uri) => await syncFile(uri, forceSync));
         } catch (error) {
             exitWithCode(EX_TEMPFAIL, error);
         }

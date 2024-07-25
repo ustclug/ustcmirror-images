@@ -49,6 +49,9 @@ const parallelLimit = parseInt(process.env.WINGET_REPO_JOBS ?? 8);
 /** Whether the debug mode is enabled. */
 const debugMode = process.env.DEBUG === 'true';
 
+/** Whether to perform a forced sync. */
+const forceSync = process.env.WINGET_FORCE_SYNC === 'true';
+
 /** Local IP address to be bound to HTTPS requests. */
 const localAddress = process.env.BIND_ADDRESS;
 
@@ -305,6 +308,7 @@ export function setupEnvironment() {
     }
     return {
         debugMode,
+        forceSync,
         local,
         parallelLimit,
         remote,
@@ -355,7 +359,7 @@ export async function syncFile(uri, update = true, save = true) {
             const localFile = await stat(localPath);
             if (localFile.mtime.getTime() == lastModified.getTime() && localFile.size == contentLength) {
                 winston.debug(`skipped ${uri} because it's up to date`);
-                return [null, lastModified, false];
+                return [await readFile(localPath), lastModified, false];
             }
         }
     }
