@@ -87,10 +87,20 @@ function getRemoteURL(uri) {
  * @returns {Buffer} The decompressed buffer.
  */
 async function decompressMSZIP(buffer) {
-    if (buffer.toString('ascii', 28, 30) != 'CK') {
+    const magicHeader = Buffer.from([0, 0, 0x43, 0x4b]);
+    if (!buffer.subarray(26, 30).equals(magicHeader)) {
         throw new Error('Invalid MSZIP format');
     }
-    return await inflateRaw(buffer.subarray(30));
+    var chunkIndex = 26;
+    var decompressed = Buffer.alloc(0);
+    while ((chunkIndex = buffer.indexOf(magicHeader, chunkIndex)) > -1) {
+        chunkIndex += magicHeader.byteLength;
+        const decompressedChunk = await inflateRaw(buffer.subarray(chunkIndex), {
+            dictionary: decompressed.subarray(-32768)
+        });
+        decompressed = Buffer.concat([decompressed, decompressedChunk]);
+    }
+    return decompressed;
 }
 
 /**
