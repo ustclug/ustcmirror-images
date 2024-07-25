@@ -58,7 +58,9 @@ async function syncIndex(version, handler) {
         }
 
         // update index package
-        await cacheFileWithURI(sourceFilename, indexBuffer, modifiedDate);
+        if (updated) {
+            await cacheFileWithURI(sourceFilename, indexBuffer, modifiedDate);
+        }
     } catch (error) {
         try {
             await rm(tempDirectory, { recursive: true });
@@ -78,11 +80,13 @@ await syncIndex(2, async (db) => {
         try {
             // sync latest package metadata and manifests in parallel
             await async.eachLimit(packageURIs, parallelLimit, async (uri) => {
-                const [metadataBuffer, modifiedDate] = await syncFile(uri, forceSync, false);
+                const [metadataBuffer, modifiedDate, updated] = await syncFile(uri, forceSync, false);
                 if (metadataBuffer) {
                     const manifestURIs = await buildManifestURIsFromPackageMetadata(metadataBuffer);
                     await async.eachSeries(manifestURIs, async (uri) => await syncFile(uri, forceSync));
-                    await cacheFileWithURI(uri, metadataBuffer, modifiedDate);
+                    if (updated) {
+                        await cacheFileWithURI(uri, metadataBuffer, modifiedDate);
+                    }
                 }
             });
         } catch (error) {
