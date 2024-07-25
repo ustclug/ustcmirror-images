@@ -49,6 +49,9 @@ const parallelLimit = parseInt(process.env.WINGET_REPO_JOBS ?? 8);
 /** Whether the debug mode is enabled. */
 const debugMode = process.env.DEBUG === 'true';
 
+/** Whether to perform a forced sync. */
+const forceSync = process.env.WINGET_FORCE_SYNC === 'true';
+
 /** Local IP address to be bound to HTTPS requests. */
 const localAddress = process.env.BIND_ADDRESS;
 
@@ -87,10 +90,20 @@ function getRemoteURL(uri) {
  * @returns {Buffer} The decompressed buffer.
  */
 async function decompressMSZIP(buffer) {
-    if (buffer.toString('ascii', 28, 30) != 'CK') {
+    const magicHeader = Buffer.from([0, 0, 0x43, 0x4b]);
+    if (!buffer.subarray(26, 30).equals(magicHeader)) {
         throw new Error('Invalid MSZIP format');
     }
-    return await inflateRaw(buffer.subarray(30));
+    var chunkIndex = 26;
+    var decompressed = Buffer.alloc(0);
+    while ((chunkIndex = buffer.indexOf(magicHeader, chunkIndex)) > -1) {
+        chunkIndex += magicHeader.byteLength;
+        const decompressedChunk = await inflateRaw(buffer.subarray(chunkIndex), {
+            dictionary: decompressed.subarray(-32768)
+        });
+        decompressed = Buffer.concat([decompressed, decompressedChunk]);
+    }
+    return decompressed;
 }
 
 /**
@@ -295,6 +308,7 @@ export function setupEnvironment() {
     }
     return {
         debugMode,
+        forceSync,
         local,
         parallelLimit,
         remote,
@@ -345,7 +359,7 @@ export async function syncFile(uri, update = true, save = true) {
             const localFile = await stat(localPath);
             if (localFile.mtime.getTime() == lastModified.getTime() && localFile.size == contentLength) {
                 winston.debug(`skipped ${uri} because it's up to date`);
-                return [null, lastModified, false];
+                return [await readFile(localPath), lastModified, false];
             }
         }
     }

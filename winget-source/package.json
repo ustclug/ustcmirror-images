@@ -1,6 +1,6 @@
 {
   "name": "@ustcmirror/winget-source",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Sync with pre-indexed WinGet source repository.",
   "main": "sync-repo.js",
   "author": "YR Chen <stevapple@icloud.com>",

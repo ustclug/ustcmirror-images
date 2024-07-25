@@ -19,7 +19,7 @@ import {
 } from './utilities.js'
 
 
-const { parallelLimit, remote, sqlite3, winston } = setupEnvironment();
+const { forceSync, parallelLimit, remote, sqlite3, winston } = setupEnvironment();
 
 /**
  * Sync with the official WinGet repository index.
@@ -35,11 +35,11 @@ async function syncIndex(version, handler) {
     try {
         // download index package to buffer
         const [indexBuffer, modifiedDate, updated] = await syncFile(sourceFilename, true, false);
-        if (!updated) {
+        if (!updated && !forceSync) {
             winston.info(`skip syncing version ${version} from ${remote}`);
             return;
         }
-        assert(indexBuffer !== null, "Failed to get the source index buffer!");
+        assert(Buffer.isBuffer(indexBuffer), 'Failed to get the source index buffer!');
 
         // unpack, extract and load index database
         try {
@@ -58,7 +58,9 @@ async function syncIndex(version, handler) {
         }
 
         // update index package
-        await cacheFileWithURI(sourceFilename, indexBuffer, modifiedDate);
+        if (updated) {
+            await cacheFileWithURI(sourceFilename, indexBuffer, modifiedDate);
+        }
     } catch (error) {
         try {
             await rm(tempDirectory, { recursive: true });
@@ -76,17 +78,17 @@ await syncIndex(2, async (db) => {
     try {
         const packageURIs = buildPackageMetadataURIs(await db.all('SELECT id, hash FROM packages'));
         try {
-            // sync latest package metadata in parallel
-            const manifestURIs = await async.concatLimit(packageURIs, parallelLimit, async (uri) => {
-                const [metadataBuffer] = await syncFile(uri, false);
-                try {
-                    return metadataBuffer ? await buildManifestURIsFromPackageMetadata(metadataBuffer) : [];
-                } catch (error) {
-                    exitWithCode(EX_SOFTWARE, error);
+            // sync latest package metadata and manifests in parallel
+            await async.eachLimit(packageURIs, parallelLimit, async (uri) => {
+                const [metadataBuffer, modifiedDate, updated] = await syncFile(uri, forceSync, false);
+                if (metadataBuffer) {
+                    const manifestURIs = await buildManifestURIsFromPackageMetadata(metadataBuffer);
+                    await async.eachSeries(manifestURIs, async (uri) => await syncFile(uri, forceSync));
+                    if (updated) {
+                        await cacheFileWithURI(uri, metadataBuffer, modifiedDate);
+                    }
                 }
             });
-            // sync latest manifests in parallel
-            await async.eachLimit(manifestURIs, parallelLimit, async (uri) => await syncFile(uri, false));
         } catch (error) {
             exitWithCode(EX_TEMPFAIL, error);
         }
@@ -101,7 +103,7 @@ await syncIndex(1, async (db) => {
         const uris = buildManifestURIs(await db.all('SELECT pathpart FROM manifest ORDER BY rowid DESC'), pathparts);
         // sync latest manifests in parallel
         try {
-            await async.eachLimit(uris, parallelLimit, async (uri) => await syncFile(uri, false));
+            await async.eachLimit(uris, parallelLimit, async (uri) => await syncFile(uri, forceSync));
         } catch (error) {
             exitWithCode(EX_TEMPFAIL, error);
         }
