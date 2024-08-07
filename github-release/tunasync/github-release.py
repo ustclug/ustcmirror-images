@@ -213,6 +213,8 @@ def main():
             os.symlink(name, repo_dir / "LatestRelease")
         except OSError:
             pass
+    
+    success = True
 
     for cfg in REPOS:
         flat = False  # build a folder for each release
@@ -241,6 +243,7 @@ def main():
             releases = r.json()
         except:
             traceback.print_exc()
+            success = False
             break
 
         n_downloaded = 0
@@ -289,6 +292,9 @@ def main():
                     pass
 
         print("Total size is", sizeof_fmt(total_size, suffix=""))
+    
+    if not success:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
