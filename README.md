@@ -355,6 +355,8 @@ rustup-install.sh https://sh.rustup.rs/
 [![pypi](https://img.shields.io/docker/image-size/ustcmirror/pypi/latest)](https://hub.docker.com/r/ustcmirror/pypi "pypi")
 [![pypi](https://img.shields.io/docker/pulls/ustcmirror/pypi)](https://hub.docker.com/r/ustcmirror/pypi "pypi")
 
+Sync PyPI with official mirror client [bandersnatch](https://github.com/pypa/bandersnatch). Note that this image is not actively maintained. It's suggested to use [shadowmire](#shadowmire) instead.
+
 | Parameter                    | Description         |
 | ---------------------------- | ------------------- |
 | `BANDERSNATCH_WORKERS`       | Defaults to `3`.    |
@@ -410,6 +412,20 @@ ref:
 | Parameter  | Description                        |
 | ---------- | ---------------------------------- |
 | `UPSTREAM` | Defaults to `http://rubygems.org`. |
+
+### shadowmire
+
+[![shadowmire](https://img.shields.io/docker/image-size/ustcmirror/shadowmire/latest)](https://hub.docker.com/r/ustcmirror/shadowmire "shadowmire")
+[![shadowmire](https://img.shields.io/docker/pulls/ustcmirror/shadowmire)](https://hub.docker.com/r/ustcmirror/shadowmire "shadowmire")
+
+[Shadowmire](https://github.com/taoky/shadowmire/) syncs PyPI (or plain HTTP(S) PyPI mirrors using Shadowmire) with a lightweight and easy approach.
+
+| Parameter                    | Description         |
+| ---------------------------- | ------------------- |
+| `UPSTREAM`                   | Defaults to `https://pypi.org`. |
+| `INDEX_ONLY`                 | Don't download package blobs. Defaults to `false`. |
+| `EXCLUDE`                    | A list of `--exclude` and `--prerelease-exclude`.   |
+| `USE_PYPI_INDEX`             | Still use PyPI package listing when `UPSTREAM` is not `https://pypi.org`. Defaults to `false`. |
 
 ### stackage
 
