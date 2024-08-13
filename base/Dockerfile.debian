@@ -1,17 +1,18 @@
 FROM debian:bookworm-slim
 LABEL maintainer="Jian Zeng <anonymousknight96 AT gmail.com>" \
       org.ustcmirror.images=true
-RUN --mount=type=cache,target=/var/cache/apt \
+RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     --mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
-    
-    set -euo pipefail
-    echo 'Asia/Shanghai' > /etc/timezone
-    dpkg-reconfigure -f noninteractive tzdata
-    apt-get update && apt-get install -y wget
-    wget -O /usr/local/bin/su-exec https://ftp.lug.ustc.edu.cn/misc/su-exec
-    chmod +x /usr/local/bin/su-exec
-    echo "592f25c51d0e4c90945ece8c4fa35018d20a1091ac109c98b66eb95deef211c7 /usr/local/bin/su-exec" | sha256sum -c -
-    apt-get purge -y --auto-remove wget
+#!/bin/bash
+
+set -euo pipefail
+echo 'Asia/Shanghai' > /etc/timezone
+dpkg-reconfigure -f noninteractive tzdata
+apt-get update && apt-get install -y wget
+wget -O /usr/local/bin/su-exec https://ftp.lug.ustc.edu.cn/misc/su-exec
+chmod +x /usr/local/bin/su-exec
+echo "592f25c51d0e4c90945ece8c4fa35018d20a1091ac109c98b66eb95deef211c7 /usr/local/bin/su-exec" | sha256sum -c -
+apt-get purge -y --auto-remove wget
 EOF
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
 VOLUME ["/data", "/log"]
