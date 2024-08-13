@@ -5,23 +5,10 @@
 #LOGDIR=
 #LOGFILE=
 
-## SET IN ENVIRONMENT VARIABLES
-#GITSYNC_URL=
-#GITSYNC_BRANCH=
-#GITSYNC_REMOTE=
-#GITSYNC_BITMAP=
-#GITSYNC_MIRROR=
-#GITSYNC_CHECKOUT=
-#GITSYNC_TREELESS=
-#GITSYNC_GEOMETRIC=
-
-is_empty() {
-    [[ -z $(ls -A "$1" 2>/dev/null) ]]
-}
-
 set -eu
-[[ $DEBUG = true ]] && set -x
+[[ "${DEBUG:-}" = true ]] && set -x
 
+GITSYNC_URL="$GITSYNC_URL"
 GITSYNC_REMOTE="${GITSYNC_REMOTE:-origin}"
 GITSYNC_BRANCH="${GITSYNC_BRANCH:-master:master}"
 GITSYNC_BITMAP="${GITSYNC_BITMAP:-false}"
@@ -29,12 +16,19 @@ GITSYNC_MIRROR="${GITSYNC_MIRROR:-false}"
 GITSYNC_CHECKOUT="${GITSYNC_CHECKOUT:-false}"
 GITSYNC_TREELESS="${GITSYNC_TREELESS:-false}"
 GITSYNC_GEOMETRIC="${GITSYNC_GEOMETRIC:-false}"
+GITSYNC_DEPTH="${GITSYNC_DEPTH:-0}"
 
-is_empty "$TO" && git clone -v --progress \
+is_empty() {
+    [[ -z $(ls -A "$1" 2>/dev/null) ]]
+}
+
+if is_empty "$TO"; then
+  git clone -v --progress \
     $([ "$GITSYNC_CHECKOUT" = false ] && echo "--bare") \
     $([ "$GITSYNC_CHECKOUT" = true ] && echo "--no-checkout") \
     $([ "$GITSYNC_TREELESS" = true ] && echo "--filter=tree:0") \
     "$GITSYNC_URL" "$TO"
+fi
 
 cd "$TO" || exit 1
 if [[ $GITSYNC_MIRROR = true ]]; then
