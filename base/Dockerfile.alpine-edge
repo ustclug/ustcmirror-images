@@ -1,8 +1,11 @@
 FROM alpine:edge
 LABEL maintainer="Yifan Gao<git AT yfgao.com>" \
       org.ustcmirror.images=true
-RUN apk add --no-cache bash tzdata su-exec && \
+RUN <<EOF
+    set -euo pipefail
+    apk add --no-cache bash tzdata su-exec
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+EOF
 ADD ["entry.sh", "savelog", "/usr/local/bin/"]
 VOLUME ["/data", "/log"]
 CMD ["entry.sh"]
