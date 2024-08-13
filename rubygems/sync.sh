@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -e
 
 export HOME=/root
 cat << EOF > /root/.gem/.mirrorrc
