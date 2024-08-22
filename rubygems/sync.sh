@@ -9,7 +9,7 @@ cat << EOF > /root/.gem/.mirrorrc
   to: $TO
   parallelism: 10
   retries: 3
-  delete: false
+  delete: true
   skiperror: true
 EOF
 
