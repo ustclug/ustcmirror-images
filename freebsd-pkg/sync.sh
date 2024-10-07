@@ -81,7 +81,7 @@ echo "[INFO] getting version list..."
 $CURL_WRAP -sSL $FBSD_PKG_UPSTREAM | grep -oP 'FreeBSD:[0-9]+:[a-z0-9]+' | grep -vP $FBSD_PKG_EXCLUDE | sort -t : -rnk 2 | uniq | tee $FBSD_PLATFORMS
 if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
 	echo "[FATAL] get version list from $FBSD_PKG_UPSTREAM failed."
-	return 1
+	exit 1
 fi
 
 while read platform; do
