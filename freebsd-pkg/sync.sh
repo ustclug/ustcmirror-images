@@ -5,7 +5,7 @@
 source /curl-helper.sh
 
 FBSD_PKG_UPSTREAM=${FBSD_PKG_UPSTREAM:-"http://pkg.freebsd.org"}
-FBSD_PKG_EXCLUDE=${FBSD_PKG_EXCLUDE:-"^FreeBSD:[89]:"}
+FBSD_PKG_EXCLUDE=${FBSD_PKG_EXCLUDE:-"^FreeBSD:([0-9]+:(?!amd64|i386|aarch64)[a-z0-9]+$)"}
 FBSD_PKG_JOBS=${FBSD_PKG_JOBS:-1}
 FBSD_PLATFORMS=$(mktemp)
 export PARALLEL_SHELL=/bin/bash
@@ -85,7 +85,10 @@ if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
 fi
 
 while read platform; do
-	for channel in latest quarterly base_latest base_weekly base_release_0 base_release_1; do
+	echo "[INFO] getting channel list of $platform..."
+	channels=$($CURL_WRAP -sSL $FBSD_PKG_UPSTREAM/$platform | grep -oP 'latest|quarterly|base_[a-z0-9_]+' | sort -t : -rnk 2 | uniq)
+ 	echo $channels
+	for channel in $channels; do
 		if $CURL_WRAP -sLIf -o /dev/null $FBSD_PKG_UPSTREAM/$platform/$channel/packagesite.txz; then
 			channel_sync $FBSD_PKG_UPSTREAM/$platform/$channel $TO/$platform/$channel
 		fi
