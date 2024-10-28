@@ -85,7 +85,7 @@ if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
 fi
 
 while read platform; do
-	for channel in latest quarterly; do
+	for channel in latest quarterly base_latest base_weekly base_release_0 base_release_1; do
 		if $CURL_WRAP -sLIf -o /dev/null $FBSD_PKG_UPSTREAM/$platform/$channel/packagesite.txz; then
 			channel_sync $FBSD_PKG_UPSTREAM/$platform/$channel $TO/$platform/$channel
 		fi
