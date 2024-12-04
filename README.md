@@ -295,6 +295,7 @@ A script for syncing projects (especially AOSP) using Google's `repo` tool.
 | Parameter               | Description                         |
 | ----------------------- | ----------------------------------- |
 | `HOMEBREW_BOTTLES_JOBS` | Parallel jobs. Defaults to `1`      |
+| `BREW_SH_BIND_ADDRESS`  | Bind address for accessing formulae.brew.sh API |
 
 ### julia-storage
 

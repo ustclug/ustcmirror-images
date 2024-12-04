@@ -14,6 +14,8 @@ CASK_SOURCES=$(mktemp)
 
 curl_init
 
+BOTTLES_BIND_ADDRESS="$BIND_ADDRESS"
+
 # Step 1: Download new API jsons and extract
 
 # 2 special jsons for further processing
@@ -29,6 +31,10 @@ FILES=(
 	"cask_tap_migrations.jws.json"
 )
 URL_BASE="https://formulae.brew.sh/api"
+
+if [ -n "$BREW_SH_BIND_ADDRESS" ]; then
+    BIND_ADDRESS="$BREW_SH_BIND_ADDRESS"
+fi
 
 for file in "${FILES[@]}"; do
 	$CURL_WRAP --compressed -sSL -o "$TO/api/$file".tmp "$URL_BASE/$file"
@@ -97,6 +103,7 @@ Authorization: Bearer QQ==
 EOF
 
 # parallel downloading
+BIND_ADDRESS="$BOTTLES_BIND_ADDRESS"
 export by_hash=$(realpath $TO/.by-hash)
 export local_dir=$TO
 export CURL_WRAP="$CURL_WRAP --header @$headers_file"
