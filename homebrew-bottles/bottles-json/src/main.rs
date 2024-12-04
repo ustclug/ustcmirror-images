@@ -155,9 +155,11 @@ fn main() {
                     .unwrap()
                     .to_str()
                     .unwrap();
+                let url = format!("https://formulae.brew.sh/api/cask-source/{}", filename);
+                let url = urlencoding::encode(&url);
                 println!(
-                    "{} https://formulae.brew.sh/api/cask-source/{} {}",
-                    f.ruby_source_checksum.sha256, filename, filename
+                    "{} {} {}",
+                    f.ruby_source_checksum.sha256, url, filename
                 );
             }
         }
