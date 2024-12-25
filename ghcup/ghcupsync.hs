@@ -77,7 +77,7 @@ parseVersionFromFileName filename = do
           <|> stripPrefix "ghcup-" basename
   listToMaybe $ map fst . filter (\(_, rem) -> null rem) $ readP_to_S parseVersion noPrefix
 
--- This versoin of parseVersionFromFileName may have more forward compatability
+-- This version of parseVersionFromFileName may have more forward compatability
 -- but poorer performance
 -- parseVersionFromFileName filename = do
 --   let basename = takeBaseName filename
