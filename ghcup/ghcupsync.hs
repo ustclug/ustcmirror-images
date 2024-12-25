@@ -72,8 +72,21 @@ parseVersionFromFileName :: FilePath -> Maybe Version
 parseVersionFromFileName filename = do
   let basename = takeBaseName filename
   noPrefix <- stripPrefix "ghcup-prereleases-" basename
+          <|> stripPrefix "ghcup-cross-" basename
+          <|> stripPrefix "ghcup-vanilla-" basename
           <|> stripPrefix "ghcup-" basename
   listToMaybe $ map fst . filter (\(_, rem) -> null rem) $ readP_to_S parseVersion noPrefix
+
+-- This versoin of parseVersionFromFileName may have more forward compatability
+-- but poorer performance
+-- parseVersionFromFileName filename = do
+--   let basename = takeBaseName filename
+--   case find isJust . map tryParse $ tails basename of
+--     (Just m) -> m -- if found, it will be a double Just, i.e. (Just (Just Version))
+--     Nothing  -> Nothing
+--   where
+--     tryParse :: String -> Maybe Version
+--     tryParse = listToMaybe . map fst . reverse . readP_to_S parseVersion
 
 ------------------------------------------------------------------------
 syncByMetadata :: FilePath -> FilePath -> IO ()
