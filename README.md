@@ -482,6 +482,7 @@ Note that you shall bind necessary nginx log to `/nginx-log/` when syncing.
 | `YUKINA_SIZE_LIMIT` | The size limit of binary blobs. Defaults to `512g`.                                                     |
 | `YUKINA_FILTER` | Accepts regex to filter out binary blobs. Defaults to empty. |
 | `YUKINA_EXTRA`  | Extra options. Defaults to empty.                                                                      |
+| `YUKINA_REPO`   | The repository name. Defaults to `$REPO`.                                                              |
 
 ### yum-sync
 

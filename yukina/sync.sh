@@ -18,6 +18,7 @@ BIND_ADDRESS=${BIND_ADDRESS:-}
 YUKINA_SIZE_LIMIT=${YUKINA_SIZE_LIMIT:-"512g"}
 YUKINA_FILTER=${YUKINA_FILTER:-}
 YUKINA_EXTRA=${YUKINA_EXTRA:-}
+YUKINA_REPO=${YUKINA_REPO:-$REPO}
 
 if [[ $DEBUG = true ]]; then
     export RUST_LOG="yukina=debug"
@@ -37,7 +38,7 @@ while IFS= read -r -d '' arg; do
     extra_array+=("$arg")
 done < <(echo "$YUKINA_EXTRA" | xargs printf "%s\0")
 
-exec yukina --name "$REPO" \
+exec yukina --name "$YUKINA_REPO" \
     --log-path "/nginx-log" \
     --repo-path "$TO" \
     --size-limit "$YUKINA_SIZE_LIMIT" \
