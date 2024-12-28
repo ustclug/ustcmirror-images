@@ -18,6 +18,11 @@ function pull_hackage () {
     rm index.tar.gz || true &> /dev/null
     rm index-00.tar.gz || true &> /dev/null
 
+    # snapshot.json contains hashes of 01-index.tar.gz
+    # Download it first to minimize the chance of race condition
+    echo "Download snapshot (hashes) ..."
+    $CURL_WRAP -sSL -o snapshot.json.bak "$HACKAGE_BASE_URL/snapshot.json" &> /dev/null
+
     echo "Download latest index ..."
     $CURL_WRAP -sSL -o index.tar.gz "$HACKAGE_BASE_URL/01-index.tar.gz" &> /dev/null
 
@@ -25,7 +30,7 @@ function pull_hackage () {
     $CURL_WRAP -sSL -o index-00.tar.gz "$HACKAGE_BASE_URL/00-index.tar.gz" &> /dev/null
 
     # download extra json files
-    extra_json=("mirrors.json" "root.json" "snapshot.json" "timestamp.json")
+    extra_json=("mirrors.json" "root.json" "timestamp.json")
     for json in "${extra_json[@]}"; do
         $CURL_WRAP -sSL -o "$json" "$HACKAGE_BASE_URL/$json" &> /dev/null
     done
@@ -79,6 +84,7 @@ function pull_hackage () {
 
     cp index.tar.gz 01-index.tar.gz
     mv index-00.tar.gz 00-index.tar.gz
+    mv snapshot.json.bak snapshot.json
 }
 
 function download_pkg () {
