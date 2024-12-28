@@ -22,11 +22,13 @@ RSYNC_RSH=${RSYNC_RSH:-''}
 RSYNC_DELAY_UPDATES="${RSYNC_DELAY_UPDATES:-true}"
 RSYNC_SPARSE="${RSYNC_SPARSE:-true}"
 RSYNC_DELETE_DELAY="${RSYNC_DELETE_DELAY:-true}"
+RSYNC_DELETE_EXCLUDED="${RSYNC_DELETE_EXCLUDED:-true}"
 
-opts="-pPrltvH --partial-dir=.rsync-partial --timeout ${RSYNC_TIMEOUT} --safe-links --delete-excluded"
+opts="-pPrltvH --partial-dir=.rsync-partial --timeout ${RSYNC_TIMEOUT} --safe-links"
 
 [[ -n $RSYNC_USER ]] && RSYNC_HOST="$RSYNC_USER@$RSYNC_HOST"
 
+[[ $RSYNC_DELETE_EXCLUDED = true ]] && opts+=' --delete-excluded'
 [[ $RSYNC_DELETE_DELAY = true ]] && opts+=' --delete-delay' || opts+=' --delete'
 [[ $RSYNC_DELAY_UPDATES = true ]] && opts+=' --delay-updates'
 [[ $RSYNC_SPARSE = true ]] && opts+=' --sparse'

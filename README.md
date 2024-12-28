@@ -387,23 +387,24 @@ ref:
 [![rsync](https://img.shields.io/docker/image-size/ustcmirror/rsync/latest)](https://hub.docker.com/r/ustcmirror/rsync "rsync")
 [![rsync](https://img.shields.io/docker/pulls/ustcmirror/rsync)](https://hub.docker.com/r/ustcmirror/rsync "rsync")
 
-| Parameter             | Description                                                      |
-| --------------------- | ---------------------------------------------------------------- |
-| `RSYNC_HOST`          | The hostname of the remote server.                               |
-| `RSYNC_USER`          | (Optional) No defaults.                                          |
-| `RSYNC_PASSWORD`      | (Optional) No defaults.                                          |
-| `RSYNC_PATH`          | The destination path on the remote server.                       |
-| `RSYNC_BW`            | Bandwidth limit. Defaults to `0`.                                |
-| `RSYNC_EXTRA`         | Extra options. Defaults to empty.                                |
-| `RSYNC_EXCLUDE`       | Files to be excluded. Defaults to `--exclude .~tmp~/`.           |
-| `RSYNC_FILTER`        | Filter rules. More convenient for larger lists.                  |
-| `RSYNC_BLKSIZE`       | Defaults to `8192`.                                              |
-| `RSYNC_TIMEOUT`       | Defaults to `14400`.                                             |
-| `RSYNC_SPARSE`        | Defaults to `true`.                                              |
-| `RSYNC_DELAY_UPDATES` | Defaults to `true`.                                              |
-| `RSYNC_DELETE_DELAY`  | Defaults to `true`. Use `--delete-delay` rather than `--delete`  |
-| `RSYNC_MAXDELETE`     | Maximum number of files that can be removed. Defaults to `4000`. |
-| `RSYNC_RSH`           | Specify the remote shell, e.g. `ssh -i /path/to/key`.            |
+| Parameter              | Description                                                           |
+| ---------------------- | --------------------------------------------------------------------- |
+| `RSYNC_HOST`           | The hostname of the remote server.                                    |
+| `RSYNC_USER`           | (Optional) No defaults.                                               |
+| `RSYNC_PASSWORD`       | (Optional) No defaults.                                               |
+| `RSYNC_PATH`           | The destination path on the remote server.                            |
+| `RSYNC_BW`             | Bandwidth limit. Defaults to `0`.                                     |
+| `RSYNC_EXTRA`          | Extra options. Defaults to empty.                                     |
+| `RSYNC_EXCLUDE`        | Files to be excluded. Defaults to `--exclude .~tmp~/`.                |
+| `RSYNC_FILTER`         | Filter rules. More convenient for larger lists.                       |
+| `RSYNC_BLKSIZE`        | Defaults to `8192`.                                                   |
+| `RSYNC_TIMEOUT`        | Defaults to `14400`.                                                  |
+| `RSYNC_SPARSE`         | Defaults to `true`.                                                   |
+| `RSYNC_DELAY_UPDATES`  | Defaults to `true`.                                                   |
+| `RSYNC_DELETE_DELAY`   | Defaults to `true`. Use `--delete-delay` rather than `--delete`       |
+| `RSYNC_DELETE_EXCLUDED`| Defaults to `true`. Use `--delete-excluded` to delete excluded files. |
+| `RSYNC_MAXDELETE`      | Maximum number of files that can be removed. Defaults to `4000`.      |
+| `RSYNC_RSH`            | Specify the remote shell, e.g. `ssh -i /path/to/key`.                 |
 
 ### rubygems
 
