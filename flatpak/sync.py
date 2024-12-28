@@ -50,6 +50,7 @@ def download_if_modified(url, local_path):
         mtime = os.path.getmtime(local_path)
         headers["If-Modified-Since"] = formatdate(mtime, usegmt=True)
     response = requests.get(url, headers=headers, stream=True, timeout=TIMEOUT_OPTION)
+    response.raise_for_status()
     if response.status_code == 200:
         print("Downloading", url)
         with overwrite(local_path, "wb") as f:
