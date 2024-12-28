@@ -4,6 +4,7 @@ import requests
 import hashlib
 import os
 from email.utils import formatdate, parsedate_to_datetime
+from contextlib import contextmanager
 
 # https://github.com/flatpak/flatpak/blob/7a6c98c563a43a0d4b601b6bc7daaff3e4776efb/doc/flatpak-summaries.txt
 SUMMARY_VARIANT = GLib.VariantType("(a{s(ayaaya{sv})}a{sv})")
@@ -13,6 +14,7 @@ USER_AGENT = os.getenv(
     "USER_AGENT", "flatpak-sync (+https://github.com/ustclug/ustcmirror-images)"
 )
 requests.utils.default_user_agent = lambda: USER_AGENT
+TIMEOUT_OPTION = (7, 30)
 
 
 def set_retry(max_retries):
@@ -30,15 +32,27 @@ func = requests.adapters.HTTPAdapter.__init__
 requests.adapters.HTTPAdapter.__init__ = set_retry(3)(func)
 
 
+@contextmanager
+def overwrite(file_path, mode: str = "w", tmp_suffix: str = ".tmp"):
+    tmp_path = file_path + tmp_suffix
+    try:
+        with open(tmp_path, mode) as tmp_file:
+            yield tmp_file
+        os.rename(tmp_path, file_path)
+    except Exception:
+        # well, just keep the tmp_path in error case.
+        raise
+
+
 def download_if_modified(url, local_path):
     headers = {}
     if os.path.exists(local_path):
         mtime = os.path.getmtime(local_path)
         headers["If-Modified-Since"] = formatdate(mtime, usegmt=True)
-    response = requests.get(url, headers=headers, stream=True)
+    response = requests.get(url, headers=headers, stream=True, timeout=TIMEOUT_OPTION)
     if response.status_code == 200:
         print("Downloading", url)
-        with open(local_path, "wb") as f:
+        with overwrite(local_path, "wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
         if "Last-Modified" in response.headers:
