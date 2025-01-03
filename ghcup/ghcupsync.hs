@@ -29,6 +29,8 @@ import           System.Process.Typed
 import           Text.ParserCombinators.ReadP
 import           Text.Printf
 import           Text.Read
+import           System.Posix.Files (createSymbolicLink)
+import           Data.Function (on)
 
 type URL = Text
 type SHA256 = Text
@@ -42,12 +44,8 @@ main = do
 
   -- Download all artifacts referenced in _supported_ metadata files
   files <- listDirectory (mdtmpdir basedir)
-  let isSupported filename =
-        case parseVersionFromFileName filename of
-          Just version -> version >= minimumSupportedVersion
-          Nothing      -> False
-      mdfiles = filter isSupported . filter ("yaml" `isExtensionOf`) $ files
-      mdpaths = map (mdtmpdir basedir </>) mdfiles
+  let mdfiles = onlySupported $ map parseVersionFromFileName $ filter ("yaml" `isExtensionOf`) files
+      mdpaths = map (mdtmpdir basedir </>) $ map filepath mdfiles
   for_ mdpaths $ \mdpath ->
     printf "Will sync: %s\n" mdpath
   mapM_ (syncByMetadata basedir) mdpaths
@@ -55,9 +53,37 @@ main = do
   -- Delete unreferenced files (before replacing URLs)
   garbageCollect basedir mdpaths
 
+  -- group channels and create symlinks
+  let
+    mdByChannel = groupBy sameChannel $ 
+      sortOn channel mdfiles
+
+    linkof :: Channel -> FilePath
+    linkof channel = mdtmpdir basedir </> ("ghcup-" ++ channel ++ "latest.yaml")
+    
+    latests = maximumBy (compare `on` version) <$> mdByChannel
+    link'target = do
+      md <- latests
+      return (linkof (channel md), filepath md)
+
+  mapM_ link link'target
+
   -- Replace URLs in tmp metadata, and then copy these files
   mapM_ replaceUrls mdpaths
   enableMetadata basedir
+
+  where
+    onlySupported :: [Maybe Metadata] -> [Metadata]
+    onlySupported xs = do
+      (Just m) <- xs
+      guard $ version m >= minimumSupportedVersion
+      return m
+    
+    sameChannel :: Metadata -> Metadata -> Bool
+    sameChannel m1 m2 = channel m1 == channel m2
+
+    link :: (FilePath, FilePath) -> IO ()
+    link link'target = createSymbolicLink (snd link'target) (fst link'target)
 
 ghcupMetadataRepo :: URL
 ghcupMetadataRepo = "https://github.com/haskell/ghcup-metadata"
@@ -68,14 +94,25 @@ mirroredFileUrl local = fromString $ printf "http://mirrors.ustc.edu.cn/ghcup/%s
 minimumSupportedVersion :: Version
 minimumSupportedVersion = makeVersion [0, 0, 6]  -- Metadata format version
 
-parseVersionFromFileName :: FilePath -> Maybe Version
+type Channel = String
+
+data Metadata = Metadata {
+  version :: Version,
+  channel :: Channel,
+  filepath :: FilePath
+}
+
+parseVersionFromFileName :: FilePath -> Maybe Metadata
 parseVersionFromFileName filename = do
   let basename = takeBaseName filename
-  noPrefix <- stripPrefix "ghcup-prereleases-" basename
-          <|> stripPrefix "ghcup-cross-" basename
-          <|> stripPrefix "ghcup-vanilla-" basename
-          <|> stripPrefix "ghcup-" basename
-  listToMaybe $ map fst . filter (\(_, rem) -> null rem) $ readP_to_S parseVersion noPrefix
+  (channel, noPrefix) <- basename `tryChannel` "prereleases-"
+          <|> basename `tryChannel` "cross-"
+          <|> basename `tryChannel` "vanilla-"
+          <|> basename `tryChannel` ""
+  version <- listToMaybe $ map fst . filter (\(_, rem) -> null rem) $ readP_to_S parseVersion noPrefix
+  return $ Metadata version channel filename
+  where
+    tryChannel basename channel = ((,) channel) <$> stripPrefix ("ghcup-" ++ channel) basename
 
 -- This version of parseVersionFromFileName may have more forward compatability
 -- but poorer performance
