@@ -83,7 +83,9 @@ main = do
     sameChannel m1 m2 = channel m1 == channel m2
 
     link :: (FilePath, FilePath) -> IO ()
-    link link'target = createSymbolicLink (snd link'target) (fst link'target)
+    link link'target = do
+      createSymbolicLink (snd link'target) (fst link'target)
+      createSymbolicLink (snd link'target ++ ".sig") (fst link'target ++ ".sig")
 
 ghcupMetadataRepo :: URL
 ghcupMetadataRepo = "https://github.com/haskell/ghcup-metadata"
