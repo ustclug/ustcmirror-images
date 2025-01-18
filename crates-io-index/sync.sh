@@ -21,6 +21,7 @@ CRATES_PROXY="${CRATES_PROXY:-https://crates-io.proxy.ustclug.org/api/v1/crates}
 CRATES_GITMSG="${CRATES_GITMSG:-Redirect to USTC Mirrors}"
 CRATES_GITMAIL="${CRATES_GITMAIL:-lug AT ustc.edu.cn}"
 CRATES_GITNAME="${CRATES_GITNAME:-mirror}"
+GEOMETRIC_REPACK="${GEOMETRIC_REPACK:-false}"
 
 ensure_redirect() {
     pushd "$TO"
@@ -47,7 +48,11 @@ if ! is_empty "$TO"; then
     git fetch origin
     git reset --hard origin/master
     ensure_redirect
-    git repack -adb
+    if [[ $GEOMETRIC_REPACK == true ]]; then
+        git repack --write-midx --write-bitmap-index -d --geometric=2
+    else
+        git repack -adb
+    fi
     git gc --auto
     git update-server-info
 else
