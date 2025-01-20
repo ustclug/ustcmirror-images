@@ -1,7 +1,7 @@
 FROM ustcmirror/base:alpine
 LABEL maintainer="Keyu Tao <taoky AT ustclug.org>"
 LABEL bind_support=true
-ARG TSUMUGU_VERSION=20250119
+ARG TSUMUGU_VERSION=20250120
 
 RUN <<EOF
     set -euo pipefail
