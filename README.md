@@ -18,6 +18,7 @@
     - [debian-cd](#debian-cd)
     - [docker-ce](#docker-ce)
     - [fedora](#fedora)
+    - [flatpak](#flatpak)
     - [freebsd-pkg](#freebsd-pkg)
     - [freebsd-ports](#freebsd-ports)
     - [ghcup](#ghcup)
@@ -192,6 +193,17 @@ See [dist conf](https://pagure.io/quick-fedora-mirror/blob/master/f/quick-fedora
 | `CHECKIN_HOST`     | see in mirrormanager                                                                              |
 
 Note: This image is not in use now, as `quick-fedora-mirror` has some mysterious bugs when being used.
+
+### flatpak
+
+[![flatpak](https://img.shields.io/docker/image-size/ustcmirror/flatpak/latest)](https://hub.docker.com/r/ustcmirror/flatpak "flatpak")
+[![flatpak](https://img.shields.io/docker/pulls/ustcmirror/flatpak)](https://hub.docker.com/r/ustcmirror/flatpak "flatpak")
+
+A simple sync script to sync necessary metadata for flatpak. **This DOES NOT SYNC ANY BLOB FILES.**
+
+| Parameter    | Description      |
+| ------------ | ---------------- |
+| `USER_AGENT` | user agent used  |
 
 ### freebsd-pkg
 
