@@ -44,10 +44,14 @@ def overwrite(file_path, mode: str = "w", tmp_suffix: str = ".tmp"):
         raise
 
 
-def download_if_modified(url, local_path):
+def download_if_modified(url, local_path, check_path=None):
     headers = {}
-    if os.path.exists(local_path):
-        mtime = os.path.getmtime(local_path)
+    if check_path:
+        local_check_path = check_path
+    else:
+        local_check_path = local_path
+    if os.path.exists(local_check_path):
+        mtime = os.path.getmtime(local_check_path)
         headers["If-Modified-Since"] = formatdate(mtime, usegmt=True)
     response = requests.get(url, headers=headers, stream=True, timeout=TIMEOUT_OPTION)
     response.raise_for_status()
@@ -66,7 +70,10 @@ def main():
     download_if_modified(FLATHUB + "config", "config")
     # download summary.idx
     url = FLATHUB + "summary.idx"
-    download_if_modified(url, "summary.idx.bak")
+    resp = download_if_modified(url, "summary.idx.bak", "summary.idx")
+    if resp.status_code == 304:
+        # nothing to do, bye~
+        exit(0)
     with open("summary.idx.bak", "rb") as f:
         summary_data = f.read()
 
