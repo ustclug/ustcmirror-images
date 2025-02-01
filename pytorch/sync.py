@@ -34,7 +34,7 @@ def recursive_download(client, url):
         if (base / path).exists():
             return
         if not dry_run:
-            os.makedirs(base / path.parent, exist_ok=True)
+            os.makedirs((base / path).parent, exist_ok=True)
             with open(base / path, "wb") as f:
                 f.write(client.get(url).content)
 
