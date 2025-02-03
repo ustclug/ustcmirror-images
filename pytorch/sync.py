@@ -11,6 +11,7 @@ import time
 RELEASES_URL = "https://raw.githubusercontent.com/pytorch/pytorch.github.io/refs/heads/site/releases.json"
 HREF_RE = re.compile(r'href="([^"]+)"')
 
+
 base = Path(os.environ.get("TO", "."))
 dry_run = os.environ.get("DRY_RUN", "0") == "1"
 jobs = int(os.environ.get("JOBS", "2"))
@@ -73,10 +74,10 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
     path = urlparse(url).path
     while path.startswith("/"):
         path = path[1:]
-    print(f"Downloading {url} to {base / path}")
     if url.endswith("/"):
         # index.html
         async with sem:
+            print(f"Getting {url}")
             resp = await client.get(url)
             resp.raise_for_status()
             index_resp = resp.text
@@ -100,12 +101,12 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
             return
         if not dry_run:
             os.makedirs((base / path).parent, exist_ok=True)
-            with overwrite(base / path, "wb") as f:
-                async with sem:
-                    resp = await client.get(url)
-                    resp.raise_for_status()
+            async with sem:
+                print(f"Downloading {url} to {base / path}")
+                with overwrite(base / path, "wb") as f:
+                    contents = await get_with_progress(client, url)
                     # Large files
-                    await asyncio.to_thread(f.write, resp.content)
+                    await asyncio.to_thread(f.write, contents)
 
 
 async def main():
@@ -116,6 +117,7 @@ async def main():
         transport=httpx.AsyncHTTPTransport(retries=3),
         timeout=timeout,
     )
+    print("Getting releases info from GitHub...")
     resp = await client.get(RELEASES_URL)
     resp.raise_for_status()
     releases = resp.json()
