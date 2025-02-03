@@ -6,6 +6,7 @@ import os
 import re
 from urllib.parse import urlparse, urljoin
 import asyncio
+import time
 
 RELEASES_URL = "https://raw.githubusercontent.com/pytorch/pytorch.github.io/refs/heads/site/releases.json"
 HREF_RE = re.compile(r'href="([^"]+)"')
@@ -30,6 +31,42 @@ def overwrite(
     except Exception:
         # well, just keep the tmp_path in error case.
         raise
+
+
+async def show_progress(url, start_time, get_downloaded, total):
+    try:
+        while True:
+            await asyncio.sleep(5)
+            downloaded = get_downloaded()
+            elapsed = time.monotonic() - start_time
+            print(
+                f"Progress of {url}: {downloaded}/{total} ({downloaded / total:.2%}), elapsed: {elapsed:.0f}s"
+            )
+    except asyncio.CancelledError:
+        pass
+
+
+async def get_with_progress(client: httpx.AsyncClient, url: str):
+    async with client.stream("GET", url) as resp:
+        resp.raise_for_status()
+        total = int(resp.headers.get("Content-Length", 0))
+        downloaded = 0
+
+        progress_task = asyncio.create_task(
+            show_progress(url, time.monotonic(), lambda: downloaded, total)
+        )
+        chunks = []
+        try:
+            async for chunk in resp.aiter_bytes():
+                downloaded += len(chunk)
+                chunks.append(chunk)
+        finally:
+            progress_task.cancel()
+            try:
+                await progress_task
+            except asyncio.CancelledError:
+                pass
+        return b"".join(chunks)
 
 
 async def recursive_download(client: httpx.AsyncClient, url: str):
