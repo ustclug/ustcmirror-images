@@ -13,6 +13,7 @@ HREF_RE = re.compile(r'href="([^"]+)"')
 base = Path(os.environ.get("TO", "."))
 dry_run = os.environ.get("DRY_RUN", "0") == "1"
 jobs = int(os.environ.get("JOBS", "2"))
+timeout = int(os.environ.get("TIMEOUT", "30"))
 
 sem = asyncio.Semaphore(jobs)
 
@@ -76,6 +77,7 @@ async def main():
             "User-Agent": "pytorch-sync (+https://github.com/ustclug/ustcmirror-images)"
         },
         transport=httpx.AsyncHTTPTransport(retries=3),
+        timeout=timeout,
     )
     resp = await client.get(RELEASES_URL)
     resp.raise_for_status()
