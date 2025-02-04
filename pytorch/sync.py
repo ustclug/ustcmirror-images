@@ -48,26 +48,33 @@ async def show_progress(url, start_time, get_downloaded, total):
 
 
 async def get_with_progress(client: httpx.AsyncClient, url: str):
-    async with client.stream("GET", url) as resp:
-        resp.raise_for_status()
-        total = int(resp.headers.get("Content-Length", 0))
-        downloaded = 0
-
-        progress_task = asyncio.create_task(
-            show_progress(url, time.monotonic(), lambda: downloaded, total)
-        )
-        chunks = []
+    for attempt in range(3):
         try:
-            async for chunk in resp.aiter_bytes():
-                downloaded += len(chunk)
-                chunks.append(chunk)
-        finally:
-            progress_task.cancel()
-            try:
-                await progress_task
-            except asyncio.CancelledError:
-                pass
-        return b"".join(chunks)
+            async with client.stream("GET", url) as resp:
+                resp.raise_for_status()
+                total = int(resp.headers.get("Content-Length", 0))
+                downloaded = 0
+
+                progress_task = asyncio.create_task(
+                    show_progress(url, time.monotonic(), lambda: downloaded, total)
+                )
+                chunks = []
+                try:
+                    async for chunk in resp.aiter_bytes():
+                        downloaded += len(chunk)
+                        chunks.append(chunk)
+                finally:
+                    progress_task.cancel()
+                    try:
+                        await progress_task
+                    except asyncio.CancelledError:
+                        pass
+                return b"".join(chunks)
+        except Exception as e:
+            if attempt == 2:
+                raise e
+            print(f"Failed to download {url}, retrying ({attempt + 1})...")
+            await asyncio.sleep(5)
 
 
 async def recursive_download(client: httpx.AsyncClient, url: str):
@@ -78,9 +85,8 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
         # index.html
         async with sem:
             print(f"Getting {url}")
-            resp = await client.get(url)
-            resp.raise_for_status()
-            index_resp = resp.text
+            contents = await get_with_progress(client, url)
+            index_resp = contents.decode("utf-8")
 
         tasks = []
         for m in HREF_RE.finditer(index_resp):
@@ -114,7 +120,6 @@ async def main():
         headers={
             "User-Agent": "pytorch-sync (+https://github.com/ustclug/ustcmirror-images)"
         },
-        transport=httpx.AsyncHTTPTransport(retries=3),
         timeout=timeout,
     )
     print("Getting releases info from GitHub...")
