@@ -16,6 +16,11 @@ base = Path(os.environ.get("TO", "."))
 dry_run = os.environ.get("DRY_RUN", "0") == "1"
 jobs = int(os.environ.get("JOBS", "2"))
 timeout = int(os.environ.get("TIMEOUT", "30"))
+urlbase = os.environ.get("URLBASE", "/pytorch/")
+if not urlbase.endswith("/"):
+    urlbase += "/"
+if not urlbase.startswith("/"):
+    urlbase = "/" + urlbase
 
 sem = asyncio.Semaphore(jobs)
 
@@ -99,6 +104,7 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
         if tasks:
             await asyncio.gather(*tasks)
         if not dry_run:
+            index_resp = index_resp.replace('href="/', f'href="{urlbase}')
             os.makedirs(base / path, exist_ok=True)
             with overwrite(base / path / "index.html", "w") as f:
                 f.write(index_resp)
