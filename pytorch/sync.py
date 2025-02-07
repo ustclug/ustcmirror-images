@@ -4,7 +4,7 @@ import httpx
 from pathlib import Path
 import os
 import re
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse, urljoin, unquote
 import asyncio
 import time
 
@@ -83,7 +83,7 @@ async def get_with_progress(client: httpx.AsyncClient, url: str):
 
 
 async def recursive_download(client: httpx.AsyncClient, url: str):
-    path = urlparse(url).path
+    path = unquote(urlparse(url).path)
     while path.startswith("/"):
         path = path[1:]
     if url.endswith("/"):
