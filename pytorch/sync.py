@@ -9,6 +9,7 @@ import asyncio
 import time
 
 RELEASES_URL = "https://raw.githubusercontent.com/pytorch/pytorch.github.io/refs/heads/site/releases.json"
+A_RE = re.compile(r'<a ([^>]*)>')
 HREF_RE = re.compile(r'href="([^"]+)"')
 
 
@@ -94,13 +95,17 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
             index_resp = contents.decode("utf-8")
 
         tasks = []
-        for m in HREF_RE.finditer(index_resp):
-            suburl = m.group(1).split("#")[0]
+        for m in A_RE.finditer(index_resp):
+            attr = m.group(1)
+            href = HREF_RE.search(attr)
+            suburl = href.group(1).split("#")[0]
             if suburl.startswith("/"):
                 suburl = urljoin("https://download.pytorch.org", suburl)
             else:
                 suburl = urljoin(url, suburl)
             tasks.append(asyncio.create_task(recursive_download(client, suburl)))
+            if suburl.endswith(".whl") and "data-core-metadata" in attr:
+                tasks.append(asyncio.create_task(recursive_download(client, suburl + ".metadata")))
         if tasks:
             await asyncio.gather(*tasks)
         if not dry_run:
