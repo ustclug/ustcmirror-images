@@ -86,7 +86,7 @@ fi
 
 while read platform; do
 	echo "[INFO] getting channel list of $platform..."
-	channels=$($CURL_WRAP -sSL $FBSD_PKG_UPSTREAM/$platform | grep -oP 'latest|quarterly|base_[a-z0-9_]+' | sort -t : -rnk 2 | uniq)
+	channels=$($CURL_WRAP -sSL $FBSD_PKG_UPSTREAM/$platform | grep -oP 'latest|quarterly|base_[a-z0-9_]+|kmods_[a-z0-9_]+' | sort -t : -rnk 2 | uniq)
  	echo $channels
 	for channel in $channels; do
 		if $CURL_WRAP -sLIf -o /dev/null $FBSD_PKG_UPSTREAM/$platform/$channel/packagesite.txz; then
