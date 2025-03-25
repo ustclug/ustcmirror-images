@@ -80,7 +80,7 @@ export -f download_and_check
 remote_url=$FBSD_PORTS_DISTFILES_UPSTREAM local_dir=$TO/distfiles parallel --line-buffer -j $FBSD_PORTS_JOBS --pipepart -a $meta download_and_check
 
 # generate index archive
-git -C $TO/ports.git archive --format=tar.gz -o $TO/ports.tar.gz HEAD
+git -C $TO/ports.git archive --format=tar.gz --prefix=ports/ -o $TO/ports.tar.gz HEAD
 
 # sanity check before removing old distfiles
 awk '{print $2}' $meta > /tmp/check1
