@@ -31,9 +31,9 @@ OS_TEMPLATE = {
     # https://endoflife.date/rhel (excluding ELCS)
     'rhel-current': ["8", "9"],
     # https://endoflife.date/fedora
-    'fedora-current': ["39", "40"],
+    'fedora-current': ["40", "41", "42"],
     # https://endoflife.date/opensuse
-    'opensuse-current': ["15.5", "15.6"],
+    'opensuse-current': ["15.6"],
 }
 
 def calc_repo_size(path: Path):

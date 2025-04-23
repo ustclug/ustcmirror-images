@@ -35,8 +35,8 @@ channel_sync() {
 	# get meta-data
 	export remote_url=$baseurl
 	export local_dir=$tmpdir
-	enable_mtime=true fail_to_exit=false download <<<"$(echo digests.txz meta.txz meta.conf meta.pkg packagesite.pkg data.pkg data.txz | tr ' ' '\n')"
-	enable_mtime=true fail_to_exit=true  download <<<"$(echo meta packagesite.txz | tr ' ' '\n')"
+	enable_mtime=true fail_to_exit=false download <<<"$(echo digests.txz meta.txz meta.conf meta.pkg packagesite.txz packagesite.tzst data.pkg data.txz data.tzst | tr ' ' '\n')"
+	enable_mtime=true fail_to_exit=true  download <<<"$(echo meta packagesite.pkg | tr ' ' '\n')"
 
 	if [[ $? -ne 0 ]]; then
 		echo "[FATAL] download meta-data failed."
@@ -49,11 +49,15 @@ channel_sync() {
 	enable_mtime=true fail_to_exit=false download <<<"$(echo Latest/{pkg-devel.pkg,pkg.pkg,pkg.pkg.sig} | tr ' ' '\n')"
 
 	# get packages
-	tar -C $tmpdir -xJf $tmpdir/packagesite.txz packagesite.yaml
+	tar -C $tmpdir -xJf $tmpdir/packagesite.pkg packagesite.yaml
 	if [[ $? -ne 0 ]]; then
-		echo '[FATAL] unzip packagesite.txz failed.'
-		EXIT_CODE=$((EXIT_CODE + 1))
-		return 1
+		echo '[WARN] xz failed, trying zstd...'
+		tar -C $tmpdir --zstd -xf $tmpdir/packagesite.pkg packagesite.yaml
+		if [[ $? -ne 0 ]]; then
+			echo '[FATAL] zstd packagesite.pkg failed.'
+			EXIT_CODE=$((EXIT_CODE + 1))
+			return 1
+		fi
 	fi
 	jq -r '"\(.sum) \(.repopath)"' $tmpdir/packagesite.yaml | sort -k2 > $meta
 	rm -f $tmpdir/packagesite.yaml
@@ -86,10 +90,10 @@ fi
 
 while read platform; do
 	echo "[INFO] getting channel list of $platform..."
-	channels=$($CURL_WRAP -sSL $FBSD_PKG_UPSTREAM/$platform | grep -oP 'latest|quarterly|base_[a-z0-9_]+' | sort -t : -rnk 2 | uniq)
+	channels=$($CURL_WRAP -sSL $FBSD_PKG_UPSTREAM/$platform | grep -oP 'latest|quarterly|base_[a-z0-9_]+|kmods_[a-z0-9_]+' | sort -t : -rnk 2 | uniq)
  	echo $channels
 	for channel in $channels; do
-		if $CURL_WRAP -sLIf -o /dev/null $FBSD_PKG_UPSTREAM/$platform/$channel/packagesite.txz; then
+		if $CURL_WRAP -sLIf -o /dev/null $FBSD_PKG_UPSTREAM/$platform/$channel/packagesite.pkg; then
 			channel_sync $FBSD_PKG_UPSTREAM/$platform/$channel $TO/$platform/$channel
 		fi
 	done

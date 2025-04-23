@@ -2,13 +2,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
+import Control.Exception (try)
 import Control.Monad (unless)
 import Data.Aeson qualified as A
 import Data.ByteString.Lazy qualified as BS
+import Data.Either (fromRight)
 import Data.List.Split (splitOn)
 import Data.Map.Strict qualified as M
 import Data.Yaml
-import System.Directory (createDirectory, doesDirectoryExist, doesFileExist)
+import System.Directory (createDirectory, doesDirectoryExist, getFileSize)
 import System.Environment (getEnv)
 import System.Exit (ExitCode (..))
 import System.FilePath.Posix ((</>))
@@ -57,9 +59,15 @@ data StackSetup = StackSetup
   }
   deriving (Show)
 
+data GitHubReleaseAsset = GitHubReleaseAsset
+  { browser_download_url :: URL,
+    size :: Int
+  }
+  deriving (Show)
+
 data GitHubReleases = GitHubReleases
   { prerelease :: Bool,
-    urls :: [URL]
+    assets :: [GitHubReleaseAsset]
   }
   deriving (Show)
 
@@ -114,10 +122,16 @@ instance ToJSON StackSetup where
         "ghcjs" .= ghcjs
       ]
 
+instance FromJSON GitHubReleaseAsset where
+  parseJSON = withObject "GitHubReleaseAsset" $ \o -> do
+    browser_download_url <- o .: "browser_download_url"
+    size <- o .: "size"
+    return GitHubReleaseAsset {..}
+
 instance FromJSON GitHubReleases where
   parseJSON = withObject "GitHubReleases" $ \o -> do
     prerelease <- o .: "prerelease"
-    urls <- o .: "assets" >>= mapM (.: "browser_download_url")
+    assets <- o .: "assets"
     return GitHubReleases {..}
 
 redirectToMirror :: Path -> ResourceInfo -> ResourceInfo
@@ -127,15 +141,15 @@ redirectToMirror relPath (ResourceInfo ver url conLen s1 s256) =
 
 -- download a file to given path
 -- sha-1 checksum is enabled when sha isn't empty string
-download :: URL -> FilePath -> (SHA1, SHA256) -> Bool -> IO ()
-download url path sha force = do
+download :: URL -> FilePath -> (SHA1, SHA256) -> Int -> Bool -> IO ()
+download url path sha contentLength force = do
   let fileName = head (splitOn "?" (last (splitOn "/" url)))
   let filePath = path </> fileName
   putStrLn $ printf "Try to Download %s..." fileName
   pathExists <- doesDirectoryExist path
   unless pathExists (createDirectory path)
-  filePathExists <- doesFileExist filePath
-  if filePathExists && not force
+  fileSize <- fromRight (-1) <$> (try (getFileSize filePath) :: IO (Either IOError Integer))
+  if (fileSize == fromIntegral contentLength) && not force
     then putStrLn $ printf "%s already exists. Just skip." filePath
     else do
       let args_ =
@@ -202,7 +216,7 @@ stackSetup bp setupPath = do
   let newStack = M.map (M.map (redirectToMirror "stack")) stack
 
   -- store 7z
-  let dl7z (ResourceInfo _ u _ s1 s256) = download u (bp </> "7z") (s1, s256) False
+  let dl7z (ResourceInfo _ u l s1 s256) = download u (bp </> "7z") (s1, s256) l False
    in do
         dl7z exe
         dl7z dll
@@ -211,7 +225,7 @@ stackSetup bp setupPath = do
   let newDll = redirectToMirror "7z" dll
 
   -- store portable git
-  let dlGit (ResourceInfo _ u _ s1 s256) = download u (bp </> "pgit") (s1, s256) False
+  let dlGit (ResourceInfo _ u l s1 s256) = download u (bp </> "pgit") (s1, s256) l False
    in dlGit pgit
 
   let newPgit = redirectToMirror "pgit" pgit
@@ -219,7 +233,7 @@ stackSetup bp setupPath = do
   -- store ghc
   let filesToDownload = map snd $ M.elems ghc >>= M.toList
 
-  let dlGhc (ResourceInfo _ u _ s1 s256) = download u (bp </> "ghc") (s1, s256) False
+  let dlGhc (ResourceInfo _ u l s1 s256) = download u (bp </> "ghc") (s1, s256) l False
    in mapM_ dlGhc filesToDownload
 
   let newGhc = M.map (M.map (redirectToMirror "ghc")) ghc
@@ -227,7 +241,7 @@ stackSetup bp setupPath = do
   -- store msys2
   let filesToDownload = snd <$> M.toList msys2
 
-  let dlMsys2 (ResourceInfo _ u _ s1 s256) = download u (bp </> "msys2") (s1, s256) False
+  let dlMsys2 (ResourceInfo _ u l s1 s256) = download u (bp </> "msys2") (s1, s256) l False
    in mapM_ dlMsys2 filesToDownload
 
   let newMsys2 = M.map (redirectToMirror "msys2") msys2
@@ -242,6 +256,7 @@ syncStack basePath = do
     "https://api.github.com/repos/commercialhaskell/stack/releases/latest"
     "/tmp"
     ("", "")
+    0
     True
   let filename = "/tmp/latest"
   text <- BS.readFile filename
@@ -249,15 +264,16 @@ syncStack basePath = do
         Just o -> o :: GitHubReleases
         _ -> error "decode latest fail!"
   let isPreRelease = prerelease latestInfo
-  let assetsURLs = urls latestInfo
-  unless isPreRelease (syncAssets assetsURLs)
+  let as = assets latestInfo
+  unless isPreRelease (syncAssets as)
   where
     syncAssets = mapM_ syncAsset
-    syncAsset urlValue = do
+    syncAsset as = do
       download
-        urlValue
+        (browser_download_url as)
         (basePath </> "stack")
         ("", "")
+        (size as)
         False
 
 main :: IO ()
@@ -269,13 +285,14 @@ main = do
   updateChannels basePath
 
   -- load snapshots
-  download "https://www.stackage.org/download/snapshots.json" basePath ("", "") True
+  download "https://www.stackage.org/download/snapshots.json" basePath ("", "") 0 True
 
   -- load stack setup
   download
     "https://raw.githubusercontent.com/fpco/stackage-content/master/stack/stack-setup-2.yaml"
     "/tmp"
     ("", "")
+    0
     True
 
   stackSetup basePath "/tmp/stack-setup-2.yaml"
