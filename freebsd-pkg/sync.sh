@@ -30,7 +30,8 @@ channel_sync() {
 	find $basedir -name '*.tmp' -delete
 
 	# restore old meta-data to $tmpdir
-	rsync -a --exclude=/All $basedir/ $tmpdir/
+	# manually include meta-data files to avoid OOM (tmpfs)
+	rsync -a --include=Latest --include=data.* --include=meta --include=meta.* --include=packagesite.* --exclude=* $basedir/ $tmpdir/
 
 	# get meta-data
 	export remote_url=$baseurl
