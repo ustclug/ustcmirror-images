@@ -120,10 +120,19 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
             os.makedirs((base / path).parent, exist_ok=True)
             async with sem:
                 print(f"Downloading {url} to {base / path}")
-                with overwrite(base / path, "wb") as f:
-                    contents = await get_with_progress(client, url)
-                    # Large files
-                    await asyncio.to_thread(f.write, contents)
+                try:
+                    with overwrite(base / path, "wb") as f:
+                        contents = await get_with_progress(client, url)
+                        # Large files
+                        await asyncio.to_thread(f.write, contents)
+                except httpx.HTTPStatusError as e:
+                    # Some urls are blocked by upstream, e.g.,
+                    # https://download.pytorch.org/whl/cu128/nvidia_cudnn_cu12-9.8.0.87-py3-none-manylinux_2_27_aarch64.whl
+                    # This is a workaround to skip those files.
+                    if e.response.status_code == 403:
+                        print(f"[WARN] Forbidden: {url}, skipping.")
+                    else:
+                        raise e
 
 
 async def main():
