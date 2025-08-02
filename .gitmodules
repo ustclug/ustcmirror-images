@@ -1,3 +1,6 @@
 [submodule "archvsync/upstream"]
 	path = archvsync/upstream
 	url = https://salsa.debian.org/mirror-team/archvsync.git
+[submodule "rustup/upstream"]
+	path = rustup/upstream
+	url = https://github.com/jiegec/rustup-mirror
