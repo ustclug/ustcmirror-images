@@ -36,6 +36,7 @@
     - [rclone](#rclone)
     - [rsync](#rsync)
     - [rubygems](#rubygems)
+	- [rustup](#rustup)
     - [stackage](#stackage)
     - [tsumugu](#tsumugu)
     - [winget-source](#winget-source)
@@ -429,6 +430,19 @@ ref:
 | Parameter  | Description                        |
 | ---------- | ---------------------------------- |
 | `UPSTREAM` | Defaults to `http://rubygems.org`. |
+
+### rustup
+
+[![rustup](https://img.shields.io/docker/image-size/ustcmirror/rustup/latest)](https://hub.docker.com/r/ustcmirror/rustup "rustup")
+[![rustup](https://img.shields.io/docker/pulls/ustcmirror/rustup/latest)](https://hub.docker.com/r/ustcmirror/rustup "rustup")
+
+| Parameter  | Description                                 |
+| ---------- | ------------------------------------------- |
+| `UPSTREAM` | Defaults to `https://static.rust-lang.org/` |
+| `GC`       | Defaults to `1`                             |
+| `TARGETS`  | Defaults to `x86_64-unknown-linux-gnu`      |
+| `URL`      | Defaults to `http://127.0.0.1:8000/`
+
 
 ### shadowmire
 
