@@ -438,12 +438,12 @@ ref:
 
 This image is based on [rustup-mirror](https://github.com/jiegec/rustup-mirror).
 
-| Parameter  | Description                                  |
-| ---------- | -------------------------------------------- |
-| `UPSTREAM` | Defaults to `https://static.rust-lang.org/`. |
-| `GC`       | Defaults to `1`.                             |
-| `TARGETS`  | Defaults to `x86_64-unknown-linux-gnu`.      |
-| `URL`      | Defaults to `http://127.0.0.1:8000/`.        |
+| Parameter  | Description                                 |
+| ---------- | ------------------------------------------- |
+| `UPSTREAM` | Defaults to `https://static.rust-lang.org/` |
+| `GC`       | Defaults to `1`                             |
+| `TARGETS`  | Defaults to `x86_64-unknown-linux-gnu`      |
+| `URL`      | Defaults to `http://127.0.0.1:8000/`        |
 
 
 ### shadowmire
