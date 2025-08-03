@@ -13,6 +13,7 @@ ARG CARGO_BUILD_EXTRA=" "
 RUN cargo build --release ${CARGO_BUILD_EXTRA}
 
 FROM ustcmirror/base:debian
+LABEL maintainer="Erina Init <erina@mail.ustc.edu.cn>"
 
 COPY --from=builder /app/target/release/rustup-mirror /usr/local/bin
 
