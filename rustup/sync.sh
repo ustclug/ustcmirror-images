@@ -15,5 +15,3 @@ rustup-mirror --upstream-url "$UPSTREAM" \
 	      --gc "$GC" \
 	      --url "$URL" \
 	      --mirror "$TO"
-
-
