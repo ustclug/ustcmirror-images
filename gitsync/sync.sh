@@ -47,10 +47,10 @@ if [[ $GITSYNC_MIRROR = true ]]; then
 fi
 
 if [[ $GITSYNC_CHECKOUT = true ]]; then
-    git fetch "$GITSYNC_REMOTE" "$GITSYNC_BRANCH" -u -v --progress --force
+    git fetch "$GITSYNC_REMOTE" $GITSYNC_BRANCH -u -v --progress --force
     git reset --hard FETCH_HEAD
 else
-    git fetch "$GITSYNC_REMOTE" "$GITSYNC_BRANCH" -v --progress --tags --force
+    git fetch "$GITSYNC_REMOTE" $GITSYNC_BRANCH -v --progress --tags --force
     git update-server-info
 fi
 
