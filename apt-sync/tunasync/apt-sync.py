@@ -37,9 +37,9 @@ requests.utils.default_user_agent = lambda: APTSYNC_USER_AGENT
 
 OS_TEMPLATE = {
     'ubuntu-lts': ["focal", "jammy", "noble"],
-    'debian-current': ["bullseye", "bookworm"],
-    'debian-latest2': ["bullseye", "bookworm"],
-    'debian-latest': ["bookworm"],
+    'debian-current': ["bullseye", "bookworm", "trixie"],
+    'debian-latest2': ["bookworm", "trixie"],
+    'debian-latest': ["trixie"],
 }
 MAX_RETRY = int(os.getenv('MAX_RETRY', '3'))
 DOWNLOAD_TIMEOUT = int(os.getenv('DOWNLOAD_TIMEOUT', '1800'))
