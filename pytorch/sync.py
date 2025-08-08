@@ -98,12 +98,17 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
     path = unquote(urlparse(url).path)
     while path.startswith("/"):
         path = path[1:]
-    if url.endswith("/"):
-        # index.html
+    if url.endswith("/") or url.endswith(".html"):
+        # index.html (current) or torch_stable.html (old)
         async with sem:
             logging.info(f"Getting {url}")
             contents = await get_with_progress(client, url)
             index_resp = contents.decode("utf-8")
+            if url.endswith("/"):
+                filename = "index.html"
+            else:
+                filename = url.split("/")[-1]
+                assert filename.endswith(".html"), f"Unexpected HTML file: {filename}"
 
         tasks = []
         for m in A_RE.finditer(index_resp):
@@ -127,7 +132,7 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
         if not dry_run:
             index_resp = index_resp.replace('href="/', f'href="{urlbase}')
             os.makedirs(base / path, exist_ok=True)
-            with overwrite(base / path / "index.html", "w") as f:
+            with overwrite(base / path / filename, "w") as f:
                 f.write(index_resp)
     else:
         if (base / path).exists():
@@ -177,7 +182,10 @@ async def main():
                 if not url.startswith("https://download.pytorch.org"):
                     continue
                 if url.startswith("https://download.pytorch.org/whl/"):
-                    urls.add(url + "/")
+                    if url.endswith(".html"):
+                        urls.add(url)
+                    else:
+                        urls.add(url + "/")
     else:
         logging.info("Getting published versions from GitHub...")
         resp = await client.get(PUBLISHED_VERSION_URL)
@@ -199,7 +207,10 @@ async def main():
         for command in find_commands(published_versions):
             command = command.split(" ")[-1]
             if command.startswith("https://download.pytorch.org/whl/"):
-                urls.add(command + "/")
+                if command.endswith(".html"):
+                    urls.add(command)
+                else:
+                    urls.add(command + "/")
 
     await asyncio.gather(*(recursive_download(client, url) for url in urls))
 
