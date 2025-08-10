@@ -28,6 +28,8 @@ urlbase = os.environ.get("URLBASE", "/pytorch/")
 get_all = os.environ.get("GET_ALL", "0") == "1"
 # allow custom endpoints, e.g., https://download.pytorch.org/whl/xpu (Intel GPU builds)
 custom_endpoints = os.environ.get("CUSTOM_ENDPOINTS", "").split(",")
+# exclude nightly builds, by default
+no_nightly = os.environ.get("NO_NIGHTLY", "1") == "1"
 if not urlbase.endswith("/"):
     urlbase += "/"
 if not urlbase.startswith("/"):
@@ -164,10 +166,18 @@ async def main():
         timeout=timeout,
     )
     urls = set()
+    
+    def add_endpoint(url: str):
+        if no_nightly and "/nightly/" in url:
+            logging.info(f"Skipping nightly build: {url}")
+            return
+        if url.endswith(".html"):
+            urls.add(url)
+        else:
+            urls.add(url + "/")
+    
     for endpoint in custom_endpoints:
-        if not endpoint.endswith("/"):
-            endpoint += "/"
-        urls.add(endpoint)
+        add_endpoint(endpoint)
 
     if not get_all:
         logging.info("Getting releases info from GitHub...")
@@ -182,10 +192,7 @@ async def main():
                 if not url.startswith("https://download.pytorch.org"):
                     continue
                 if url.startswith("https://download.pytorch.org/whl/"):
-                    if url.endswith(".html"):
-                        urls.add(url)
-                    else:
-                        urls.add(url + "/")
+                    add_endpoint(url)
     else:
         logging.info("Getting published versions from GitHub...")
         resp = await client.get(PUBLISHED_VERSION_URL)
@@ -207,10 +214,7 @@ async def main():
         for command in find_commands(published_versions):
             command = command.split(" ")[-1]
             if command.startswith("https://download.pytorch.org/whl/"):
-                if command.endswith(".html"):
-                    urls.add(command)
-                else:
-                    urls.add(command + "/")
+                add_endpoint(command)
 
     await asyncio.gather(*(recursive_download(client, url) for url in urls))
 
