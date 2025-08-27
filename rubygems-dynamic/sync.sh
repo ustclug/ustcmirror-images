@@ -16,6 +16,7 @@ for f in "${SPEC_FILES[@]}"; do
 done
 
 # Reset info API
+mkdir -p "$TO/info"
 find "$TO/info" -type f -delete
 
 # Fetch index
