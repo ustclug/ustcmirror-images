@@ -8,7 +8,7 @@ SPEC_VERSION=4.8
 # Fetch specs
 for f in "${SPEC_FILES[@]}"; do
   fn="$TO/$f.$SPEC_VERSION"
-  wget -O "$fn.gz.new" "$UPSTREAM/$fn"
+  wget -O "$fn.gz.new" "$UPSTREAM/$fn.gz"
   gzip -cd "$fn.gz.new" > "$fn.new"
   mv -f "$fn.new" "$fn"
   mv -f "$fn.gz.new" "$fn.gz"
