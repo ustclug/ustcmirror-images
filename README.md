@@ -422,7 +422,7 @@ ref:
 | `RSYNC_MAXDELETE`      | Maximum number of files that can be removed. Defaults to `4000`.      |
 | `RSYNC_RSH`            | Specify the remote shell, e.g. `ssh -i /path/to/key`.                 |
 
-### rubygems
+### rubygems / rubygems-dynamic
 
 [![rubygems](https://img.shields.io/docker/image-size/ustcmirror/rubygems/latest)](https://hub.docker.com/r/ustcmirror/rubygems "rubygems")
 [![rubygems](https://img.shields.io/docker/pulls/ustcmirror/rubygems)](https://hub.docker.com/r/ustcmirror/rubygems "rubygems")
