@@ -98,12 +98,12 @@ while read platform; do
 			channel_sync $FBSD_PKG_UPSTREAM/$platform/$channel $TO/$platform/$channel
 		fi
 	done
+	echo "[INFO] finished $platform, doing GC to free some disk space..."
+	clean_hash_file
 done < $FBSD_PLATFORMS
 
 find $TO -type d -print0 | xargs -0 chmod 755
 
 rm $FBSD_PLATFORMS
-
-clean_hash_file
 
 exit $EXIT_CODE
