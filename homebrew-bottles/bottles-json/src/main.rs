@@ -1,7 +1,7 @@
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     fs::File,
-    io::{Read, Write},
+    io::Write,
     path::{Path, PathBuf},
 };
 
@@ -74,22 +74,20 @@ fn d(f: &Formula) -> Option<()> {
     Some(())
 }
 
-fn e(f: &Value, name: &str, target: &Path) -> Option<()> {
+fn e(f: &Value, name: &str, target: &Path, indexes: &mut HashMap<String, String>) -> Option<bool> {
+    // Return Some(true) if no change, Some(false) if updated
     let tmp_name = format!("{}.json.new", name);
     let final_name = format!("{}.json", name);
     let contents = serde_json::to_string(f).unwrap();
 
+    let hash = blake3::hash(contents.as_bytes()).to_string();
+    if let Some(existing_hash) = indexes.get(name)
+        && existing_hash == &hash
     {
-        // is it the same as existing file?
-        // this is to avoid unnecessary file metadata modification
-        let mut existing = String::new();
-        if let Ok(mut file) = File::open(target.join(final_name.clone())) {
-            if let Err(e) = file.read_to_string(&mut existing) {
-                eprintln!("Failed to read existing file {}: {}", final_name, e);
-            } else if existing == contents {
-                return Some(());
-            }
-        }
+        // no change
+        return Some(true);
+    } else {
+        indexes.insert(name.to_owned(), hash);
     }
 
     {
@@ -97,7 +95,7 @@ fn e(f: &Value, name: &str, target: &Path) -> Option<()> {
         file.write_all(contents.as_bytes()).unwrap();
     }
     std::fs::rename(target.join(tmp_name), target.join(final_name)).unwrap();
-    Some(())
+    Some(false)
 }
 
 fn main() {
@@ -118,6 +116,20 @@ fn main() {
             let target_dir = cli
                 .folder
                 .expect("target folder is required as an argument");
+            // Try open index file. Continue with an empty map if not exist.
+            let index_file = target_dir.join(format!(
+                "{}_bottles_json.index",
+                match cli.type_ {
+                    Type::Formula => "formula",
+                    Type::Cask => "cask",
+                }
+            ));
+            let mut indexes: HashMap<String, String> = if let Ok(file) = File::open(&index_file) {
+                serde_json::from_reader(file).unwrap_or_default()
+            } else {
+                HashMap::new()
+            };
+
             let mut existing_jsons = std::fs::read_dir(&target_dir)
                 .unwrap()
                 .filter_map(|e| {
@@ -131,16 +143,34 @@ fn main() {
                     )
                 })
                 .collect::<HashSet<_>>();
+            let mut updated = false;
             for f in f.as_array().unwrap() {
                 let fname = match cli.type_ {
                     Type::Formula => &f["name"],
                     Type::Cask => &f["token"],
                 };
                 let fname = fname.as_str().unwrap();
-                if e(f, fname, &target_dir).is_none() {
-                    eprintln!("Failed to extract json: {}", fname);
+                let res = e(f, fname, &target_dir, &mut indexes);
+                match res {
+                    Some(true) => {} // no change
+                    Some(false) => {
+                        updated = true;
+                    }
+                    None => {
+                        eprintln!("Failed to extract json: {}", fname);
+                    }
                 }
                 existing_jsons.remove(fname);
+            }
+            if updated {
+                // Save index file
+                let tmp = format!("{}.new", index_file.to_str().unwrap());
+                {
+                    let mut file = File::create(&tmp).unwrap();
+                    let contents = serde_json::to_string(&indexes).unwrap();
+                    file.write_all(contents.as_bytes()).unwrap();
+                }
+                std::fs::rename(&tmp, &index_file).unwrap();
             }
             // Clean unused jsons
             for fname in existing_jsons {
@@ -157,10 +187,7 @@ fn main() {
                     .unwrap();
                 let url = format!("https://formulae.brew.sh/api/cask-source/{}", filename);
                 let url = urlencoding::encode(&url);
-                println!(
-                    "{} {} {}",
-                    f.ruby_source_checksum.sha256, url, filename
-                );
+                println!("{} {} {}", f.ruby_source_checksum.sha256, url, filename);
             }
         }
     }
