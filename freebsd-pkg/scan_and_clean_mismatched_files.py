@@ -29,7 +29,8 @@ def main(args):
                 "-xf",
                 str(packagesite_file),
                 "packagesite.yaml",
-            ], check=True
+            ],
+            check=True,
         )
         with open("/tmp/packagesite.yaml", "r") as f:
             for line in f:
@@ -39,7 +40,7 @@ def main(args):
                 repopath_full = (packagesite_file.parent / repopath).absolute()
                 path_to_hash[repopath_full] = hash_value
         os.remove("/tmp/packagesite.yaml")
-    
+
     def scan_pkg_file(pkg_file: os.DirEntry[str]):
         pathname = Path(pkg_file.path)
         inode = pkg_file.inode()
@@ -55,21 +56,22 @@ def main(args):
                 os.remove(pathname)
             return
         if actual_hash != expected_hash:
-            print(f"[MISMATCH] file {pathname} has hash {actual_hash}, expected {expected_hash}")
+            print(
+                f"[MISMATCH] file {pathname} has hash {actual_hash}, expected {expected_hash}"
+            )
             if not args.dry_run:
                 print(f"[INFO] deleting mismatched file {pathname}")
                 os.remove(pathname)
-    
+
     # 3. scan existing packages and check for mismatches
     for all_path in TO.rglob("*/*/All"):
         for pkg_file in os.scandir(all_path):
             scan_pkg_file(pkg_file)
-    
+
     for all_path in TO.rglob("*/*/"):
         for file in os.scandir(all_path):
             if file.name.startswith("FreeBSD-") and file.name.endswith(".pkg"):
                 scan_pkg_file(file)
-        
 
 
 if __name__ == "__main__":
