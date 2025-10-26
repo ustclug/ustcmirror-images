@@ -213,11 +213,12 @@ A simple sync script to sync necessary metadata for flatpak. **This DOES NOT SYN
 [![freebsd-pkg](https://img.shields.io/docker/image-size/ustcmirror/freebsd-pkg/latest)](https://hub.docker.com/r/ustcmirror/freebsd-pkg "freebsd-pkg")
 [![freebsd-pkg](https://img.shields.io/docker/pulls/ustcmirror/freebsd-pkg)](https://hub.docker.com/r/ustcmirror/freebsd-pkg "freebsd-pkg")
 
-| Parameter           | Description                                                      |
-| ------------------- | ---------------------------------------------------------------- |
-| `FBSD_PKG_UPSTREAM` | Set the URL of upstream. Defaults to `http://pkg.freebsd.org`.   |
-| `FBSD_PKG_JOBS`     | Defaults to `1`.                                                 |
-| `FBSD_PKG_EXCLUDE`  | Exclude ABI by regular expression. Defaults to `^FreeBSD:[89]:`. |
+| Parameter             | Description                                                                                     |
+| --------------------- | ----------------------------------------------------------------------------------------------- |
+| `FBSD_PKG_UPSTREAM`   | Set the URL of upstream. Defaults to `http://pkg.freebsd.org`.                                  |
+| `FBSD_PKG_JOBS`       | Defaults to `1`.                                                                                |
+| `FBSD_PKG_EXCLUDE`    | Exclude ABI by regular expression. Defaults to `^FreeBSD:[89]:`.                                |
+| `FBSD_PKG_INDEX_ONLY` | Set to `true` to only sync index files, without downloading package files. Defaults to `false`. |
 
 ### freebsd-ports
 

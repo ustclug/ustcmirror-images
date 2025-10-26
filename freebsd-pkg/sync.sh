@@ -7,6 +7,7 @@ source /curl-helper.sh
 FBSD_PKG_UPSTREAM=${FBSD_PKG_UPSTREAM:-"http://pkg.freebsd.org"}
 FBSD_PKG_EXCLUDE=${FBSD_PKG_EXCLUDE:-"^FreeBSD:([0-9]+:(?!amd64|i386|aarch64)[a-z0-9]+$)"}
 FBSD_PKG_JOBS=${FBSD_PKG_JOBS:-1}
+FBSD_PKG_INDEX_ONLY=${FBSD_PKG_INDEX_ONLY:-false}
 FBSD_PLATFORMS=$(mktemp)
 export PARALLEL_SHELL=/bin/bash
 
@@ -63,7 +64,11 @@ channel_sync() {
 	jq -r '"\(.sum) \(.repopath)"' $tmpdir/packagesite.yaml | sort -k2 > $meta
 	rm -f $tmpdir/packagesite.yaml
 	export local_dir=$basedir
-	enable_checksum=true parallel --line-buffer -j $FBSD_PKG_JOBS --pipepart -a $meta download
+	if [[ $FBSD_PKG_INDEX_ONLY == false ]]; then
+		enable_checksum=true parallel --line-buffer -j $FBSD_PKG_JOBS --pipepart -a $meta download
+	else
+		echo "[INFO] index-only mode, skip package download."
+	fi
 
 	# update meta-data
 	rsync -a $tmpdir/ $basedir/
@@ -98,11 +103,22 @@ while read platform; do
 			channel_sync $FBSD_PKG_UPSTREAM/$platform/$channel $TO/$platform/$channel
 		fi
 	done
-	echo "[INFO] finished $platform, doing GC to free some disk space..."
-	clean_hash_file
+	if [[ $FBSD_PKG_INDEX_ONLY == false ]]; then
+		# if in index-only, do gc after all platforms synced
+		echo "[INFO] finished $platform, doing GC to free some disk space..."
+		clean_hash_file
+	fi
 done < $FBSD_PLATFORMS
 
 find $TO -type d -print0 | xargs -0 chmod 755
+
+echo "[INFO] final verification and cleanup..."
+./scan_and_clean_mismatched_files.py
+if [[ $? -ne 0 ]]; then
+	echo "[FATAL] scan and clean mismatched files failed."
+	EXIT_CODE=$((EXIT_CODE + 1))
+fi
+clean_hash_file
 
 rm $FBSD_PLATFORMS
 
