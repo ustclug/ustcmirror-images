@@ -29,11 +29,11 @@ OS_TEMPLATE = {
     # keep for compatibility only
     'centos-current': ["NONEXIST!"],
     # https://endoflife.date/rhel (excluding ELCS)
-    'rhel-current': ["8", "9"],
+    'rhel-current': ["8", "9", "10"],
     # https://endoflife.date/fedora
-    'fedora-current': ["40", "41", "42"],
+    'fedora-current': ["41", "42", "43"],
     # https://endoflife.date/opensuse
-    'opensuse-current': ["15.6"],
+    'opensuse-current': ["15.6", "16.0"],
 }
 
 def calc_repo_size(path: Path):
