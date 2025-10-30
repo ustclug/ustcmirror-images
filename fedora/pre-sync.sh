@@ -40,7 +40,8 @@ else
     su-exec "$OWNER" ln -s "$TO" "/mirror/$_MODULE_DIR"
 fi
 
-_RSYNCOPTS=(-aSH -f "'R .~tmp~'" --keep-dirlinks --stats --delay-updates "--out-format='@ %i  %n%L'")
+# see quick-fedora-mirror set_default_vars()
+_RSYNCOPTS=(-aSH -f "'R .~tmp~'" --keep-dirlinks --stats --delay-updates "--out-format='@ %i %10l  %n%L'")
 
 if [[ -n "${BIND_ADDRESS:+1}" ]]; then
     if [[ "$BIND_ADDRESS" =~ .*: ]]; then
