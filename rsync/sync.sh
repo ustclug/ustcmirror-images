@@ -23,13 +23,16 @@ RSYNC_DELAY_UPDATES="${RSYNC_DELAY_UPDATES:-true}"
 RSYNC_SPARSE="${RSYNC_SPARSE:-true}"
 RSYNC_DELETE_DELAY="${RSYNC_DELETE_DELAY:-true}"
 RSYNC_DELETE_EXCLUDED="${RSYNC_DELETE_EXCLUDED:-true}"
+RSYNC_NO_DELETE="${RSYNC_NO_DELETE:-false}"
 
 opts="-pPrltvH --partial-dir=.rsync-partial --timeout ${RSYNC_TIMEOUT} --safe-links"
 
 [[ -n $RSYNC_USER ]] && RSYNC_HOST="$RSYNC_USER@$RSYNC_HOST"
 
-[[ $RSYNC_DELETE_EXCLUDED = true ]] && opts+=' --delete-excluded'
-[[ $RSYNC_DELETE_DELAY = true ]] && opts+=' --delete-delay' || opts+=' --delete'
+if [[ $RSYNC_NO_DELETE != true ]]; then
+  [[ $RSYNC_DELETE_EXCLUDED = true ]] && opts+=' --delete-excluded'
+  [[ $RSYNC_DELETE_DELAY = true ]] && opts+=' --delete-delay' || opts+=' --delete'
+fi
 [[ $RSYNC_DELAY_UPDATES = true ]] && opts+=' --delay-updates'
 [[ $RSYNC_SPARSE = true ]] && opts+=' --sparse'
 [[ $RSYNC_BLKSIZE -ne 0 ]] && opts+=" --block-size ${RSYNC_BLKSIZE}"
@@ -54,4 +57,7 @@ else
   RSYNC_URL="rsync://$RSYNC_HOST/$RSYNC_PATH"
 fi
 
-exec rsync $RSYNC_EXCLUDE --filter="merge $filter_file" --bwlimit "$RSYNC_BW" --max-delete "$RSYNC_MAXDELETE" $opts $RSYNC_EXTRA "$RSYNC_URL" "$TO"
+max_delete_arg="--max-delete $RSYNC_MAXDELETE"
+[[ $RSYNC_NO_DELETE = true ]] && max_delete_arg=''
+
+exec rsync $RSYNC_EXCLUDE --filter="merge $filter_file" --bwlimit "$RSYNC_BW" $max_delete_arg $opts $RSYNC_EXTRA "$RSYNC_URL" "$TO"

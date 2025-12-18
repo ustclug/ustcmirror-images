@@ -422,6 +422,7 @@ ref:
 | `RSYNC_DELETE_EXCLUDED`| Defaults to `true`. Use `--delete-excluded` to delete excluded files. |
 | `RSYNC_MAXDELETE`      | Maximum number of files that can be removed. Defaults to `4000`.      |
 | `RSYNC_RSH`            | Specify the remote shell, e.g. `ssh -i /path/to/key`.                 |
+| `RSYNC_NO_DELETE`      | Defaults to `false`. Set to `true` to disable all deletion arguments. |
 
 ### rubygems / rubygems-dynamic
 
