@@ -27,7 +27,7 @@ const fetch = withRetry(originalFetch, {
     retryOn: (attempt, error, response) => {
         if (attempt > 3) return false;
 
-        if (error || response.status >= 400) {
+        if (error || !response.ok) {
             if (response)
                 winston.warn(`retrying ${response.url} (${attempt})`);
             else
@@ -341,7 +341,7 @@ export async function cacheFileWithURI(uri, buffer, modifiedAt) {
  * @param {boolean} update Whether to allow updating an existing file.
  * @param {boolean} save Whether to save the file to disk.
  *
- * @returns {Promise<[?Buffer, ?Date, boolean]>} File buffer, last modified date and if the file is updated.
+ * @returns {Promise<[?Buffer, ?Date, boolean]>} File buffer, last modified date and if the local file is updated.
  */
 export async function syncFile(uri, update = true, save = true) {
     const localPath = getLocalPath(uri);
@@ -353,18 +353,23 @@ export async function syncFile(uri, update = true, save = true) {
             return [null, null, false];
         }
         const response = await fetch(remoteURL, { method: 'HEAD' });
-        const lastModified = getLastModifiedDate(response);
-        const contentLength = getContentLength(response);
-        if (lastModified) {
-            const localFile = await stat(localPath);
-            if (localFile.mtime.getTime() == lastModified.getTime() && localFile.size == contentLength) {
-                winston.debug(`skipped ${uri} because it's up to date`);
-                return [await readFile(localPath), lastModified, false];
+        if (response.ok) {
+            const lastModified = getLastModifiedDate(response);
+            const contentLength = getContentLength(response);
+            if (lastModified) {
+                const localFile = await stat(localPath);
+                if (localFile.mtime.getTime() == lastModified.getTime() && localFile.size == contentLength) {
+                    winston.debug(`skipped ${uri} because it's up to date`);
+                    return [await readFile(localPath), lastModified, false];
+                }
             }
         }
     }
     winston.info(`downloading from ${remoteURL}`);
     const response = await fetch(remoteURL);
+    if (!response.ok) {
+        throw new Error(`failed to fetch ${uri} due to upstream error: ${response.status} ${response.statusText}`);
+    }
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const lastModified = getLastModifiedDate(response);
