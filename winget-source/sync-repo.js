@@ -36,7 +36,7 @@ async function syncIndex(version, handler) {
         // download index package to buffer
         const [indexBuffer, modifiedDate, updated] = await syncFile(sourceFilename, true, false);
         if (!updated && !forceSync) {
-            winston.info(`skip syncing version ${version} from ${remote}`);
+            winston.info(`skip syncing index version ${version} from ${remote}`);
             return;
         }
         assert(Buffer.isBuffer(indexBuffer), 'Failed to get the source index buffer!');
