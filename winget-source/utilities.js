@@ -52,6 +52,9 @@ const debugMode = process.env.DEBUG === 'true';
 /** Whether to perform a forced sync. */
 const forceSync = process.env.WINGET_FORCE_SYNC === 'true';
 
+/** Packages to be excluded from syncing. */
+const excludedPackages = (process.env.WINGET_REPO_EXCLUDE ?? '').split(',').map(pkg => pkg.trim());
+
 /** Local IP address to be bound to HTTPS requests. */
 const localAddress = process.env.BIND_ADDRESS;
 
@@ -191,6 +194,17 @@ function setupWinstonLogger() {
 }
 
 /**
+ * Filter package rows by excluding specific packages.
+ * 
+ * @param {{ id: string, [key: string]: string }[]} rows Rows returned by the query.
+ * 
+ * @returns {{ id: string, [key: string]: string }[]} Filtered rows without excluded packages.
+ */
+export function applyPackageExclusion(rows) {
+    return rows.filter((row) => !excludedPackages.includes(row.id));
+}
+
+/**
  * Build a local storage for path parts from database query.
  *
  * @param {{ rowid: number, parent: number, pathpart: string }[]} rows Rows returned by the query.
@@ -308,6 +322,7 @@ export function setupEnvironment() {
     }
     return {
         debugMode,
+        excludedPackages,
         forceSync,
         local,
         parallelLimit,
