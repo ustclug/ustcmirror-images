@@ -6,6 +6,7 @@ import { AsyncDatabase } from 'promised-sqlite3'
 import { EX_IOERR, EX_SOFTWARE, EX_TEMPFAIL, EX_UNAVAILABLE } from './sysexits.js'
 
 import {
+    applyPackageExclusion,
     buildManifestURIs,
     buildManifestURIsFromPackageMetadata,
     buildPackageMetadataURIs,
@@ -76,7 +77,8 @@ winston.info(`start syncing with ${remote}`);
 
 await syncIndex(2, async (db) => {
     try {
-        const packageURIs = buildPackageMetadataURIs(await db.all('SELECT id, hash FROM packages'));
+        const packageRows = await db.all('SELECT id, hash FROM packages');
+        const packageURIs = buildPackageMetadataURIs(applyPackageExclusion(packageRows));
         try {
             // sync latest package metadata and manifests in parallel
             await async.eachLimit(packageURIs, parallelLimit, async (uri) => {
@@ -100,7 +102,10 @@ await syncIndex(2, async (db) => {
 await syncIndex(1, async (db) => {
     try {
         const pathparts = buildPathpartMap(await db.all('SELECT * FROM pathparts'));
-        const uris = buildManifestURIs(await db.all('SELECT pathpart FROM manifest ORDER BY rowid DESC'), pathparts);
+        const rows = await db.all(
+            'SELECT ids.id AS id, manifest.pathpart AS pathpart FROM manifest LEFT JOIN ids ON manifest.id = ids.rowid ORDER BY manifest.rowid DESC'
+        );
+        const uris = buildManifestURIs(applyPackageExclusion(rows), pathparts);
         // sync latest manifests in parallel
         try {
             await async.eachLimit(uris, parallelLimit, async (uri) => await syncFile(uri, forceSync));

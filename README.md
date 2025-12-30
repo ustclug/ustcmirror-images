@@ -494,11 +494,12 @@ An alternative HTTP(S) syncing tool, replacing `rclone` and `lftp` in some cases
 
 A handy tool to sync pre-indexed [Windows Package Manager](https://github.com/microsoft/winget-cli) (aka. WinGet) sources.
 
-| Parameter             | Description                                                       |
-| --------------------- | ----------------------------------------------------------------- |
-| `WINGET_FORCE_SYNC`   | Force syncs everything against the upstream. Defaults to `false`. |
+| Parameter             | Description                                                            |
+| --------------------- | ---------------------------------------------------------------------- |
+| `WINGET_FORCE_SYNC`   | Force syncs everything against the upstream. Defaults to `false`.      |
 | `WINGET_REPO_URL`     | Sets the URL of upstream. Defaults to [`https://cdn.winget.microsoft.com/cache`](https://cdn.winget.microsoft.com/cache) |
-| `WINGET_REPO_JOBS`    | Parallel jobs. Defaults to 8.                                     |
+| `WINGET_REPO_JOBS`    | Parallel jobs. Defaults to 8.                                          |
+| `WINGET_REPO_EXCLUDE` | Packages to be excluded. Value example: `Google.Chrome,Microsoft.Edge` |
 
 ### yukina
 
