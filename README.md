@@ -423,7 +423,7 @@ ref:
 | `RSYNC_MAXDELETE`      | Maximum number of files that can be removed. Defaults to `4000`.      |
 | `RSYNC_RSH`            | Specify the remote shell, e.g. `ssh -i /path/to/key`.                 |
 | `RSYNC_NO_DELETE`      | Defaults to `false`. Set to `true` to disable all deletion arguments. |
-| `RSYNC_SSL`            | Defaults to `false`. Set to `true` to use `rsync-ssl`.                |
+| `RSYNC_SSL`            | Defaults to `false`. Set to `true` to use `rsync-ssl`. `BIND_ADDRESS` is not respected when true. |
 
 ### rubygems / rubygems-dynamic
 
