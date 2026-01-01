@@ -24,6 +24,7 @@ RSYNC_SPARSE="${RSYNC_SPARSE:-true}"
 RSYNC_DELETE_DELAY="${RSYNC_DELETE_DELAY:-true}"
 RSYNC_DELETE_EXCLUDED="${RSYNC_DELETE_EXCLUDED:-true}"
 RSYNC_NO_DELETE="${RSYNC_NO_DELETE:-false}"
+RSYNC_SSL="${RSYNC_SSL:-false}"
 
 opts="-pPrltvH --partial-dir=.rsync-partial --timeout ${RSYNC_TIMEOUT} --safe-links"
 
@@ -60,4 +61,9 @@ fi
 max_delete_arg="--max-delete $RSYNC_MAXDELETE"
 [[ $RSYNC_NO_DELETE = true ]] && max_delete_arg=''
 
-exec rsync $RSYNC_EXCLUDE --filter="merge $filter_file" --bwlimit "$RSYNC_BW" $max_delete_arg $opts $RSYNC_EXTRA "$RSYNC_URL" "$TO"
+rsync_program="rsync"
+if [[ $RSYNC_SSL = true ]]; then
+  rsync_program="rsync-ssl"
+fi
+
+exec $rsync_program $RSYNC_EXCLUDE --filter="merge $filter_file" --bwlimit "$RSYNC_BW" $max_delete_arg $opts $RSYNC_EXTRA "$RSYNC_URL" "$TO"
