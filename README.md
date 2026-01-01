@@ -2,49 +2,6 @@
 
 [![Build Status](https://github.com/ustclug/ustcmirror-images/workflows/Build/badge.svg)](https://github.com/ustclug/ustcmirror-images/actions)
 
-## Table Of Content
-
-- [ustcmirror-images](#ustcmirror-images)
-  - [Table Of Content](#table-of-content)
-  - [Introduction](#introduction)
-  - [Quick Start](#quick-start)
-  - [Configuration](#configuration)
-    - [Volumes](#volumes)
-    - [Common Configuration Parameters(AKA environment variables)](#common-configuration-parametersaka-environment-variables)
-    - [aptsync](#aptsync)
-    - [apt-sync](#apt-sync)
-    - [archvsync](#archvsync)
-    - [crates-io-index](#crates-io-index)
-    - [debian-cd](#debian-cd)
-    - [docker-ce](#docker-ce)
-    - [fedora](#fedora)
-    - [flatpak](#flatpak)
-    - [freebsd-pkg](#freebsd-pkg)
-    - [freebsd-ports](#freebsd-ports)
-    - [ghcup](#ghcup)
-    - [github-release](#github-release)
-    - [gitsync](#gitsync)
-    - [google-repo](#google-repo)
-    - [gsutil-rsync](#gsutil-rsync)
-    - [hackage](#hackage)
-    - [homebrew-bottles](#homebrew-bottles)
-    - [julia-storage](#julia-storage)
-    - [lftpsync](#lftpsync)
-    - [misc](#misc)
-    - [nix-channels](#nix-channels)
-    - [pypi](#pypi)
-    - [rclone](#rclone)
-    - [rsync](#rsync)
-    - [rubygems](#rubygems)
-    - [rustup](#rustup)
-    - [stackage](#stackage)
-    - [tsumugu](#tsumugu)
-    - [winget-source](#winget-source)
-    - [yukina](#yukina)
-    - [yum-sync](#yum-sync)
-  - [License](#license)
-  - [Contributing](#contributing)
-
 ## Introduction
 
 These images are designed for mirroring remote directories/repositories in a consistent and portable way. They are used by [ustcmirror (yuki)](https://github.com/ustclug/yuki).
@@ -73,14 +30,14 @@ docker run --rm \
 
 Apart from `TO` and `LOGDIR`, these environment variables are common to all images.
 
-| Parameter          | Description                                                                                                            |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `DEBUG`            | Set this to `true` to enable debugging.                                                                                |
-| `BIND_ADDRESS`     | Set the local ip to be bound. Require `--network=host`. (Some programs don't support this parameter)                   |
-| `OWNER`            | Set the uid and gid of the process so that the downloaded files wont get messed up. Defaults to `0:0` (aka root:root). |
-| `LOG_ROTATE_CYCLE` | Specify how many cycle versions of the logfile to be saved. Set this to `0` will **disable log file**. Defaults to `0` (NO LOG FILE).    |
-| `REPO`             | Name of the repository. Required in `archvsync`.                                                                       |
-| `RETRY`            | Times to re-sync if the process exits abnormally. Defaults to `0`.                                                     |
+| Parameter          | Description                                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `DEBUG`            | Set this to `true` to enable debugging.                                                                                               |
+| `BIND_ADDRESS`     | Set the local ip to be bound. Require `--network=host`. (Some programs don't support this parameter)                                  |
+| `OWNER`            | Set the uid and gid of the process so that the downloaded files wont get messed up. Defaults to `0:0` (aka root:root).                |
+| `LOG_ROTATE_CYCLE` | Specify how many cycle versions of the logfile to be saved. Set this to `0` will **disable log file**. Defaults to `0` (NO LOG FILE). |
+| `REPO`             | Name of the repository. Required in `archvsync`.                                                                                      |
+| `RETRY`            | Times to re-sync if the process exits abnormally. Defaults to `0`.                                                                    |
 
 ### aptsync
 
@@ -97,7 +54,7 @@ Apart from `TO` and `LOGDIR`, these environment variables are common to all imag
 
 Notes: The following `mirror.list`:
 
-```
+```debsources
 deb-i386 https://apt.dockerproject.org/repo debian-jessie main
 deb-amd64 https://apt.dockerproject.org/repo debian-jessie main
 deb-armhf https://apt.dockerproject.org/repo raspbian-jessie main testing
@@ -105,7 +62,7 @@ deb-armhf https://apt.dockerproject.org/repo raspbian-jessie main testing
 
 is equivalent to the following parameters:
 
-```
+```ini
 APTSYNC_URL='https://apt.dockerproject.org/repo'
 APTSYNC_DISTS='debian-jessie|main|i386 amd64:raspbian-jessie|main testing|armhf'
 ```
@@ -145,12 +102,12 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 
 A dedicated script to sync <https://github.com/rust-lang/crates.io-index>.
 
-| Parameter        | Description                                                                                                |
-| ---------------- | ---------------------------------------------------------------------------------------------------------- |
-| `CRATES_PROXY`     | The URL that crates will be redirected to. Defaults to `https://crates-io.proxy.ustclug.org/api/v1/crates` |
-| `CRATES_GITMSG`    | The commit message of `config.json`. Defaults to `Redirect to USTC Mirrors`                                |
-| `CRATES_GITMAIL`   | `user.email` when committing `config.json`. Defaults to `lug AT ustc.edu.cn`                               |
-| `CRATES_GITNAME`   | `user.name` when committing `config.json`. Defaults to `mirror`                                            |
+| Parameter          | Description                                                                                                                                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CRATES_PROXY`     | The URL that crates will be redirected to. Defaults to `https://crates-io.proxy.ustclug.org/api/v1/crates`                                                                                                          |
+| `CRATES_GITMSG`    | The commit message of `config.json`. Defaults to `Redirect to USTC Mirrors`                                                                                                                                         |
+| `CRATES_GITMAIL`   | `user.email` when committing `config.json`. Defaults to `lug AT ustc.edu.cn`                                                                                                                                        |
+| `CRATES_GITNAME`   | `user.name` when committing `config.json`. Defaults to `mirror`                                                                                                                                                     |
 | `GEOMETRIC_REPACK` | Use geometric repacking to speed up repacking (requires `git >= 2.34` on server). See [GitHub Blog: Scaling monorepo maintenance](https://github.blog/2021-04-29-scaling-monorepo-maintenance/). Defaults to false. |
 
 ### debian-cd
@@ -204,9 +161,9 @@ Note: This image is not in use now, as `quick-fedora-mirror` has some mysterious
 
 A simple sync script to sync necessary metadata for flatpak. **This DOES NOT SYNC ANY BLOB FILES.**
 
-| Parameter    | Description      |
-| ------------ | ---------------- |
-| `USER_AGENT` | user agent used  |
+| Parameter    | Description     |
+| ------------ | --------------- |
+| `USER_AGENT` | user agent used |
 
 ### freebsd-pkg
 
@@ -262,16 +219,16 @@ To specified the repo list to sync, you can:
 [![gitsync](https://img.shields.io/docker/image-size/ustcmirror/gitsync/latest)](https://hub.docker.com/r/ustcmirror/gitsync "gitsync")
 [![gitsync](https://img.shields.io/docker/pulls/ustcmirror/gitsync)](https://hub.docker.com/r/ustcmirror/gitsync "gitsync")
 
-| Parameter          | Description                                                                                                                               |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `GITSYNC_URL`      | Sets the url of upstream.                                                                                                                 |
-| `GITSYNC_BRANCH`   | Defaults to `master:master`.                                                                                                              |
-| `GITSYNC_REMOTE`   | Defaults to `origin`.                                                                                                                     |
-| `GITSYNC_BITMAP`   | Enable bitmap index. Defaults to `false`.                                                                                                 |
-| `GITSYNC_MIRROR`   | A shortcut to sync all branches and tags as if `GITSYNC_BRANCH='+refs/heads/*:refs/heads/*'`. `GITSYNC_BRANCH` is ignored when it is set. |
-| `GITSYNC_CHECKOUT` | Checkout instead of bare cloning. Defaults to `false`.                                                                                    |
-| `GITSYNC_TREELESS` | Use [treeless clone](https://github.blog/2020-12-21-get-up-to-speed-with-partial-clone-and-shallow-clone/) to save disk space. Defaults to `false`. |
-| `GITSYNC_GEOMETRIC`| Use [geometric repacking](https://github.blog/2021-04-29-scaling-monorepo-maintenance/) to speed up repacking. Requires `GITSYNC_BITMAP`. Defaults to `false`. |
+| Parameter           | Description                                                                                                                                                    |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GITSYNC_URL`       | Sets the url of upstream.                                                                                                                                      |
+| `GITSYNC_BRANCH`    | Defaults to `master:master`.                                                                                                                                   |
+| `GITSYNC_REMOTE`    | Defaults to `origin`.                                                                                                                                          |
+| `GITSYNC_BITMAP`    | Enable bitmap index. Defaults to `false`.                                                                                                                      |
+| `GITSYNC_MIRROR`    | A shortcut to sync all branches and tags as if `GITSYNC_BRANCH='+refs/heads/*:refs/heads/*'`. `GITSYNC_BRANCH` is ignored when it is set.                      |
+| `GITSYNC_CHECKOUT`  | Checkout instead of bare cloning. Defaults to `false`.                                                                                                         |
+| `GITSYNC_TREELESS`  | Use [treeless clone](https://github.blog/2020-12-21-get-up-to-speed-with-partial-clone-and-shallow-clone/) to save disk space. Defaults to `false`.            |
+| `GITSYNC_GEOMETRIC` | Use [geometric repacking](https://github.blog/2021-04-29-scaling-monorepo-maintenance/) to speed up repacking. Requires `GITSYNC_BITMAP`. Defaults to `false`. |
 
 ### google-repo
 
@@ -280,9 +237,9 @@ To specified the repo list to sync, you can:
 
 A script for syncing projects (especially AOSP) using Google's `repo` tool.
 
-| Parameter  | Description                                                                  |
-| ---------- | ---------------------------------------------------------------------------- |
-| `UPSTREAM` | Upstream URL. Defaults to `https://android.googlesource.com/mirror/manifest` |
+| Parameter          | Description                                                                                                                                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `UPSTREAM`         | Upstream URL. Defaults to `https://android.googlesource.com/mirror/manifest`                                                                                                                                        |
 | `GEOMETRIC_REPACK` | Use geometric repacking to speed up repacking (requires `git >= 2.34` on server). See [GitHub Blog: Scaling monorepo maintenance](https://github.blog/2021-04-29-scaling-monorepo-maintenance/). Defaults to false. |
 
 ### gsutil-rsync
@@ -309,9 +266,9 @@ A script for syncing projects (especially AOSP) using Google's `repo` tool.
 [![homebrew-bottles](https://img.shields.io/docker/image-size/ustcmirror/homebrew-bottles/latest)](https://hub.docker.com/r/ustcmirror/homebrew-bottles "homebrew-bottles")
 [![homebrew-bottles](https://img.shields.io/docker/pulls/ustcmirror/homebrew-bottles)](https://hub.docker.com/r/ustcmirror/homebrew-bottles "homebrew-bottles")
 
-| Parameter               | Description                         |
-| ----------------------- | ----------------------------------- |
-| `HOMEBREW_BOTTLES_JOBS` | Parallel jobs. Defaults to `1`      |
+| Parameter               | Description                                     |
+| ----------------------- | ----------------------------------------------- |
+| `HOMEBREW_BOTTLES_JOBS` | Parallel jobs. Defaults to `1`                  |
 | `BREW_SH_BIND_ADDRESS`  | Bind address for accessing formulae.brew.sh API |
 
 ### julia-storage
@@ -340,9 +297,9 @@ A new solution to sync Julia general registry (using `StorageMirrorServer.jl`). 
 [![misc](https://img.shields.io/docker/image-size/ustcmirror/misc/latest)](https://hub.docker.com/r/ustcmirror/misc "misc")
 [![misc](https://img.shields.io/docker/pulls/ustcmirror/misc)](https://hub.docker.com/r/ustcmirror/misc "misc")
 
-| Parameter | Description |
-| --------- | ----------- |
-| `DOWNLOAD_LINKS`    | Files to be downloaded by wget. Format is `filename.sh http://example.com/filename.sh` seperates by newlines |
+| Parameter        | Description                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------ |
+| `DOWNLOAD_LINKS` | Files to be downloaded by wget. Format is `filename.sh http://example.com/filename.sh` seperates by newlines |
 
 Download seperate, small files inconvenient for other sync containers.
 
@@ -358,14 +315,14 @@ rustup-install.sh https://sh.rustup.rs/
 [![nix-channels](https://img.shields.io/docker/image-size/ustcmirror/nix-channels/latest)](https://hub.docker.com/r/ustcmirror/nix-channels "nix-channels")
 [![nix-channels](https://img.shields.io/docker/pulls/ustcmirror/nix-channels)](https://hub.docker.com/r/ustcmirror/nix-channels "nix-channels")
 
-| Parameter                | Description                                                                                                                                                       |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NIX_MIRROR_UPSTREAM`    | Main page of Nix channels. No trailing slash. Defaults to [`https://nixos.org/channels`](https://nixos.org/channels)                                              |
-| `NIX_MIRROR_BASE_URL`    | The root URL this mirror will be served at. No trailing slash. Defaults to [`https://mirrors.ustc.edu.cn/nix-channels`](https://mirrors.ustc.edu.cn/nix-channels) |
-| `NIX_MIRROR_PATH_BATCH`  | Number of paths to pass to `nix` each time, to avoid `E2BIG`. Defaults to `8192`, which is about 1/4 of the 2M `ARG_MAX`.                                         |
-| `NIX_MIRROR_THREADS`     | Number of threads to use to download in parallel. Defaults to 10                                                                                                  |
-| `NIX_MIRROR_RETAIN_DAYS` | Days to consider old versions as reachable. Defaults to 30. (The newest version of a release is always reachable)                                                 |
-| `NIX_MIRROR_DELETE_OLD`  | Whether to actually delete files in garbage collection. Set to `1` to delete and `0` to not delete. Defaults to `1`                                               |
+| Parameter                  | Description                                                                                                                                                       |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NIX_MIRROR_UPSTREAM`      | Main page of Nix channels. No trailing slash. Defaults to [`https://nixos.org/channels`](https://nixos.org/channels)                                              |
+| `NIX_MIRROR_BASE_URL`      | The root URL this mirror will be served at. No trailing slash. Defaults to [`https://mirrors.ustc.edu.cn/nix-channels`](https://mirrors.ustc.edu.cn/nix-channels) |
+| `NIX_MIRROR_PATH_BATCH`    | Number of paths to pass to `nix` each time, to avoid `E2BIG`. Defaults to `8192`, which is about 1/4 of the 2M `ARG_MAX`.                                         |
+| `NIX_MIRROR_THREADS`       | Number of threads to use to download in parallel. Defaults to 10                                                                                                  |
+| `NIX_MIRROR_RETAIN_DAYS`   | Days to consider old versions as reachable. Defaults to 30. (The newest version of a release is always reachable)                                                 |
+| `NIX_MIRROR_DELETE_OLD`    | Whether to actually delete files in garbage collection. Set to `1` to delete and `0` to not delete. Defaults to `1`                                               |
 | `NIX_MIRROR_RELEASES_ONLY` | Don't download binary blobs. Defaults to 0 (false)                                                                                                                |
 
 ### pypi
@@ -404,26 +361,26 @@ ref:
 [![rsync](https://img.shields.io/docker/image-size/ustcmirror/rsync/latest)](https://hub.docker.com/r/ustcmirror/rsync "rsync")
 [![rsync](https://img.shields.io/docker/pulls/ustcmirror/rsync)](https://hub.docker.com/r/ustcmirror/rsync "rsync")
 
-| Parameter              | Description                                                           |
-| ---------------------- | --------------------------------------------------------------------- |
-| `RSYNC_HOST`           | The hostname of the remote server.                                    |
-| `RSYNC_USER`           | (Optional) No defaults.                                               |
-| `RSYNC_PASSWORD`       | (Optional) No defaults.                                               |
-| `RSYNC_PATH`           | The destination path on the remote server.                            |
-| `RSYNC_BW`             | Bandwidth limit. Defaults to `0`.                                     |
-| `RSYNC_EXTRA`          | Extra options. Defaults to empty.                                     |
-| `RSYNC_EXCLUDE`        | Files to be excluded. Defaults to `--exclude .~tmp~/`.                |
-| `RSYNC_FILTER`         | Filter rules. More convenient for larger lists.                       |
-| `RSYNC_BLKSIZE`        | Defaults to `8192`.                                                   |
-| `RSYNC_TIMEOUT`        | Defaults to `14400`.                                                  |
-| `RSYNC_SPARSE`         | Defaults to `true`.                                                   |
-| `RSYNC_DELAY_UPDATES`  | Defaults to `true`.                                                   |
-| `RSYNC_DELETE_DELAY`   | Defaults to `true`. Use `--delete-delay` rather than `--delete`       |
-| `RSYNC_DELETE_EXCLUDED`| Defaults to `true`. Use `--delete-excluded` to delete excluded files. |
-| `RSYNC_MAXDELETE`      | Maximum number of files that can be removed. Defaults to `4000`.      |
-| `RSYNC_RSH`            | Specify the remote shell, e.g. `ssh -i /path/to/key`.                 |
-| `RSYNC_NO_DELETE`      | Defaults to `false`. Set to `true` to disable all deletion arguments. |
-| `RSYNC_SSL`            | Defaults to `false`. Set to `true` to use `rsync-ssl`. `BIND_ADDRESS` is not respected when true. |
+| Parameter               | Description                                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------------- |
+| `RSYNC_HOST`            | The hostname of the remote server.                                                                |
+| `RSYNC_USER`            | (Optional) No defaults.                                                                           |
+| `RSYNC_PASSWORD`        | (Optional) No defaults.                                                                           |
+| `RSYNC_PATH`            | The destination path on the remote server.                                                        |
+| `RSYNC_BW`              | Bandwidth limit. Defaults to `0`.                                                                 |
+| `RSYNC_EXTRA`           | Extra options. Defaults to empty.                                                                 |
+| `RSYNC_EXCLUDE`         | Files to be excluded. Defaults to `--exclude .~tmp~/`.                                            |
+| `RSYNC_FILTER`          | Filter rules. More convenient for larger lists.                                                   |
+| `RSYNC_BLKSIZE`         | Defaults to `8192`.                                                                               |
+| `RSYNC_TIMEOUT`         | Defaults to `14400`.                                                                              |
+| `RSYNC_SPARSE`          | Defaults to `true`.                                                                               |
+| `RSYNC_DELAY_UPDATES`   | Defaults to `true`.                                                                               |
+| `RSYNC_DELETE_DELAY`    | Defaults to `true`. Use `--delete-delay` rather than `--delete`                                   |
+| `RSYNC_DELETE_EXCLUDED` | Defaults to `true`. Use `--delete-excluded` to delete excluded files.                             |
+| `RSYNC_MAXDELETE`       | Maximum number of files that can be removed. Defaults to `4000`.                                  |
+| `RSYNC_RSH`             | Specify the remote shell, e.g. `ssh -i /path/to/key`.                                             |
+| `RSYNC_NO_DELETE`       | Defaults to `false`. Set to `true` to disable all deletion arguments.                             |
+| `RSYNC_SSL`             | Defaults to `false`. Set to `true` to use `rsync-ssl`. `BIND_ADDRESS` is not respected when true. |
 
 ### rubygems / rubygems-dynamic
 
@@ -448,7 +405,6 @@ This image is based on [rustup-mirror](https://github.com/jiegec/rustup-mirror).
 | `TARGETS`  | Defaults to `x86_64-unknown-linux-gnu`      |
 | `URL`      | Defaults to `http://127.0.0.1:8000/`        |
 
-
 ### shadowmire
 
 [![shadowmire](https://img.shields.io/docker/image-size/ustcmirror/shadowmire/latest)](https://hub.docker.com/r/ustcmirror/shadowmire "shadowmire")
@@ -456,12 +412,12 @@ This image is based on [rustup-mirror](https://github.com/jiegec/rustup-mirror).
 
 [Shadowmire](https://github.com/taoky/shadowmire/) syncs PyPI (or plain HTTP(S) PyPI mirrors using Shadowmire) with a lightweight and easy approach.
 
-| Parameter                    | Description         |
-| ---------------------------- | ------------------- |
-| `UPSTREAM`                   | Defaults to `https://pypi.org`. |
-| `INDEX_ONLY`                 | Don't download package blobs. Defaults to `false`. |
-| `EXCLUDE`                    | A list of `--exclude` and `--prerelease-exclude`.   |
-| `USE_PYPI_INDEX`             | Still use PyPI package listing when `UPSTREAM` is not `https://pypi.org`. Defaults to `false`. |
+| Parameter        | Description                                                                                    |
+| ---------------- | ---------------------------------------------------------------------------------------------- |
+| `UPSTREAM`       | Defaults to `https://pypi.org`.                                                                |
+| `INDEX_ONLY`     | Don't download package blobs. Defaults to `false`.                                             |
+| `EXCLUDE`        | A list of `--exclude` and `--prerelease-exclude`.                                              |
+| `USE_PYPI_INDEX` | Still use PyPI package listing when `UPSTREAM` is not `https://pypi.org`. Defaults to `false`. |
 
 ### stackage
 
@@ -495,12 +451,12 @@ An alternative HTTP(S) syncing tool, replacing `rclone` and `lftp` in some cases
 
 A handy tool to sync pre-indexed [Windows Package Manager](https://github.com/microsoft/winget-cli) (aka. WinGet) sources.
 
-| Parameter             | Description                                                            |
-| --------------------- | ---------------------------------------------------------------------- |
-| `WINGET_FORCE_SYNC`   | Force syncs everything against the upstream. Defaults to `false`.      |
+| Parameter             | Description                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `WINGET_FORCE_SYNC`   | Force syncs everything against the upstream. Defaults to `false`.                                                        |
 | `WINGET_REPO_URL`     | Sets the URL of upstream. Defaults to [`https://cdn.winget.microsoft.com/cache`](https://cdn.winget.microsoft.com/cache) |
-| `WINGET_REPO_JOBS`    | Parallel jobs. Defaults to 8.                                          |
-| `WINGET_REPO_EXCLUDE` | Packages to be excluded. Value example: `Google.Chrome,Microsoft.Edge` |
+| `WINGET_REPO_JOBS`    | Parallel jobs. Defaults to 8.                                                                                            |
+| `WINGET_REPO_EXCLUDE` | Packages to be excluded. Value example: `Google.Chrome,Microsoft.Edge`                                                   |
 
 ### yukina
 
@@ -512,13 +468,13 @@ Usually this shall be used with another sync container that only downloads index
 
 Note that you shall bind necessary nginx log to `/nginx-log/` when syncing.
 
-| Parameter          | Description                                                                                           |
-| ------------------ | ----------------------------------------------------------------------------------------------------- |
-| `UPSTREAM`        | Sets the url of upstream.                                                                             |
-| `YUKINA_SIZE_LIMIT` | The size limit of binary blobs. Defaults to `512g`.                                                     |
-| `YUKINA_FILTER` | Accepts regex to filter out binary blobs. Defaults to empty. |
-| `YUKINA_EXTRA`  | Extra options. Defaults to empty.                                                                      |
-| `YUKINA_REPO`   | The repository name. Defaults to `$REPO`.                                                              |
+| Parameter           | Description                                                  |
+| ------------------- | ------------------------------------------------------------ |
+| `UPSTREAM`          | Sets the url of upstream.                                    |
+| `YUKINA_SIZE_LIMIT` | The size limit of binary blobs. Defaults to `512g`.          |
+| `YUKINA_FILTER`     | Accepts regex to filter out binary blobs. Defaults to empty. |
+| `YUKINA_EXTRA`      | Extra options. Defaults to empty.                            |
+| `YUKINA_REPO`       | The repository name. Defaults to `$REPO`.                    |
 
 ### yum-sync
 
@@ -543,20 +499,20 @@ Notes:
 
 The following repo configuration:
 
-```
+```ini
 baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el$releasever-$basearch
 ```
 
 translates to:
 
-```
+```ini
 YUMSYNC_URL='https://packages.cloud.google.com/yum/repos/kubernetes-el@{os_ver}-@{arch}'
 YUMSYNC_DISTS='6-7|kubernetes|x86_64,aarch64,armhfp,ppc64le,s390x|kubernetes-el@{os_ver}-@{arch}|/yum/repos/kubernetes-el@{os_ver}-@{arch}'
 ```
 
 And the following:
 
-```
+```ini
 [mysql80-community]
 name=MySQL 8.0 Community Server
 baseurl=http://repo.mysql.com/yum/mysql-8.0-community/el/$releasever/$basearch/
@@ -574,7 +530,7 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-mysql
 
 translates to:
 
-```
+```ini
 YUMSYNC_URL='https://repo.mysql.com/yum/@{comp}/el/@{os_ver}/@{arch}/'
 YUMSYNC_DISTS='6-8|mysql-8.0-community,mysql-5.7-community|aarch64,i386,x86_64|@{arch}|/yum/@{comp}/el/@{os_ver}/@{arch}/'
 ```
