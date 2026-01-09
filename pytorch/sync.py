@@ -68,7 +68,7 @@ async def show_progress(url, start_time, get_downloaded, total):
 async def get_with_progress(client: httpx.AsyncClient, url: str) -> bytes:
     for attempt in range(3):
         try:
-            async with client.stream("GET", url) as resp:
+            async with client.stream("GET", url, follow_redirects=True) as resp:
                 resp.raise_for_status()
                 total = int(resp.headers.get("Content-Length", 0))
                 downloaded = 0
