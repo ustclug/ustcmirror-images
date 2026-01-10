@@ -30,14 +30,14 @@ docker run --rm \
 
 Apart from `TO` and `LOGDIR`, these environment variables are common to all images.
 
-| Parameter          | Description                                                                                                                           |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `DEBUG`            | Set this to `true` to enable debugging.                                                                                               |
-| `BIND_ADDRESS`     | Set the local ip to be bound. Require `--network=host`. (Some programs don't support this parameter)                                  |
-| `OWNER`            | Set the uid and gid of the process so that the downloaded files wont get messed up. Defaults to `0:0` (aka root:root).                |
-| `LOG_ROTATE_CYCLE` | Specify how many cycle versions of the logfile to be saved. Set this to `0` will **disable log file**. Defaults to `0` (NO LOG FILE). |
-| `REPO`             | Name of the repository. Required in `archvsync`.                                                                                      |
-| `RETRY`            | Times to re-sync if the process exits abnormally. Defaults to `0`.                                                                    |
+| Parameter          | Description                                                                                                                                    |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DEBUG`            | Set this to `true` to enable debugging.                                                                                                        |
+| `BIND_ADDRESS`     | Set the local ip to be bound. Require `--network=host`. (Deprecated -- use Docker network instead. Some programs don't support this parameter) |
+| `OWNER`            | Set the uid and gid of the process so that the downloaded files wont get messed up. Defaults to `0:0` (aka root:root).                         |
+| `LOG_ROTATE_CYCLE` | Specify how many cycle versions of the logfile to be saved. Set this to `0` will **disable log file**. Defaults to `0` (NO LOG FILE).          |
+| `REPO`             | Name of the repository. Required in `archvsync`.                                                                                               |
+| `RETRY`            | Times to re-sync if the process exits abnormally. Defaults to `0`.                                                                             |
 
 ### aptsync
 
