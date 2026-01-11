@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set_upstream "rsync://$RSYNC_HOST/$RSYNC_PATH"
+
 # override the `killer` func in entry.sh
 killer() {
     kill -- "$1"
