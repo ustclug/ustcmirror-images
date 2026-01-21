@@ -61,7 +61,7 @@ channel_sync() {
 			return 1
 		fi
 	fi
-	jq -r '"\(.sum) \(.repopath)"' $tmpdir/packagesite.yaml | sort -k2 > $meta
+	jq -r 'select(.repopath != null and .sum != null) | "\(.sum) \(.repopath)"' $tmpdir/packagesite.yaml | sort -k2 > $meta
 	rm -f $tmpdir/packagesite.yaml
 	export local_dir=$basedir
 	if [[ $FBSD_PKG_INDEX_ONLY == false ]]; then

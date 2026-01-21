@@ -35,6 +35,9 @@ def main(args):
         with open("/tmp/packagesite.yaml", "r") as f:
             for line in f:
                 line = json.loads(line)
+                # Skip lines without repopath or sum
+                if "repopath" not in line or "sum" not in line:
+                    continue
                 hash_value = line["sum"]
                 repopath: str = line["repopath"]  # like All/xxx.pkg
                 repopath_full = (packagesite_file.parent / repopath).absolute()
