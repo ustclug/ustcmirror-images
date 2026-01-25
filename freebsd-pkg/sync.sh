@@ -112,12 +112,6 @@ done < $FBSD_PLATFORMS
 
 find $TO -type d -print0 | xargs -0 chmod 755
 
-echo "[INFO] final verification and cleanup..."
-/scan_and_clean_mismatched_files.py
-if [[ $? -ne 0 ]]; then
-	echo "[FATAL] scan and clean mismatched files failed."
-	EXIT_CODE=$((EXIT_CODE + 1))
-fi
 clean_hash_file
 
 rm $FBSD_PLATFORMS
