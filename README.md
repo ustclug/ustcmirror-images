@@ -338,6 +338,23 @@ Sync PyPI with official mirror client [bandersnatch](https://github.com/pypa/ban
 | `BANDERSNATCH_STOP_ON_ERROR` | Defaults to `true`. |
 | `BANDERSNATCH_TIMEOUT`       | Defaults to `20`.   |
 
+### pytorch
+
+[![pytorch](https://img.shields.io/docker/image-size/ustcmirror/pytorch/latest)](https://hub.docker.com/r/ustcmirror/pytorch "pytorch")
+[![pytorch](https://img.shields.io/docker/pulls/ustcmirror/pytorch)](https://hub.docker.com/r/ustcmirror/pytorch "pytorch")
+
+Sync PyTorch packages from <https://download.pytorch.org/>.
+
+| Parameter          | Description                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| `DRY_RUN`          | Set to `1` to skip writing files. Defaults to `0`.                                       |
+| `JOBS`             | Number of concurrent downloads. Defaults to `2`.                                         |
+| `TIMEOUT`          | HTTP timeout in seconds. Defaults to `30`.                                               |
+| `URLBASE`          | URL prefix used when rewriting HTML links. Defaults to `/pytorch/`.                      |
+| `GET_ALL`          | Set to `1` to use `published_versions.json` instead of `releases.json`. Defaults to `0`. |
+| `CUSTOM_ENDPOINTS` | Comma-separated list of extra endpoints, e.g. `https://download.pytorch.org/whl/xpu`.    |
+| `NO_NIGHTLY`       | Set to `1` to skip nightly builds. Defaults to `1`.                                      |
+
 ### rclone
 
 [![rclone](https://img.shields.io/docker/image-size/ustcmirror/rclone/latest)](https://hub.docker.com/r/ustcmirror/rclone "rclone")
