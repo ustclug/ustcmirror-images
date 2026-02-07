@@ -12,6 +12,7 @@
 #TSUMUGU_PARSER=
 #TSUMUGU_THREADS=
 #TSUMUGU_EXTRA=
+#TSUMUGU_DELAY_UPDATE=
 
 set -eu
 [[ $DEBUG = true ]] && set -x
@@ -25,6 +26,7 @@ TSUMUGU_USERAGENT=${TSUMUGU_USERAGENT:-"Tsumugu HTTP Syncing Tool/"$(tsumugu --v
 TSUMUGU_PARSER=${TSUMUGU_PARSER:-"nginx"}
 TSUMUGU_THREADS=${TSUMUGU_THREADS:-"2"}
 TSUMUGU_EXTRA=${TSUMUGU_EXTRA:-}
+TSUMUGU_DELAY_UPDATE=${TSUMUGU_DELAY_UPDATE:-"metadata"}
 
 if [[ -n $TSUMUGU_TIMEZONEFILE ]]; then
     TSUMUGU_TIMEZONEFILE="--timezone-file $TSUMUGU_TIMEZONEFILE"
@@ -32,6 +34,12 @@ fi
 
 if [[ $DEBUG = true ]]; then
     export RUST_LOG="tsumugu=debug"
+fi
+
+if [[ $TSUMUGU_DELAY_UPDATE = "metadata" ]]; then
+    TSUMUGU_EXTRA+=" --delay-update-metadata"
+elif [[ $TSUMUGU_DELAY_UPDATE = "all" ]]; then
+    TSUMUGU_EXTRA+=" --delay-update"
 fi
 
 export NO_COLOR=1

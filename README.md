@@ -450,16 +450,17 @@ Stackage doesn't need to specify upstream.
 
 An alternative HTTP(S) syncing tool, replacing `rclone` and `lftp` in some cases. See [usage](https://github.com/taoky/tsumugu#usage).
 
-| Parameter              | Description                                                                                         |
-| ---------------------- | --------------------------------------------------------------------------------------------------- |
-| `UPSTREAM`             | Sets the url of upstream.                                                                           |
-| `TSUMUGU_MAXDELETE`    | Maximum number of files that can be removed. Defaults to `1000`.                                    |
-| `TSUMUGU_TIMEZONEFILE` | The file URL for guessing remote server timezone.                                                   |
-| `TSUMUGU_EXCLUDE`      | Files to be excluded. Value example: `"--exclude '^temp'"`                                          |
-| `TSUMUGU_USERAGENT`    | The user agent of `tsumugu` syncing program. Defaults to `Tsumugu Syncing Tool/$(tsumugu_version)`. |
-| `TSUMUGU_PARSER`       | HTML parser used to parse index page. Defaults to `nginx`.                                          |
-| `TSUMUGU_THREADS`      | Number of threads to use to download in parallel. Defaults to 2.                                    |
-| `TSUMUGU_EXTRA`        | Extra options. Defaults to empty.                                                                   |
+| Parameter               | Description                                                                                         |
+| ----------------------- | --------------------------------------------------------------------------------------------------- |
+| `UPSTREAM`              | Sets the url of upstream.                                                                           |
+| `TSUMUGU_MAXDELETE`     | Maximum number of files that can be removed. Defaults to `1000`.                                    |
+| `TSUMUGU_TIMEZONEFILE`  | The file URL for guessing remote server timezone.                                                   |
+| `TSUMUGU_EXCLUDE`       | Files to be excluded. Value example: `"--exclude '^temp'"`                                          |
+| `TSUMUGU_USERAGENT`     | The user agent of `tsumugu` syncing program. Defaults to `Tsumugu Syncing Tool/$(tsumugu_version)`. |
+| `TSUMUGU_PARSER`        | HTML parser used to parse index page. Defaults to `nginx`.                                          |
+| `TSUMUGU_THREADS`       | Number of threads to use to download in parallel. Defaults to 2.                                    |
+| `TSUMUGU_EXTRA`         | Extra options. Defaults to empty.                                                                   |
+| `TSUMUGU_DELAY_UPDATES` | Delay updates until end of transfer. Defaults to `metadata`. Set to `all` to delay all files.       |
 
 ### winget-source
 
