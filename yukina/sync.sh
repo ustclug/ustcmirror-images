@@ -45,4 +45,5 @@ exec yukina --name "$YUKINA_REPO" \
     --url "$UPSTREAM" \
     --remote-sizedb "$TO/.yukina-remote.db" \
     --local-sizedb "$TO/.yukina-local.db" \
+    --output-stats \
     "${filter_array[@]}" "${extra_array[@]}"
