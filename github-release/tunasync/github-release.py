@@ -2,6 +2,7 @@
 import concurrent.futures
 import logging
 import os
+import re
 import tempfile
 from datetime import datetime
 from pathlib import Path
@@ -158,9 +159,11 @@ def main():
         release: dict,
         release_dir: Path,
         tarball: bool,
+        exclude_regexes: list[str],
     ) -> int:
-        
+
         release_size = 0
+        exclude_re = re.compile("|".join(exclude_regexes)) if exclude_regexes else None
 
         if tarball:
             url = release["tarball_url"]
@@ -183,6 +186,9 @@ def main():
                 )
 
         for asset in release["assets"]:
+            if exclude_re and exclude_re.search(asset["name"]):
+                logger.info(f"excluding {asset['name']} by regex")
+                continue
             url = asset["browser_download_url"]
             updated = datetime.strptime(
                 asset["updated_at"], "%Y-%m-%dT%H:%M:%SZ"
@@ -245,25 +251,20 @@ def main():
     total_size = 0
 
     for cfg in REPOS:
-        flat = False  # build a folder for each release
-        versions = 1  # keep only one release
-        tarball = False  # do not download the tarball
-        prerelease = False  # filter out pre-releases
-        perpage = 0
         if isinstance(cfg, str):
-            repo = cfg
-        else:
-            repo = cfg["repo"]
-            if "versions" in cfg:
-                versions = cfg["versions"]
-            if "flat" in cfg:
-                flat = cfg["flat"]
-            if "tarball" in cfg:
-                tarball = cfg["tarball"]
-            if "pre_release" in cfg:
-                prerelease = cfg["pre_release"]
-            if "per_page" in cfg:
-                perpage = cfg["per_page"]
+            cfg = {"repo": cfg}
+        repo = cfg["repo"]
+        versions = cfg.get("versions", 1)  # keep # of latest releases
+        flat = cfg.get("flat", False)  # build a folder for each release
+        tarball = cfg.get("tarball", False)  # download source tarball
+        prerelease = cfg.get("prerelease", False)  # include pre-releases
+        perpage = cfg.get("per_page", 0)  # number of releases per page
+        exclude_regexes = cfg.get("exclude", [])  # list of file name regexes to exclude
+
+        assert type(perpage) is int and perpage >= 0, "`per_page` must be a non-negative integer"
+        assert type(tarball) is bool, "`tarball` must be a boolean"
+        assert type(exclude_regexes) is list, "`exclude` must be a list of regex strings"
+        assert type(versions) is int and versions >= 0, "`versions` must be a non-negative integer"
 
         repo_dir = working_dir / Path(repo)
         logger.info(f"syncing {repo} to {repo_dir}")
@@ -292,6 +293,7 @@ def main():
                     release,
                     (repo_dir if flat else repo_dir / name),
                     tarball,
+                    exclude_regexes
                 )
                 if n_downloaded == 0 and not flat:
                     # create a symbolic link to the latest release folder
