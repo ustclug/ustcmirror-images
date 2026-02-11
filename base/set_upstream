@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -e
+set -o pipefail
+
+# Write argv[1] (upstream) to $LOGDIR/yuki_upstream.txt
+# This program is expected to be called by pre-sync.sh (recommended) or post-sync.sh
+# in all sync images
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 <upstream>" >&2
+    exit 1
+fi
+
+if [ -z "$LOGDIR" ]; then
+    echo "LOGDIR environment variable is not set" >&2
+    exit 1
+fi
+
+# Avoid leaving empty file in case of being interrupted
+echo "$1" > "$LOGDIR/yuki_upstream.txt.new"
+mv "$LOGDIR/yuki_upstream.txt.new" "$LOGDIR/yuki_upstream.txt"
+echo "Upstream set to: $1"

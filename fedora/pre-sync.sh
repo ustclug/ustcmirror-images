@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [[ -z "$REMOTE" ]]; then
+    set_upstream "rsync://dl.fedoraproject.org"
+else
+    set_upstream "$REMOTE/$MODULE"
+fi
+
 _CONF_FILE='/etc/quick-fedora-mirror.conf'
 LOGDIR="${LOGDIR%%/}"
 
