@@ -38,8 +38,14 @@ while IFS= read -r -d '' arg; do
     extra_array+=("$arg")
 done < <(echo "$YUKINA_EXTRA" | xargs printf "%s\0")
 
+json_log_args=()
+if compgen -G "/nginx-log/${YUKINA_REPO}_json.log*" > /dev/null; then
+    json_log_args=(--log-format mirror-json --log-suffix _json)
+fi
+
 exec yukina --name "$YUKINA_REPO" \
     --log-path "/nginx-log" \
+    "${json_log_args[@]}" \
     --repo-path "$TO" \
     --size-limit "$YUKINA_SIZE_LIMIT" \
     --url "$UPSTREAM" \
