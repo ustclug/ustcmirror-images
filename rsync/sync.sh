@@ -66,4 +66,6 @@ if [[ $RSYNC_SSL = true ]]; then
   rsync_program="rsync-ssl"
 fi
 
+# Rsync cmdline construction is very complex, always print final cmdline for easier debugging
+set -x
 exec $rsync_program $RSYNC_EXCLUDE --filter="merge $filter_file" --bwlimit "$RSYNC_BW" $max_delete_arg $opts $RSYNC_EXTRA "$RSYNC_URL" "$TO"
