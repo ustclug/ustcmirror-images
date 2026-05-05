@@ -14,6 +14,6 @@ chmod +x /usr/local/bin/su-exec
 echo "592f25c51d0e4c90945ece8c4fa35018d20a1091ac109c98b66eb95deef211c7 /usr/local/bin/su-exec" | sha256sum -c -
 apt-get purge -y --auto-remove wget
 EOF
-ADD ["entry.sh", "savelog", "/usr/local/bin/"]
+ADD ["entry.sh", "savelog", "set_upstream", "/usr/local/bin/"]
 VOLUME ["/data", "/log"]
 CMD ["entry.sh"]
