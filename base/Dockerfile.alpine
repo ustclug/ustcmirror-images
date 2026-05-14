@@ -1,4 +1,4 @@
-FROM alpine:3.20
+FROM alpine:3.23
 LABEL maintainer="Jian Zeng <anonymousknight96 AT gmail.com>" \
       org.ustcmirror.images=true
 RUN <<EOF
