@@ -78,11 +78,12 @@ if [[ $GITSYNC_MIRROR = true ]]; then
     GITSYNC_BRANCH='+refs/heads/*:refs/heads/*'
 fi
 
+git remote prune "$GITSYNC_REMOTE"
 if [[ $GITSYNC_CHECKOUT = true ]]; then
-    git fetch "$GITSYNC_REMOTE" $GITSYNC_BRANCH -u -v --progress --force --prune --prune-tags
+    git fetch "$GITSYNC_REMOTE" $GITSYNC_BRANCH -u -v --progress --force
     git reset --hard FETCH_HEAD
 else
-    git fetch "$GITSYNC_REMOTE" $GITSYNC_BRANCH -v --progress --tags --force --prune --prune-tags
+    git fetch "$GITSYNC_REMOTE" $GITSYNC_BRANCH -v --progress --tags --force
 fi
 
 if [[ -n $GITSYNC_POST_FETCH_HOOK ]]; then
