@@ -1,4 +1,5 @@
-FROM ustcmirror/base:alpine
+FROM ustcmirror/gitsync
 LABEL maintainer="Keyu Tao <taoky AT lug.ustc.edu.cn>"
-RUN apk add --no-cache git
-ADD sync.sh /
+ADD sync-crates.sh /sync-crates
+ADD crates-hook.sh /
+ENV SYNC_SCRIPT=/sync-crates.sh

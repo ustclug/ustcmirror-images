@@ -102,13 +102,13 @@ A.K.A. [ftpsync](https://anonscm.debian.org/cgit/mirror/archvsync.git/)
 
 A dedicated script to sync <https://github.com/rust-lang/crates.io-index>.
 
-| Parameter          | Description                                                                                                                                                                                                         |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CRATES_PROXY`     | The URL that crates will be redirected to. Defaults to `https://crates-io.proxy.ustclug.org/api/v1/crates`                                                                                                          |
-| `CRATES_GITMSG`    | The commit message of `config.json`. Defaults to `Redirect to USTC Mirrors`                                                                                                                                         |
-| `CRATES_GITMAIL`   | `user.email` when committing `config.json`. Defaults to `lug AT ustc.edu.cn`                                                                                                                                        |
-| `CRATES_GITNAME`   | `user.name` when committing `config.json`. Defaults to `mirror`                                                                                                                                                     |
-| `GEOMETRIC_REPACK` | Use geometric repacking to speed up repacking (requires `git >= 2.34` on server). See [GitHub Blog: Scaling monorepo maintenance](https://github.blog/2021-04-29-scaling-monorepo-maintenance/). Defaults to false. |
+| Parameter          | Description                                                                                                                                                                                                                                                           |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CRATES_PROXY`     | The URL that crates will be redirected to. Defaults to `https://crates-io.proxy.ustclug.org/api/v1/crates`                                                                                                                                                            |
+| `CRATES_GITMSG`    | The commit message of `config.json`. Defaults to `Redirect to USTC Mirrors`                                                                                                                                                                                           |
+| `CRATES_GITMAIL`   | `user.email` when committing `config.json`. Defaults to `lug AT ustc.edu.cn`                                                                                                                                                                                          |
+| `CRATES_GITNAME`   | `user.name` when committing `config.json`. Defaults to `mirror`                                                                                                                                                                                                       |
+| `GEOMETRIC_REPACK` | Backward-compatible alias of `GITSYNC_GEOMETRIC`. Use geometric repacking to speed up repacking (requires `git >= 2.34` on server). See [GitHub Blog: Scaling monorepo maintenance](https://github.blog/2021-04-29-scaling-monorepo-maintenance/). Defaults to false. |
 
 ### debian-cd
 
@@ -230,6 +230,7 @@ To specified the repo list to sync, you can:
 | `GITSYNC_TREELESS`                     | Use [treeless clone](https://github.blog/2020-12-21-get-up-to-speed-with-partial-clone-and-shallow-clone/) to save disk space. Defaults to `false`.            |
 | `GITSYNC_GEOMETRIC`                    | Use [geometric repacking](https://github.blog/2021-04-29-scaling-monorepo-maintenance/) to speed up repacking. Requires `GITSYNC_BITMAP`. Defaults to `false`. |
 | `GITSYNC_MAINTENANCE_INTERVAL_SECONDS` | Time interval of running `run_periodic_maintenance`. Defaults to 604800 (1 week).                                                                              |
+| `GITSYNC_POST_FETCH_HOOK`              | Executable hook run after fetch/reset and before maintenance/repack. Useful for repository-specific post-processing. Defaults to unset.                        |
 
 ### google-repo
 

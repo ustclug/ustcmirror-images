@@ -15,6 +15,7 @@
 #GITSYNC_TREELESS=
 #GITSYNC_GEOMETRIC=
 #GITSYNC_MAINTENANCE_INTERVAL_SECONDS=
+#GITSYNC_POST_FETCH_HOOK=
 
 is_empty() {
     [[ -z $(ls -A "$1" 2>/dev/null) ]]
@@ -31,6 +32,8 @@ GITSYNC_CHECKOUT="${GITSYNC_CHECKOUT:-false}"
 GITSYNC_TREELESS="${GITSYNC_TREELESS:-false}"
 GITSYNC_GEOMETRIC="${GITSYNC_GEOMETRIC:-false}"
 GITSYNC_MAINTENANCE_INTERVAL_SECONDS="${GITSYNC_MAINTENANCE_INTERVAL_SECONDS:-604800}"
+# This is used only when called by other syncing scripts.
+GITSYNC_POST_FETCH_HOOK="${GITSYNC_POST_FETCH_HOOK:-}"
 
 run_periodic_maintenance() {
     local git_dir stamp now last=0
@@ -80,6 +83,10 @@ if [[ $GITSYNC_CHECKOUT = true ]]; then
     git reset --hard FETCH_HEAD
 else
     git fetch "$GITSYNC_REMOTE" $GITSYNC_BRANCH -v --progress --tags --force --prune --prune-tags
+fi
+
+if [[ -n $GITSYNC_POST_FETCH_HOOK ]]; then
+    "$GITSYNC_POST_FETCH_HOOK"
 fi
 
 run_periodic_maintenance
