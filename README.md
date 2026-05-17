@@ -224,11 +224,11 @@ To specified the repo list to sync, you can:
 | `GITSYNC_URL`                          | Sets the url of upstream.                                                                                                                                      |
 | `GITSYNC_BRANCH`                       | Defaults to `master:master`.                                                                                                                                   |
 | `GITSYNC_REMOTE`                       | Defaults to `origin`.                                                                                                                                          |
-| `GITSYNC_BITMAP`                       | Enable bitmap index. Defaults to `false`.                                                                                                                      |
+| `GITSYNC_BITMAP`                       | Enable bitmap index. Defaults to `true`.                                                                                                                      |
 | `GITSYNC_MIRROR`                       | A shortcut to sync all branches and tags as if `GITSYNC_BRANCH='+refs/heads/*:refs/heads/*'`. `GITSYNC_BRANCH` is ignored when it is set.                      |
 | `GITSYNC_CHECKOUT`                     | Checkout instead of bare cloning. Defaults to `false`.                                                                                                         |
 | `GITSYNC_TREELESS`                     | Use [treeless clone](https://github.blog/2020-12-21-get-up-to-speed-with-partial-clone-and-shallow-clone/) to save disk space. Defaults to `false`.            |
-| `GITSYNC_GEOMETRIC`                    | Use [geometric repacking](https://github.blog/2021-04-29-scaling-monorepo-maintenance/) to speed up repacking. Requires `GITSYNC_BITMAP`. Defaults to `false`. |
+| `GITSYNC_GEOMETRIC`                    | Use [geometric repacking](https://github.blog/2021-04-29-scaling-monorepo-maintenance/) to speed up repacking. Requires `GITSYNC_BITMAP`. Defaults to `true`. |
 | `GITSYNC_MAINTENANCE_INTERVAL_SECONDS` | Time interval of running `run_periodic_maintenance`. Defaults to 604800 (1 week).                                                                              |
 | `GITSYNC_POST_FETCH_HOOK`              | Executable hook run after fetch/reset and before maintenance/repack. Useful for repository-specific post-processing. Defaults to unset.                        |
 
