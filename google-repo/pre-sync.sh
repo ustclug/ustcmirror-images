@@ -1,5 +1,9 @@
 #!/bin/sh
 
+UPSTREAM="${UPSTREAM:-https://android.googlesource.com/mirror/manifest}"
+
+set_upstream "$UPSTREAM"
+
 # Alpine's ssh does not seem to like the idea
 # when UID 1000 user is not in /etc/passwd.
 # Otherwise, `ssh -V` will not be executed successfully.

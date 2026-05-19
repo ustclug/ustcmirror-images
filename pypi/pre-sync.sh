@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set_upstream "https://pypi.python.org"
+
 cat << EOF > /etc/bandersnatch.conf
 [mirror]
 directory = $TO
