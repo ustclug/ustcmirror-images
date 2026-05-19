@@ -35,6 +35,9 @@ GITSYNC_MAINTENANCE_INTERVAL_SECONDS="${GITSYNC_MAINTENANCE_INTERVAL_SECONDS:-60
 # This is used only when called by other syncing scripts.
 GITSYNC_POST_FETCH_HOOK="${GITSYNC_POST_FETCH_HOOK:-}"
 
+git config --global set pack.windowMemory 100m
+git config --global set pack.threads 2
+
 run_periodic_maintenance() {
     local git_dir stamp now last=0
 

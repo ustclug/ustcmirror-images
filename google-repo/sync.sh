@@ -14,6 +14,9 @@ PATH=/usr/local/bin:$PATH
 
 cd "$TO"
 
+git config --global set pack.windowMemory 100m
+git config --global set pack.threads 2
+
 # Check if repo has been initialized
 if [[ ! -d "$TO"/.repo ]]; then
     echo "initalizing repo"
