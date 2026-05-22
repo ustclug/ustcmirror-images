@@ -132,7 +132,13 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
         if tasks:
             await asyncio.gather(*tasks)
         if not dry_run:
+            # Rewrite links so the index page points back to this mirror.
+            # Upstream now emits absolute URLs like
+            # "https://download-r2.pytorch.org/whl/..." instead of "/whl/...",
+            # so we have to handle both forms (relative + each absolute origin).
             index_resp = index_resp.replace('href="/', f'href="{urlbase}')
+            index_resp = index_resp.replace('href="https://download.pytorch.org/', f'href="{urlbase}')
+            index_resp = index_resp.replace('href="https://download-r2.pytorch.org/', f'href="{urlbase}')
             os.makedirs(base / path, exist_ok=True)
             with overwrite(base / path / filename, "w") as f:
                 f.write(index_resp)
