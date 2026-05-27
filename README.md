@@ -110,6 +110,23 @@ A dedicated script to sync <https://github.com/rust-lang/crates.io-index>.
 | `CRATES_GITNAME`   | `user.name` when committing `config.json`. Defaults to `mirror`                                                                                                                                                                                                       |
 | `GEOMETRIC_REPACK` | Backward-compatible alias of `GITSYNC_GEOMETRIC`. Use geometric repacking to speed up repacking (requires `git >= 2.34` on server). See [GitHub Blog: Scaling monorepo maintenance](https://github.blog/2021-04-29-scaling-monorepo-maintenance/). Defaults to false. |
 
+### crates-io
+
+[![crates-io](https://img.shields.io/docker/image-size/ustcmirror/crates-io/latest)](https://hub.docker.com/r/ustcmirror/crates-io "crates-io")
+[![crates-io](https://img.shields.io/docker/pulls/ustcmirror/crates-io)](https://hub.docker.com/r/ustcmirror/crates-io "crates-io")
+
+Sync the crates.io git index and incrementally download `.crate` files. Aside from `crates-io-index`, it also uses following env:
+
+| Parameter               | Description                                                                                                        |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `CRATES_FILES_UPSTREAM` | Upstream base URL used to download `.crate` files. Defaults to `https://static.crates.io/crates`                   |
+| `CRATES_JOBS`           | Number of parallel crate downloads. Defaults to `4`                                                                |
+| `CRATES_RETRY`          | Number of retries for each failed crate download. Defaults to `2`                                                  |
+| `CRATES_TIMEOUT`        | Timeout in seconds for each crate download request. Defaults to `60`                                               |
+| `CRATES_USER_AGENT`     | User-Agent header used for `.crate` downloads. Defaults to `ustcmirror-crates-io/1 (+https://mirrors.ustc.edu.cn)` |
+
+The synced data is stored under `/data/index` (bind mounted crates.io-index repo), `/data/crates`, and `/data/state`. If a previous index commit is no longer available after force-push and git maintenance, the sync falls back to scanning changed index files by mtime.
+
 ### debian-cd
 
 [![debian-cd](https://img.shields.io/docker/image-size/ustcmirror/debian-cd/latest)](https://hub.docker.com/r/ustcmirror/debian-cd "debian-cd")
