@@ -224,6 +224,12 @@ def main() -> int:
     jobs = max(1, int(os.environ.get("CRATES_JOBS", "4")))
     retries = max(0, int(os.environ.get("CRATES_RETRY", "2")))
     timeout = max(1, int(os.environ.get("CRATES_TIMEOUT", "60")))
+    dry_run = os.environ.get("CRATES_DRY_RUN", "false").lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
     upstream_base = os.environ.get(
         "CRATES_FILES_UPSTREAM", "https://static.crates.io/crates"
     )
@@ -263,6 +269,12 @@ def main() -> int:
                 continue
             seen.add(item)
             items.append(item)
+
+    if dry_run:
+        print(
+            f"[INFO] dry run: files={len(files)} entries={len(items)} previous={previous or '-'} current={upstream_head}"
+        )
+        return 0
 
     downloaded, present = sync_crates(
         crates_dir, upstream_base, items, user_agent, jobs, retries, timeout

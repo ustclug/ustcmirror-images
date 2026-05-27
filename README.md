@@ -123,6 +123,7 @@ Sync the crates.io git index and incrementally download `.crate` files. Aside fr
 | `CRATES_JOBS`           | Number of parallel crate downloads. Defaults to `4`                                                                |
 | `CRATES_RETRY`          | Number of retries for each failed crate download. Defaults to `2`                                                  |
 | `CRATES_TIMEOUT`        | Timeout in seconds for each crate download request. Defaults to `60`                                               |
+| `CRATES_DRY_RUN`        | If set, only compute and print the pending index files and crate entries without downloading or updating state. Defaults to `false` |
 | `CRATES_USER_AGENT`     | User-Agent header used for `.crate` downloads. Defaults to `ustcmirror-crates-io/1 (+https://mirrors.ustc.edu.cn)` |
 
 The synced data is stored under `/data/index` (bind mounted crates.io-index repo), `/data/crates`, and `/data/state`. If a previous index commit is no longer available after force-push and git maintenance, the sync falls back to scanning changed index files by mtime.
