@@ -282,12 +282,14 @@ def main() -> int:
     downloaded, present, failed = sync_crates(
         crates_dir, upstream_base, items, user_agent, jobs, retries, timeout
     )
-    previous_file.write_text(upstream_head + "\n")
-    previous_sync_file.write_text(str(time.time_ns()) + "\n")
+    if failed == 0:
+        previous_file.write_text(upstream_head + "\n")
+        previous_sync_file.write_text(str(time.time_ns()) + "\n")
     print(
         f"[INFO] crates sync complete: files={len(files)} entries={len(items)} downloaded={downloaded} present={present} failed={failed}"
     )
     if failed != 0:
+        print("[WARN] sync state is not written as there are failed crates.")
         return 1
     return 0
 
