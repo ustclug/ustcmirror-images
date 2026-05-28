@@ -170,11 +170,12 @@ def sync_crates(
     jobs: int,
     retries: int,
     timeout: int,
-) -> tuple[int, int]:
+) -> tuple[int, int, int]:
     downloaded = 0
     present = 0
+    failed = 0
     if not items:
-        return downloaded, present
+        return downloaded, present, failed
 
     with ThreadPoolExecutor(max_workers=jobs) as executor:
         pending = {
@@ -190,14 +191,16 @@ def sync_crates(
                 try:
                     result = future.result()
                 except Exception as exc:
-                    raise RuntimeError(
-                        f"sync failed for {item[0]} {item[1]}: {exc}"
-                    ) from exc
+                    print(
+                        f"[ERROR] sync failed for {item[0]} {item[1]}: {exc}"
+                    )
+                    failed += 1
+                    continue
                 if result == "downloaded":
                     downloaded += 1
                 else:
                     present += 1
-    return downloaded, present
+    return downloaded, present, failed
 
 
 def main() -> int:
@@ -276,14 +279,16 @@ def main() -> int:
         )
         return 0
 
-    downloaded, present = sync_crates(
+    downloaded, present, failed = sync_crates(
         crates_dir, upstream_base, items, user_agent, jobs, retries, timeout
     )
     previous_file.write_text(upstream_head + "\n")
     previous_sync_file.write_text(str(time.time_ns()) + "\n")
     print(
-        f"[INFO] crates sync complete: files={len(files)} entries={len(items)} downloaded={downloaded} present={present}"
+        f"[INFO] crates sync complete: files={len(files)} entries={len(items)} downloaded={downloaded} present={present} failed={failed}"
     )
+    if failed != 0:
+        return 1
     return 0
 
 
