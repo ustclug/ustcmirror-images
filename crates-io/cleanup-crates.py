@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import sys
 import argparse
+import subprocess
 
 from utils_crates import iter_index_files
 
@@ -16,8 +17,27 @@ dry_run = os.environ.get("CRATES_DRY_RUN", "false").lower() in {
     "on",
 }
 
+def is_git_repository(path: Path) -> bool:
+    git_dir = path / ".git"
+    if not git_dir.exists() or not git_dir.is_dir():
+        return False
+
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(path), "rev-parse", "--git-dir"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        return result.returncode == 0
+    except (subprocess.SubprocessError, FileNotFoundError):
+        return False
 
 def main(index_dir: Path, crates_dir: Path):
+    if not is_git_repository(crates_dir):
+        print(f"[ERROR] {crates_dir} is not a Git repository. Refusing to proceed.", file=sys.stderr)
+        return 1
+    
     indexes = set()
     for entry in iter_index_files(index_dir):
         indexes.add(Path(entry).name.lower())
@@ -41,6 +61,7 @@ def main(index_dir: Path, crates_dir: Path):
         else:
             print(f"[INFO] {folder_name} shall be removed")
             shutil.rmtree(crates_dir / folder_name)
+    return None
 
 
 if __name__ == "__main__":
