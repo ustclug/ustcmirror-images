@@ -34,8 +34,8 @@ def is_git_repository(path: Path) -> bool:
         return False
 
 def main(index_dir: Path, crates_dir: Path):
-    if not is_git_repository(crates_dir):
-        print(f"[ERROR] {crates_dir} is not a Git repository. Refusing to proceed.", file=sys.stderr)
+    if not is_git_repository(index_dir):
+        print(f"[ERROR] {index_dir} is not a Git repository. Refusing to proceed.", file=sys.stderr)
         return 1
     
     indexes = set()
