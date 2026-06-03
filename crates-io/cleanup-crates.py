@@ -25,8 +25,8 @@ def is_git_repository(path: Path) -> bool:
     try:
         result = subprocess.run(
             ["git", "-C", str(path), "rev-parse", "--git-dir"],
-            capture_output=True,
-            text=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
             timeout=5,
         )
         return result.returncode == 0
