@@ -6,5 +6,4 @@ RUN <<EOF
     apk add --no-cache python3 py3-gobject3 py3-requests
 EOF
 
-ADD sync.sh /
-ADD sync.py /
+ADD sync.sh upstream.sh sync.py /

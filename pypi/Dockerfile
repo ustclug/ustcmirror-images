@@ -10,4 +10,4 @@ RUN <<EOF
     pip3 --no-cache-dir install bandersnatch
     apk del --purge python3-dev musl-dev gcc libxml2-dev libxslt-dev
 EOF
-ADD sync.sh pre-sync.sh /
+ADD sync.sh pre-sync.sh upstream.sh /

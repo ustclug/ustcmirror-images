@@ -12,4 +12,4 @@ RUN <<EOF
 EOF
 
 ADD startup.jl /opt/julia/etc/julia/startup.jl
-ADD ["pre-sync.sh", "sync.sh", "/"]
+ADD ["pre-sync.sh", "sync.sh", "upstream.sh", "/"]

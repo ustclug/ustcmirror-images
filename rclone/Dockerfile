@@ -15,4 +15,4 @@ RUN <<EOF
     rm -rf /tmp/* && apk del wget
 EOF
 
-ADD sync.sh /
+ADD sync.sh upstream.sh /

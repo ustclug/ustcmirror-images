@@ -10,4 +10,4 @@ RUN <<EOF
     mkdir -p /var/spool/apt-mirror/mirror /var/spool/apt-mirror/skel /etc/apt/
 EOF
 ADD ["apt-mirror", "/usr/local/bin/apt-mirror"]
-ADD ["pre-sync.sh", "sync.sh", "/"]
+ADD ["pre-sync.sh", "sync.sh", "upstream.sh", "/"]

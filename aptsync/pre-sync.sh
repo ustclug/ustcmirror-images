@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set_upstream "$APTSYNC_URL"
-
 get_hostname() {
     sed -re 's|[^/]*//([^@]*@)?([^:/]*).*|\2|' <<< "$1"
 }

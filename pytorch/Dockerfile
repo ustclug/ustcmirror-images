@@ -6,5 +6,4 @@ RUN <<EOF
     apk add --no-cache python3 py3-httpx
 EOF
 
-ADD sync.sh /
-ADD sync.py /
+ADD sync.sh sync.py upstream.sh /

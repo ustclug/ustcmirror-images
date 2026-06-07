@@ -16,4 +16,4 @@ RUN <<EOF
     pip3 install pyquery minio==6.0.2
 EOF
 
-ADD [ "sync.sh", "nix-channels.py", "/" ]
+ADD [ "sync.sh", "nix-channels.py", "upstream.sh", "/" ]

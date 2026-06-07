@@ -9,4 +9,4 @@ RUN <<EOF
     git config set --system pack.threads 2
     git config set --system maintenance.autoDetach false
 EOF
-ADD ["pre-sync.sh", "sync.sh", "/"]
+ADD ["pre-sync.sh", "sync.sh", "upstream.sh", "/"]

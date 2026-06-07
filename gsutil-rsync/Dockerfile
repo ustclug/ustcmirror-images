@@ -7,4 +7,4 @@ RUN <<EOF
     pip3 install --upgrade pip
     pip3 --no-cache-dir install gsutil
 EOF
-ADD pre-sync.sh sync.sh /
+ADD pre-sync.sh sync.sh upstream.sh /

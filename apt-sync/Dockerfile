@@ -7,4 +7,4 @@ RUN <<EOF
     mkdir -p /usr/local/lib/tunasync
 EOF
 ADD tunasync /usr/local/lib/tunasync
-ADD sync.sh sync.py /
+ADD upstream.sh sync.sh sync.py /

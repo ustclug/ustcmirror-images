@@ -22,4 +22,4 @@ RUN apt update \
     ca-certificates \
     libssl3
 
-ADD sync.sh /
+ADD sync.sh upstream.sh /

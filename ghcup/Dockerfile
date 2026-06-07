@@ -1,6 +1,6 @@
 FROM ustcmirror/base:debian
 LABEL maintainer="Kai Ma <ksqsf@mail.ustc.edu.cn>"
-ADD ["sync.sh", "ghcupsync.hs", "/"]
+ADD ["sync.sh", "ghcupsync.hs", "upstream.sh", "/"]
 RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     --mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
 #!/bin/bash

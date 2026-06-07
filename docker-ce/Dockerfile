@@ -6,4 +6,4 @@ RUN <<EOF
     pip3 install pyquery
 EOF
 ADD tunasync /usr/local/lib/tunasync
-ADD sync.sh /
+ADD sync.sh upstream.sh /

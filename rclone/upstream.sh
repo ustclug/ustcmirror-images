@@ -19,4 +19,4 @@ case "$remote_type" in
     ;;
 esac
 
-set_upstream "${domain}${path}"
+echo "${domain}${path}"

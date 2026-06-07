@@ -7,4 +7,4 @@ RUN <<EOF
     curl -fLo /usr/local/bin/quick-fedora-mirror https://pagure.io/quick-fedora-mirror/raw/master/f/quick-fedora-mirror
     chmod +x /usr/local/bin/quick-fedora-mirror
 EOF
-ADD ["pre-sync.sh", "sync.sh", "/"]
+ADD ["pre-sync.sh", "sync.sh", "upstream.sh", "/"]

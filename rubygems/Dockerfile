@@ -3,4 +3,4 @@ LABEL maintainer="Yifan Gao <docker@yfgao.com>"
 ENV UPSTREAM=https://rubygems.org
 RUN apk add --no-cache ruby ca-certificates && \
     gem install --no-document rubygems-mirror
-ADD sync.sh pre-sync.sh /
+ADD sync.sh pre-sync.sh upstream.sh /

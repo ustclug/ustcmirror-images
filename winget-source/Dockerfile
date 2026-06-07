@@ -14,4 +14,4 @@ RUN <<EOF
 EOF
 RUN 
 
-ADD ["sync.sh", "sync-repo.js", "sysexits.js", "utilities.js", "/"]
+ADD ["sync.sh", "sync-repo.js", "sysexits.js", "utilities.js", "upstream.sh", "/"]
