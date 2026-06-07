@@ -1,7 +1,7 @@
 FROM ustcmirror/base:debian
 LABEL maintainer="Jiahao Li <gloit042@gmail.com>"
 LABEL maintainer="Keyu Tao <taoky@ustclug.org>"
-ADD ["sync.sh", "stackage.hs", "upstream.sh" "/"]
+ADD ["sync.sh", "stackage.hs", "upstream.sh", "/"]
 RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     --mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
 #!/bin/bash
