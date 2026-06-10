@@ -1,8 +1,10 @@
-FROM alpine:3.23
+FROM alpine:3.24
 LABEL maintainer="Jian Zeng <anonymousknight96 AT gmail.com>" \
       org.ustcmirror.images=true
 RUN <<EOF
     set -euo pipefail
+    apk update
+    apk upgrade
     apk add --no-cache bash tzdata su-exec
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 EOF
