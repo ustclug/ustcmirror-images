@@ -153,6 +153,13 @@ def parse_entries_from_git(index_dir: Path, commit: str, index_files):
                 raise RuntimeError(
                     f"invalid git cat-file header for {commit}:{rel}: {header!r}"
                 ) from exc
+            if object_type == b"tree":
+                size = int(object_size)
+                process.stdout.read(size)
+                if process.stdout.read(1) != b"\n":
+                    pass
+                tqdm.write(f"[WARN] skipping tree object: {commit}:{rel}")
+                continue
             if object_type != b"blob":
                 raise RuntimeError(
                     f"unexpected git object type for {commit}:{rel}: {object_type.decode()}"
@@ -223,6 +230,7 @@ def fetch_one(
         return "downloaded"
 
     target.parent.mkdir(parents=True, exist_ok=True)
+    target.parent.chmod(0o755)
     fd, tmp_name = tempfile.mkstemp(
         prefix=target.name + ".", suffix=".tmp", dir=target.parent
     )
@@ -241,6 +249,7 @@ def fetch_one(
             # if not verify_sha256(tmp_path, checksum):
             #     raise RuntimeError(f"checksum mismatch for {name} {version}")
             os.replace(tmp_path, target)
+            target.chmod(0o644)
             return "downloaded"
         except (urllib.error.URLError, OSError, RuntimeError) as exc:
             last_error = exc
