@@ -3,7 +3,6 @@
 import argparse
 import io
 import os
-import uuid
 from pathlib import Path
 import shutil
 import subprocess
@@ -154,13 +153,6 @@ def parse_entries_from_git(index_dir: Path, commit: str, index_files):
                 raise RuntimeError(
                     f"invalid git cat-file header for {commit}:{rel}: {header!r}"
                 ) from exc
-            if object_type == b"tree":
-                size = int(object_size)
-                process.stdout.read(size)
-                if process.stdout.read(1) != b"\n":
-                    pass
-                tqdm.write(f"[WARN] skipping tree object: {commit}:{rel}")
-                continue
             if object_type != b"blob":
                 raise RuntimeError(
                     f"unexpected git object type for {commit}:{rel}: {object_type.decode()}"
@@ -231,7 +223,7 @@ def fetch_one(
         return "downloaded"
 
     target.parent.mkdir(parents=True, exist_ok=True)
-    tmp_path = target.parent / f"{target.name}.{uuid.uuid4().hex}.tmp"
+    tmp_path = target.parent / f"{target.name}.tmp"
 
     last_error = None
     for attempt in range(retries + 1):
@@ -250,12 +242,7 @@ def fetch_one(
             last_error = exc
             if attempt == retries:
                 break
-            if tmp_path.exists():
-                tmp_path.unlink()
-            tmp_path = target.parent / f"{target.name}.{uuid.uuid4().hex}.tmp"
 
-    if tmp_path.exists():
-        tmp_path.unlink()
     raise RuntimeError(f"failed to fetch {name} {version} from {url}: {last_error}")
 
 
