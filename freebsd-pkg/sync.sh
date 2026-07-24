@@ -74,12 +74,17 @@ channel_sync() {
 	rsync -a $tmpdir/ $basedir/
 
 	# purge old packages
-	local removal_list=$(mktemp)
-	comm -23 <(find All -type f | sort) <(awk '{print $2}' $meta) | tee $removal_list | xargs rm -f
-	sed 's/^/[INFO] remove /g' $removal_list
+	if [[ $FBSD_PKG_INDEX_ONLY == false ]]; then
+		local removal_list=$(mktemp)
+		comm -23 <(find All -type f | sort) <(awk '{print $2}' $meta) | tee $removal_list | xargs rm -f
+		sed 's/^/[INFO] remove /g' $removal_list
+		rm -f $removal_list
+	else
+		echo "[INFO] index-only mode, skip package cleanup."
+	fi
 
 	# clean temp file or dir
-	rm -f $meta $removal_list
+	rm -f $meta
 	rm -r $tmpdir
 
 	echo "[INFO] sync finished $baseurl"
