@@ -37,7 +37,7 @@ channel_sync() {
 	# get meta-data
 	export remote_url=$baseurl
 	export local_dir=$tmpdir
-	enable_mtime=true fail_to_exit=false download <<<"$(echo digests.txz meta.txz meta.conf meta.pkg packagesite.txz packagesite.tzst data.pkg data.txz data.tzst | tr ' ' '\n')"
+	enable_mtime=true fail_to_exit=false download <<<"$(echo digests.txz meta.txz meta.conf meta.pkg packagesite.txz packagesite.tzst data.pkg data.txz data.tzst files.pkg | tr ' ' '\n')"
 	enable_mtime=true fail_to_exit=true  download <<<"$(echo meta packagesite.pkg | tr ' ' '\n')"
 
 	if [[ $? -ne 0 ]]; then
