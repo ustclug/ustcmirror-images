@@ -159,6 +159,11 @@ download_manifest() {
 	local url filename
 	while read url filename; do
 		[[ -z "$url" || -z "$filename" ]] && continue
+		# Manifest tags are immutable for a given version+revision+rebuild,
+		# so an existing file is identical to the upstream content.
+		if [[ -f "$manifest_dir/$filename" ]]; then
+			continue
+		fi
 		if $CURL_WRAP -m 600 -sSfRL -o "$manifest_dir/$filename.tmp" "$url"; then
 			mv "$manifest_dir/$filename.tmp" "$manifest_dir/$filename"
 		else
