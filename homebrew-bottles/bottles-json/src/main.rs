@@ -22,6 +22,9 @@ enum Mode {
     /// List all cask source files that need to check and download
     /// Output format: sha256 url cask_source_file.rb
     ListCaskSource,
+    /// List all bottle manifests that need to check and download
+    /// Output format: url package_name_tag.json
+    ListManifests,
 }
 
 #[derive(ValueEnum, Clone)]
@@ -70,6 +73,37 @@ fn d(f: &Formula) -> Option<()> {
                 );
             }
         }
+    }
+    Some(())
+}
+
+fn m(f: &Formula) -> Option<()> {
+    if f.versions.bottle {
+        let bs = f.bottle.stable.as_ref()?;
+        let stable = f.versions.stable.as_ref()?;
+        // GitHubPackages.image_formula_name: name.tr("@", "/").tr("+", "x")
+        let image_name = f.name.replace('@', "/").replace('+', "x");
+        // The manifest tag is version_rebuild(pkg_version, rebuild) where
+        // pkg_version.to_s = "{version}_{revision}" (if revision>0) and
+        // version_rebuild (no bottle_tag) appends "-{rebuild}" if rebuild>0.
+        let revision = if f.revision > 0 {
+            format!("_{}", f.revision)
+        } else {
+            String::new()
+        };
+        let rebuild = if bs.rebuild > 0 {
+            format!("-{}", bs.rebuild)
+        } else {
+            String::new()
+        };
+        let tag = format!("{}{}{}", stable, revision, rebuild);
+        // brew requests the image index at:
+        //   {root_url}/{image_name}/manifests/{tag}
+        // with Accept: application/vnd.oci.image.index.v1+json
+        let url = format!("{}/{}/manifests/{}", bs.root_url, image_name, tag);
+        // Flatten image_name's "/" (from "@") back to "@" for a flat filename.
+        let package_name = image_name.replace('/', "@");
+        println!("{} {}_{}.json", url, package_name, tag);
     }
     Some(())
 }
@@ -188,6 +222,14 @@ fn main() {
                 let url = format!("https://formulae.brew.sh/api/cask-source/{}", filename);
                 let url = urlencoding::encode(&url);
                 println!("{} {} {}", f.ruby_source_checksum.sha256, url, filename);
+            }
+        }
+        Mode::ListManifests => {
+            let f: Formulae = serde_json::from_reader(std::io::stdin()).unwrap();
+            for f in f.0 {
+                if m(&f).is_none() {
+                    eprintln!("Failed to list manifest for: {}", f.name);
+                }
             }
         }
     }

@@ -9,6 +9,7 @@ mkdir -p "$TO/api/formula"
 mkdir -p "$TO/api/cask"
 mkdir -p "$TO/api/cask-source"
 mkdir -p "$TO/api/internal"
+mkdir -p "$TO/api/manifests"
 
 BOTTLES=$(mktemp)
 CASK_SOURCES=$(mktemp)
@@ -139,3 +140,39 @@ sed 's/^/[INFO] remove /g' $removal_list
 find . -type d -empty -delete
 
 clean_hash_file
+
+# Step 4: Download bottle manifests (formula only)
+# OCI image indexes have no checksum, so download directly (no by-hash).
+# Reuses the ghcr CURL_WRAP (Accept + Authorization headers) configured above.
+MANIFESTS=$(mktemp)
+bottles-json --mode list-manifests > $MANIFESTS < $FORMULA_JSON
+if [[ $? -ne 0 ]]; then
+    echo "[FATAL] manifest list failed."
+    exit 7
+fi
+
+download_manifest() {
+	local manifest_dir=${manifest_dir:="$TO/api/manifests"}
+	local url filename
+	while read url filename; do
+		[[ -z "$url" || -z "$filename" ]] && continue
+		if $CURL_WRAP -m 600 -sSfRL -o "$manifest_dir/$filename.tmp" "$url"; then
+			mv "$manifest_dir/$filename.tmp" "$manifest_dir/$filename"
+		else
+			echo "[WARN] download manifest failed $url"
+			rm -f "$manifest_dir/$filename.tmp"
+		fi
+	done
+}
+export -f download_manifest
+
+export manifest_dir="$TO/api/manifests"
+parallel --line-buffer -j $HOMEBREW_BOTTLES_JOBS --pipepart -a $MANIFESTS download_manifest
+
+# cleanup outdated manifests
+removal_list=$(mktemp)
+cd "$manifest_dir"
+comm -23 <(find . -type f -name '*.json' | sed "s|^\./||" | sort) <(awk '{print $2}' $MANIFESTS | sort) | tee $removal_list | xargs rm -f
+sed 's/^/[INFO] remove /g' $removal_list
+
+cd "$TO"

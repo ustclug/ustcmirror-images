@@ -20,6 +20,7 @@ pub struct BottleInfo {
 #[derive(Deserialize)]
 pub struct BottleStable {
     pub rebuild: u64,
+    pub root_url: String,
     pub files: serde_json::Value,
 }
 
