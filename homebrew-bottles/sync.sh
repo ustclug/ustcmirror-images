@@ -9,7 +9,6 @@ mkdir -p "$TO/api/formula"
 mkdir -p "$TO/api/cask"
 mkdir -p "$TO/api/cask-source"
 mkdir -p "$TO/api/internal"
-mkdir -p "$TO/api/manifests"
 
 BOTTLES=$(mktemp)
 CASK_SOURCES=$(mktemp)
@@ -144,6 +143,10 @@ clean_hash_file
 # Step 4: Download bottle manifests (formula only)
 # OCI image indexes have no checksum, so download directly (no by-hash).
 # Reuses the ghcr CURL_WRAP (Accept + Authorization headers) configured above.
+
+# Create manifests folder here to avoid being cleaned up above.
+mkdir -p "$TO/api/manifests"
+
 MANIFESTS=$(mktemp)
 bottles-json --mode list-manifests > $MANIFESTS < $FORMULA_JSON
 if [[ $? -ne 0 ]]; then
