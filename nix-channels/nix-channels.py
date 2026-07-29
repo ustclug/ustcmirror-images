@@ -460,5 +460,6 @@ if __name__ == '__main__':
             chan_path_update = working_dir / f'.{channel}.update'
             chan_path_update.rename(chan_path)
         logging.info("Mode set to 'Releases only', not updating binary cache and garbage collecting")
+    (working_dir / STORE_DIR / 'index.html').write_text("A useless index file to stop people complaining HTTP 403.")
     if failure:
         sys.exit(1)
