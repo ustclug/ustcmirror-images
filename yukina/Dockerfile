@@ -2,7 +2,7 @@ FROM ustcmirror/base:alpine
 LABEL maintainer="Keyu Tao <taoky AT ustclug.org>"
 LABEL bind_support=true
 
-ARG YUKINA_VERSION=20260706
+ARG YUKINA_VERSION=20260810
 
 RUN <<EOF
     set -euo pipefail
