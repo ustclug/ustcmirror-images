@@ -186,7 +186,7 @@ not ordered rsync include/exclude rules.
 
 The expressions are matched against paths in quick-fedora-mirror's generated
 file lists. Paths include the module directory prefix and do not start with `/`;
-for example, `fedora/development/...` is used for `fedora-enchilada`. File-list
+for example, `fedora/linux/development/...` is used for `fedora-enchilada`. File-list
 lines containing files may have a tab and file size after the path.
 
 Example Docker Compose configuration:
@@ -195,16 +195,16 @@ Example Docker Compose configuration:
 environment:
   FILTEREXP: |-
     # Top-level directories
-    ^fedora/core(/|$)
-    ^fedora/extras(/|$)
-    ^fedora/releases/test(/|$)
-    ^fedora/updates/testing(/|$)
+    ^fedora/linux/core(/|$)
+    ^fedora/linux/extras(/|$)
+    ^fedora/linux/releases/test(/|$)
+    ^fedora/linux/updates/testing(/|$)
 
     # Development artifacts
-    ^fedora/development/rawhide(/|$)
-    ^fedora/development/.*\.(iso|qcow2|box|vmdk|raw\.xz)([[:space:]]|$)
-    ^fedora/development/.*/(CloudImages|Cloud|Everything/source)(/|$)
-    ^fedora/modular/development/.*\.iso([[:space:]]|$)
+    ^fedora/linux/development/rawhide(/|$)
+    ^fedora/linux/development/.*\.(iso|qcow2|box|vmdk|raw\.xz)([[:space:]]|$)
+    ^fedora/linux/development/.*/(CloudImages|Cloud|Everything/source)(/|$)
+    ^fedora/linux/modular/development/.*\.iso([[:space:]]|$)
 
     # Debug directories at any level
     (^|/)debug(/|$)
