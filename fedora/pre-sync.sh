@@ -54,6 +54,16 @@ fi
 _REMOTE=${REMOTE:-rsync://dl.fedoraproject.org}
 _RSYNC_TIMEOUT=${RSYNC_TIMEOUT:-600}
 _VERBOSE=${VERBOSE:-7}
+_MAXDELETE=${MAXDELETE:-4000}
+_FILTER_FILE=''
+
+# FILTEREXP may contain one extended regular expression per line.  Keep the
+# expressions out of the sourced zsh configuration so shell metacharacters in
+# them (such as | and parentheses) are not interpreted as shell syntax.
+if [[ -n $FILTEREXP ]]; then
+    _FILTER_FILE='/etc/quick-fedora-mirror.filters'
+    printf '%s\n' "$FILTEREXP" > "$_FILTER_FILE"
+fi
 
 cat > "$_CONF_FILE" << EOF
 DESTD=/mirror/
@@ -66,8 +76,9 @@ CHECKIN_SITE=${CHECKIN_SITE:-''}
 CHECKIN_PASSWORD=${CHECKIN_PASSWORD:-''}
 CHECKIN_HOST=${CHECKIN_HOST:-''}
 VERBOSE=$_VERBOSE
+MAXDELETE=$_MAXDELETE
 LOGFILE=$LOGFILE
-FILTEREXP=${FILTEREXP:-''}
+FILTERFILE=$_FILTER_FILE
 EOF
 
 cat "$_CONF_FILE"

@@ -8,6 +8,9 @@
 # to the persistent mirror volume using a symlink.  Without -H, find records
 # only that symlink and does not inventory its contents, so files removed from
 # the upstream mirror never enter quick-fedora-mirror's deletion lists.
+#
+# FILTERFILE provides a maintainable alternative to FILTEREXP: one extended
+# regular expression per line, with blank lines and comments allowed.
 # Simple script to grab the file list from Fedora and rsync everything that's
 # changed since the last time we pulled.
 #
@@ -174,7 +177,33 @@ finish () {
 
 filter () {
     # Client-side file list filtering.
-    if [[ -n $FILTEREXP ]]; then
+    if [[ -n $FILTERFILE ]]; then
+        if [[ ! -r $FILTERFILE ]]; then
+            (>&2 echo "Cannot read filter file \"$FILTERFILE\".  Exiting.")
+            exit 1
+        fi
+
+        local expression escaped
+        local -a expressions
+        while IFS= read -r expression || [[ -n $expression ]]; do
+            # A filter file contains one extended regular expression per line.
+            # Blank lines and lines whose first non-whitespace character is '#'
+            # are comments.
+            [[ $expression =~ '^[[:space:]]*$' ]] && continue
+            [[ $expression =~ '^[[:space:]]*#' ]] && continue
+
+            # sed uses a comma as the address delimiter below.  Quote literal
+            # commas so expressions in the file do not need to know about that
+            # implementation detail.
+            escaped=${expression//,/\\,}
+            expressions+=(-e "\\,$escaped,d")
+        done < $FILTERFILE
+
+        if (( ${#expressions} )); then
+            db4 filtering $1
+            sed --in-place=-prefilter -r $expressions $1
+        fi
+    elif [[ -n $FILTEREXP ]]; then
         db4 filtering $1
         sed --in-place=-prefilter -r -e "\,$FILTEREXP,d" $1
     fi
@@ -572,6 +601,10 @@ read_config () {
     if [[ -z $TIMEFILE ]]; then
         (>&2 echo "You must define TIMEFILE in your configuration file ($cfgfile).")
     fi
+    if [[ ! $MAXDELETE =~ '^[0-9]+$' ]]; then
+        (>&2 echo "MAXDELETE must be a non-negative integer.  Exiting.")
+        exit 1
+    fi
 
     # Set some other general variables based on the value of provided
     # configuration settings
@@ -626,6 +659,7 @@ set_default_vars () {
     RSYNCTIMEOUT=$((60 * 10))
     WARNDELAY=$((60 * 60 * 24))
     MAXRETRIES=10
+    MAXDELETE=4000
 
     rsyncver=$(rsync --version | head -1 | awk '{print $3}')
     if [[ $rsyncver == 3.1.3 ]]; then
@@ -1683,32 +1717,16 @@ db1 "    Transfer speed: $(hr_b $rstransferspeed)/s"
 db1 "    File list generation time: $(hr_s $rsfilelistgentime)"
 db1 "    File list transfer time: $(hr_s $rsfilelisttransfertime)"
 
-# Local dir/file deletion
+# Local file/directory deletion
 # =======================
-if [[ -s master-deletedirs ]]; then
-    linecount=$(wc -l < master-deletedirs)
-
-    if [[ -n $skipdelete && $VERBOSE -ge 2 ]]; then
-        logit d Directory deletion skipped
-        echo "Not deleting  $linecount directories.  Delete list is:"
-        cat master-deletedirs
-        echo
-    else
-        logit d Directory deletion start: $linecount directories
-        db2 Removing $linecount stale directories.
-        for nuke in $(cat master-deletedirs); do
-            if [[ -d "$DESTD/$nuke" ]]; then
-                logit D Deleting directory $nuke
-                db4 Removing $nuke
-                rm -rf "$DESTD/$nuke"
-                deletedsomething=1
-            fi
-        done
-        logit d Directory deletion end
-    fi
-else
-    db2 No stale directories to delete.
-fi
+deletefilecount=0
+deletedircount=0
+[[ -f master-deletefiles ]] && deletefilecount=$(wc -l < master-deletefiles)
+[[ -f master-deletedirs ]] && deletedircount=$(wc -l < master-deletedirs)
+deletecount=$((deletefilecount + deletedircount))
+deletebudget=$MAXDELETE
+deletelimitexceeded=''
+(( deletecount > MAXDELETE )) && deletelimitexceeded=1
 
 if [[ -s master-deletefiles ]]; then
     linecount=$(wc -l < master-deletefiles)
@@ -1719,21 +1737,65 @@ if [[ -s master-deletefiles ]]; then
         cat master-deletefiles
         echo
     else
-        logit d File deletion begin: $linecount files
-        db2 Removing $linecount stale files.
+        deletethisrun=$linecount
+        (( deletethisrun > deletebudget )) && deletethisrun=$deletebudget
+        logit d File deletion begin: $deletethisrun of $linecount files
+        db2 Removing $deletethisrun of $linecount stale files.
         # xopts=()
         # (( VERBOSE >= 4 )) && xopts=(-t)
-        tr '\n' '\0' < master-deletefiles \
-            | (pushd $DESTD; xargs $xopts -0 rm -f ; popd)
+        if (( deletethisrun > 0 )); then
+            sed -n "1,${deletethisrun}p" master-deletefiles | tr '\n' '\0' \
+                | (pushd $DESTD; xargs $xopts -0 rm -f ; popd)
+        fi
         # for nuke in $(cat master-deletefiles); do
         #     logit D Deleting file $nuke
         #     rm -f "$DESTD/$nuke"
         # done
-        deletedsomething=1
+        (( deletethisrun > 0 )) && deletedsomething=1
+        deletebudget=$((deletebudget - deletethisrun))
         logit d File deletion end
     fi
 else
     db2 No stale files to delete.
+fi
+
+if [[ -s master-deletedirs ]]; then
+    linecount=$(wc -l < master-deletedirs)
+
+    if [[ -n $skipdelete && $VERBOSE -ge 2 ]]; then
+        logit d Directory deletion skipped
+        echo "Not deleting $linecount directories.  Delete list is:"
+        cat master-deletedirs
+        echo
+    else
+        deletethisrun=$linecount
+        (( deletethisrun > deletebudget )) && deletethisrun=$deletebudget
+        logit d Directory deletion start: $deletethisrun of $linecount directories
+        db2 Removing $deletethisrun of $linecount stale directories.
+        # Delete deepest directories first and only remove empty directories.
+        # Using rm -rf here would let one directory entry bypass MAXDELETE and
+        # recursively remove an unlimited number of files.
+        if (( deletethisrun > 0 )); then
+            for nuke in $(sort -r master-deletedirs | sed -n "1,${deletethisrun}p"); do
+                if [[ -d "$DESTD/$nuke" ]]; then
+                    logit D Deleting directory $nuke
+                    db4 Removing $nuke
+                    rmdir "$DESTD/$nuke" 2>/dev/null && deletedsomething=1
+                fi
+            done
+        fi
+        deletebudget=$((deletebudget - deletethisrun))
+        logit d Directory deletion end
+    fi
+else
+    db2 No stale directories to delete.
+fi
+
+if [[ -z $skipdelete && -n $deletelimitexceeded ]]; then
+    (>&2 printf 'Processed at most %d of %d stale entries; MAXDELETE is %d.  Remaining entries will be handled by a later run.\n' \
+        $MAXDELETE $deletecount $MAXDELETE)
+    logit E "Deletion limit exceeded: deleted at most $MAXDELETE of $deletecount entries"
+    finish 25
 fi
 
 if [[ ( -n $KEEPDIRTIMES || -n $updatealldirtimes ) && -s master-updatetimestamps ]]; then

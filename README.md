@@ -158,18 +158,61 @@ The synced data is stored under `/data/index` (bind mounted crates.io-index repo
 [![fedora](https://img.shields.io/docker/image-size/ustcmirror/fedora/latest)](https://hub.docker.com/r/ustcmirror/fedora "fedora")
 [![fedora](https://img.shields.io/docker/pulls/ustcmirror/fedora)](https://hub.docker.com/r/ustcmirror/fedora "fedora")
 
-[fedora-quick-mirror](https://pagure.io/quick-fedora-mirror)
+Using a modified version of [quick-fedora-mirror](https://pagure.io/quick-fedora-mirror)
 
 See [dist conf](https://pagure.io/quick-fedora-mirror/blob/master/f/quick-fedora-mirror.conf.dist) for parameters meaning.
 
 | Parameter          | Description                                                                                       |
 | ------------------ | ------------------------------------------------------------------------------------------------- |
 | `MODULE`           | fedora module to be mirrored, e.g. fedora-enchilada,fedora-epel                                   |
-| `FILTEREXP`        | A regular expression used to filter the file lists. It must be quoted (or very carefully escaped) |
+| `FILTEREXP`        | Extended regular expressions used to exclude entries from the file lists, one expression per line |
+| `MAXDELETE`        | Maximum number of file and directory entries that may be deleted in one run. Defaults to `4000`    |
 | `VERBOSE`          | log level(0-8), default is 7                                                                      |
 | `CHECKIN_SITE`     | see in mirrormanager                                                                              |
 | `CHECKIN_PASSWORD` | see in mirrormanager                                                                              |
 | `CHECKIN_HOST`     | see in mirrormanager                                                                              |
+
+If the combined number of files and directories scheduled for deletion exceeds
+`MAXDELETE`, synchronization first completes its transfers and then deletes at
+most `MAXDELETE` entries. It leaves the remaining entries for later runs and
+exits with status 25 without updating the mirror timestamp. Files are deleted
+before directories, and only empty directories are removed, so recursive
+directory deletion cannot bypass the limit.
+
+Different from original version, `FILTEREXP` can be passed as a multiline environment variable. Blank lines and
+lines whose first non-whitespace character is `#` are ignored. An entry is
+excluded when any expression matches it. These are extended regular expressions,
+not ordered rsync include/exclude rules.
+
+The expressions are matched against paths in quick-fedora-mirror's generated
+file lists. Paths include the module directory prefix and do not start with `/`;
+for example, `fedora/development/...` is used for `fedora-enchilada`. File-list
+lines containing files may have a tab and file size after the path.
+
+Example Docker Compose configuration:
+
+```yaml
+environment:
+  FILTEREXP: |-
+    # Top-level directories
+    ^fedora/core(/|$)
+    ^fedora/extras(/|$)
+    ^fedora/releases/test(/|$)
+    ^fedora/updates/testing(/|$)
+
+    # Development artifacts
+    ^fedora/development/rawhide(/|$)
+    ^fedora/development/.*\.(iso|qcow2|box|vmdk|raw\.xz)([[:space:]]|$)
+    ^fedora/development/.*/(CloudImages|Cloud|Everything/source)(/|$)
+    ^fedora/modular/development/.*\.iso([[:space:]]|$)
+
+    # Debug directories at any level
+    (^|/)debug(/|$)
+```
+
+Filtering happens before quick-fedora-mirror calculates transfers and deletions.
+Existing local content matching an expression is therefore considered absent
+from the filtered upstream file list and may be deleted during synchronization.
 
 Note: This image is not in use now, as `quick-fedora-mirror` has some mysterious bugs when being used.
 
