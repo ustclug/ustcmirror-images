@@ -2,7 +2,7 @@
 # Vendored from https://pagure.io/quick-fedora-mirror at
 # ee1f19fd449e6db65e164cd052141836712162e9.
 #
-# Local change:
+# Local changes:
 # generate_local_file_list() invokes find with -H so command-line symlinks are
 # followed.  The fedora-enchilada container layout maps /mirror/fedora/linux
 # to the persistent mirror volume using a symlink.  Without -H, find records
@@ -11,6 +11,9 @@
 #
 # FILTERFILE provides a maintainable alternative to FILTEREXP: one extended
 # regular expression per line, with blank lines and comments allowed.
+#
+# rsync exit code 12 (error in the protocol data stream) is treated as a
+# retryable network failure and uses the existing exponential backoff.
 # Simple script to grab the file list from Fedora and rsync everything that's
 # changed since the last time we pulled.
 #
@@ -408,10 +411,11 @@ do_rsync () {
             logit e "rsync says source files vanished."
             return $rr
 
-        elif (( rr == 5 || rr == 10 || rr == 23 || rr == 30 || rr == 35 )); then
+        elif (( rr == 5 || rr == 10 || rr == 12 || rr == 23 || rr == 30 || rr == 35 )); then
             # Most of these are retryable network issues
             #  5: Error starting client-server protocol
             # 10: Error in socket I/O
+            # 12: Error in rsync protocol data stream
             # 30: Timeout in data send/receive
             # 35: Timeout waiting for daemon connection
             # 23: Partial transfer due to error
