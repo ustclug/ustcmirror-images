@@ -4,7 +4,6 @@ LABEL bind_support=true
 RUN <<EOF
     set -euo pipefail
     apk add --no-cache zsh curl rsync ca-certificates gawk grep bzip2 coreutils diffutils findutils
-    curl -fLo /usr/local/bin/quick-fedora-mirror https://pagure.io/quick-fedora-mirror/raw/master/f/quick-fedora-mirror
-    chmod +x /usr/local/bin/quick-fedora-mirror
 EOF
+COPY quick-fedora-mirror /usr/local/bin/quick-fedora-mirror
 ADD ["pre-sync.sh", "sync.sh", "upstream.sh", "/"]
