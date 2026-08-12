@@ -1,6 +1,6 @@
 FROM ustcmirror/base:alpine
 LABEL maintainer="Keyu Tao <taoky AT ustclug.org>"
-ARG COMMIT=50432cda2abf8374f0a7659d89c5822d1dcab355
+ARG COMMIT=d245a58672218c7a46fc606cb223baa7e5dc4050
 
 RUN <<EOF
     set -euo pipefail
