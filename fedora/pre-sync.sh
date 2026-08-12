@@ -43,6 +43,16 @@ fi
 # see quick-fedora-mirror set_default_vars()
 _RSYNCOPTS=(-aSH -f "'R .~tmp~'" --keep-dirlinks --stats --delay-updates "--out-format='@ %i %10l  %n%L'")
 
+# RSYNC_EXTRA is a whitespace-separated list of additional rsync options.
+# Quote each item for the zsh configuration generated below.
+if [[ -n $RSYNC_EXTRA ]]; then
+    read -r -a _RSYNC_EXTRA_OPTS <<< "$RSYNC_EXTRA"
+    for _RSYNC_EXTRA_OPT in "${_RSYNC_EXTRA_OPTS[@]}"; do
+        printf -v _RSYNC_EXTRA_OPT_QUOTED '%q' "$_RSYNC_EXTRA_OPT"
+        _RSYNCOPTS+=("$_RSYNC_EXTRA_OPT_QUOTED")
+    done
+fi
+
 if [[ -n "${BIND_ADDRESS:+1}" ]]; then
     if [[ "$BIND_ADDRESS" =~ .*: ]]; then
         _RSYNCOPTS+=(-6 --address "$BIND_ADDRESS")

@@ -167,6 +167,7 @@ See [dist conf](https://pagure.io/quick-fedora-mirror/blob/master/f/quick-fedora
 | `MODULE`           | fedora module to be mirrored, e.g. fedora-enchilada,fedora-epel                                   |
 | `FILTEREXP`        | Extended regular expressions used to exclude entries from the file lists, one expression per line |
 | `MAXDELETE`        | Maximum number of file and directory entries that may be deleted in one run. Defaults to `4000`    |
+| `RSYNC_EXTRA`      | Additional whitespace-separated options appended to rsync              |
 | `VERBOSE`          | log level(0-8), default is 7                                                                      |
 | `CHECKIN_SITE`     | see in mirrormanager                                                                              |
 | `CHECKIN_PASSWORD` | see in mirrormanager                                                                              |
