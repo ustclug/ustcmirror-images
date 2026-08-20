@@ -5,7 +5,7 @@ RUN apt update \
 
 RUN git clone https://github.com/jiegec/rustup-mirror app && \
   cd app && \
-  git checkout v0.9.0
+  git checkout v0.11.0
 
 WORKDIR /app
 
