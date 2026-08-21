@@ -2,7 +2,7 @@ import assert from 'assert'
 import async from 'async'
 
 import { rm } from 'fs/promises'
-import { AsyncDatabase } from 'promised-sqlite3'
+import { DatabaseSync } from 'node:sqlite'
 import { EX_IOERR, EX_SOFTWARE, EX_TEMPFAIL, EX_UNAVAILABLE } from './sysexits.js'
 
 import {
@@ -20,13 +20,13 @@ import {
 } from './utilities.js'
 
 
-const { forceSync, parallelLimit, remote, sqlite3, winston } = setupEnvironment();
+const { forceSync, parallelLimit, remote, winston } = setupEnvironment();
 
 /**
  * Sync with the official WinGet repository index.
  *
  * @param {number} version WinGet index version to sync.
- * @param {(db: AsyncDatabase) => Promise<void>} handler Handler function that reads the index database and syncs necessary files.
+ * @param {(db: DatabaseSync) => Promise<void>} handler Handler function that reads the index database and syncs necessary files.
  *
  * @returns {Promise<void>} Fulfills with `undefined` upon success.
  */
@@ -45,14 +45,14 @@ async function syncIndex(version, handler) {
         // unpack, extract and load index database
         try {
             const databaseFilePath = await extractDatabaseFromBundle(indexBuffer, tempDirectory);
-            const database = new sqlite3.Database(databaseFilePath, sqlite3.OPEN_READONLY);
+            const database = new DatabaseSync(databaseFilePath, { readOnly: true });
             try {
                 // sync files with handler
-                const asyncDatabase = new AsyncDatabase(database);
-                await handler(asyncDatabase);
-                await asyncDatabase.close();
+                await handler(database);
             } catch (error) {
                 exitWithCode(EX_SOFTWARE, error);
+            } finally {
+                database.close();
             }
         } catch (error) {
             exitWithCode(EX_IOERR, error);
@@ -77,7 +77,7 @@ winston.info(`start syncing with ${remote}`);
 
 await syncIndex(2, async (db) => {
     try {
-        const packageRows = await db.all('SELECT id, hash FROM packages');
+        const packageRows = db.prepare('SELECT id, hash FROM packages').all();
         const packageURIs = buildPackageMetadataURIs(applyPackageExclusion(packageRows));
         try {
             // sync latest package metadata and manifests in parallel
@@ -101,10 +101,10 @@ await syncIndex(2, async (db) => {
 
 await syncIndex(1, async (db) => {
     try {
-        const pathparts = buildPathpartMap(await db.all('SELECT * FROM pathparts'));
-        const rows = await db.all(
+        const pathparts = buildPathpartMap(db.prepare('SELECT * FROM pathparts').all());
+        const rows = db.prepare(
             'SELECT ids.id AS id, manifest.pathpart AS pathpart FROM manifest LEFT JOIN ids ON manifest.id = ids.rowid ORDER BY manifest.rowid DESC'
-        );
+        ).all();
         const uris = buildManifestURIs(applyPackageExclusion(rows), pathparts);
         // sync latest manifests in parallel
         try {
