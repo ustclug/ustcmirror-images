@@ -5,7 +5,6 @@ import originalFetch from 'node-fetch'
 import os from 'os'
 import path from 'path'
 import process from 'process'
-import sqlite3 from 'sqlite3'
 import winston from 'winston'
 import YAML from 'yaml'
 import Zlib from 'zlib'
@@ -232,13 +231,13 @@ export function buildManifestURIs(rows, pathparts) {
 /**
  * Build a list of all package metadata URIs from database query.
  *
- * @param {{ id: string, hash: Buffer, [key: string]: string }[]} rows Rows returned by the query.
+ * @param {{ id: string, hash: Uint8Array, [key: string]: string }[]} rows Rows returned by the query.
  *
  * @returns {string[]} Package metadata URIs to sync.
  */
 export function buildPackageMetadataURIs(rows) {
     return rows.map(row =>
-        path.posix.join('packages', row.id, row.hash.toString('hex').slice(0, 8), 'versionData.mszyml')
+        path.posix.join('packages', row.id, Buffer.from(row.hash).toString('hex').slice(0, 8), 'versionData.mszyml')
     );
 }
 
@@ -327,7 +326,6 @@ export function setupEnvironment() {
         local,
         parallelLimit,
         remote,
-        sqlite3: debugMode ? sqlite3.verbose() : sqlite3,
         winston
     };
 }
