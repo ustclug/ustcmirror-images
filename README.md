@@ -489,6 +489,7 @@ This image is based on [rustup-mirror](https://github.com/jiegec/rustup-mirror).
 | `TIER1_ONLY` | Set to `true` to mirror all Tier 1 targets. This overrides `TARGETS`. Defaults to `false`      |
 | `CHANNELS`   | Comma-separated release channels to mirror. Defaults to `stable,beta,nightly`                  |
 | `URL`        | Defaults to `http://127.0.0.1:8000/`                                                           |
+| `FILTERED_TARGET_AVAILABLE` | If leave metadata for targets excluded by `--targets` unchanged while still skipping their component downloads. Defaults to `false` |
 
 ### shadowmire
 
