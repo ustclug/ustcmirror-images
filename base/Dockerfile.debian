@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 LABEL maintainer="Jian Zeng <anonymousknight96 AT gmail.com>" \
       org.ustcmirror.images=true
 RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \

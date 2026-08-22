@@ -1,4 +1,4 @@
-FROM rust:1-bookworm AS builder
+FROM rust:1-trixie AS builder
 
 RUN apt update \
   && apt install -y --no-install-recommends git
