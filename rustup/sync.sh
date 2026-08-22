@@ -16,9 +16,12 @@ if [[ $TIER1_ONLY = true ]]; then
     TARGETS="aarch64-apple-darwin,aarch64-pc-windows-msvc,aarch64-unknown-linux-gnu,i686-pc-windows-gnu,i686-pc-windows-msvc,i686-unknown-linux-gnu,x86_64-apple-darwin,x86_64-pc-windows-gnu,x86_64-pc-windows-msvc,x86_64-unknown-linux-gnu"
 fi
 
+cd "$TO"
+
 exec rustup-mirror --upstream-url "$UPSTREAM" \
                    --targets "$TARGETS" \
                    --channels "$CHANNELS" \
                    --gc "$GC" \
                    --url "$URL" \
-                   --mirror "$TO"
+                   --mirror "$TO" \
+                   --orig "$TO/orig"
