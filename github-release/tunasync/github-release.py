@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# vim: ts=4 sw=4 sts=4 expandtab
+
 import concurrent.futures
 import logging
 import os
@@ -7,12 +9,12 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
-
 # Set BindIP
 # https://stackoverflow.com/a/70772914
 BINDIP = os.getenv("BIND_ADDRESS", "")
 if BINDIP:
     import urllib3
+
     real_create_conn = urllib3.util.connection.create_connection
 
     def set_src_addr(address, timeout, *args, **kw):
@@ -40,9 +42,10 @@ WORKERS = int(os.getenv("WORKERS", "8"))
 FAST_SKIP = bool(os.getenv("FAST_SKIP", ""))
 UA = "ustcmirror-tuna-github-release-mirror/0.0 (+https://github.com/ustclug/ustcmirror-images)"
 
+
 def get_repos():
     try:
-        with open('/repos.yaml') as f:
+        with open("/repos.yaml") as f:
             content = f.read()
     except FileNotFoundError:
         content = os.getenv("REPOS", None)
@@ -52,7 +55,7 @@ def get_repos():
     if isinstance(repos, list):
         return repos
     else:
-        repos = repos['repos']
+        repos = repos["repos"]
         if not isinstance(repos, list):
             raise Exception("Can not inspect repo list from the given file/env")
         return repos
@@ -83,9 +86,7 @@ def github_get(*args, **kwargs) -> requests.Response:
     return requests.get(*args, **kwargs)
 
 
-def do_download(
-    remote_url: str, dst_file: Path, remote_ts: float, remote_size: int
-) -> None:
+def do_download(remote_url: str, dst_file: Path, remote_ts: float, remote_size: int) -> None:
     # NOTE the stream=True parameter below
     with github_get(remote_url, stream=True) as r:
         r.raise_for_status()
@@ -113,7 +114,7 @@ def do_download(
             tmp_dst_file.chmod(0o644)
             tmp_dst_file.replace(dst_file)
         finally:
-            if not tmp_dst_file is None:
+            if tmp_dst_file is not None:
                 if tmp_dst_file.is_file():
                     tmp_dst_file.unlink()
 
@@ -128,15 +129,28 @@ def ensure_safe_name(filename: str) -> str:
         return filename.replace("/", "\\").replace("\\", "_")
 
 
+def repo_local_path(repo: str, hidden: bool) -> Path:
+    repo_path = Path(repo)
+    if not hidden:
+        return repo_path
+
+    parts = repo_path.parts
+    if not parts:
+        return repo_path
+
+    owner, *rest = parts
+    if not owner.startswith("."):
+        owner = f".{owner}"
+    return Path(owner, *rest)
+
+
 def main():
     import argparse
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", default=BASE_URL)
     parser.add_argument("--working-dir", default=WORKING_DIR)
-    parser.add_argument(
-        "--workers", default=WORKERS, type=int, help="number of concurrent downloading jobs"
-    )
+    parser.add_argument("--workers", default=WORKERS, type=int, help="number of concurrent downloading jobs")
     parser.add_argument(
         "--fast-skip",
         action="store_true",
@@ -167,9 +181,7 @@ def main():
 
         if tarball:
             url = release["tarball_url"]
-            updated = datetime.strptime(
-                release["published_at"], "%Y-%m-%dT%H:%M:%SZ"
-            ).timestamp()
+            updated = datetime.strptime(release["published_at"], "%Y-%m-%dT%H:%M:%SZ").timestamp()
             dst_file = release_dir / "repo-snapshot.tar.gz"
             remote_filelist.append(dst_file.relative_to(working_dir))
 
@@ -179,20 +191,14 @@ def main():
                 dst_file.parent.mkdir(parents=True, exist_ok=True)
                 # tarball has no size information, use -1 to skip size check
                 logger.info(f"queueing download of {url} to {dst_file.relative_to(working_dir)}")
-                futures.append(
-                    executor.submit(
-                        download_file, url, dst_file, working_dir, updated, -1
-                    )
-                )
+                futures.append(executor.submit(download_file, url, dst_file, working_dir, updated, -1))
 
         for asset in release["assets"]:
             if exclude_re and exclude_re.search(asset["name"]):
                 logger.info(f"excluding {asset['name']} by regex")
                 continue
             url = asset["browser_download_url"]
-            updated = datetime.strptime(
-                asset["updated_at"], "%Y-%m-%dT%H:%M:%SZ"
-            ).timestamp()
+            updated = datetime.strptime(asset["updated_at"], "%Y-%m-%dT%H:%M:%SZ").timestamp()
             dst_file = release_dir / ensure_safe_name(asset["name"])
             remote_filelist.append(dst_file.relative_to(working_dir))
             remote_size = asset["size"]
@@ -206,28 +212,18 @@ def main():
                     stat = dst_file.stat()
                     local_filesize = stat.st_size
                     local_mtime = stat.st_mtime
-                    if (
-                        local_mtime > updated
-                        or remote_size == local_filesize
-                        and local_mtime == updated
-                    ):
+                    if local_mtime > updated or remote_size == local_filesize and local_mtime == updated:
                         logger.info(f"skipping {dst_file.relative_to(working_dir)}")
                         continue
             else:
                 dst_file.parent.mkdir(parents=True, exist_ok=True)
 
             logger.info(f"queueing download of {url} to {dst_file.relative_to(working_dir)}")
-            futures.append(
-                executor.submit(
-                    download_file, url, dst_file, working_dir, updated, remote_size
-                )
-            )
+            futures.append(executor.submit(download_file, url, dst_file, working_dir, updated, remote_size))
 
         return release_size
 
-    def download_file(
-        url: str, dst_file: Path, working_dir: Path, updated: float, remote_size: int
-    ) -> bool:
+    def download_file(url: str, dst_file: Path, working_dir: Path, updated: float, remote_size: int) -> bool:
         logger.info(f"downloading {url} to {dst_file.relative_to(working_dir)} ({remote_size} bytes)")
         try:
             do_download(url, dst_file, updated, remote_size)
@@ -260,13 +256,15 @@ def main():
         prerelease = cfg.get("prerelease", False)  # include pre-releases
         perpage = cfg.get("per_page", 0)  # number of releases per page
         exclude_regexes = cfg.get("exclude", [])  # list of file name regexes to exclude
+        hidden = cfg.get("hidden", False)  # prepend a dot to the owner part of the local path
 
         assert type(perpage) is int and perpage >= 0, "`per_page` must be a non-negative integer"
         assert type(tarball) is bool, "`tarball` must be a boolean"
         assert type(exclude_regexes) is list, "`exclude` must be a list of regex strings"
         assert type(versions) is int and versions >= 0, "`versions` must be a non-negative integer"
+        assert type(hidden) is bool, "`hidden` must be a boolean"
 
-        repo_dir = working_dir / Path(repo)
+        repo_dir = working_dir / repo_local_path(repo, hidden)
         logger.info(f"syncing {repo} to {repo_dir}")
 
         try:
@@ -290,10 +288,7 @@ def main():
                     logger.error("Unnamed release")
                     continue
                 total_size += process_release(
-                    release,
-                    (repo_dir if flat else repo_dir / name),
-                    tarball,
-                    exclude_regexes
+                    release, (repo_dir if flat else repo_dir / name), tarball, exclude_regexes
                 )
                 if n_downloaded == 0 and not flat:
                     # create a symbolic link to the latest release folder
@@ -338,8 +333,6 @@ def main():
         logger.error("Some files failed to download")
         exit(1)
 
+
 if __name__ == "__main__":
     main()
-
-
-# vim: ts=4 sw=4 sts=4 expandtab
