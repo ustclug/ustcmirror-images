@@ -71,6 +71,7 @@ main = do
   -- Replace URLs in tmp metadata, and then copy these files
   mapM_ replaceUrls mdpaths
   enableMetadata basedir
+  enableMetadataGithubRawLayout basedir
 
   where
     onlySupported :: [Maybe Metadata] -> [Metadata]
@@ -195,6 +196,9 @@ mddir base = base </> "ghcup-metadata"
 mdtmpdir :: FilePath -> FilePath
 mdtmpdir base = base </> "ghcup-metadata.tmp"
 
+mdGithubRawDir :: FilePath -> FilePath
+mdGithubRawDir base = base </> "haskell" </> "ghcup-metadata"
+
 gitClone :: URL -> FilePath -> IO ()
 gitClone url path = do
   removePathForcibly path
@@ -216,6 +220,12 @@ enableMetadata basedir = do
   removePathForcibly (mdtmpdir basedir </> ".git")
   renamePath (mdtmpdir basedir) (mddir basedir)
 
+enableMetadataGithubRawLayout :: FilePath -> IO ()
+enableMetadataGithubRawLayout basedir = do
+  removePathForcibly (mdGithubRawDir basedir)
+  createDirectoryIfMissing True (mdGithubRawDir basedir)
+  createSymbolicLink "../../ghcup-metadata" (mdGithubRawDir basedir </> "master")
+
 ------------------------------------------------------------------------
 garbageCollect :: FilePath -> [FilePath] -> IO ()
 garbageCollect basedir mdpaths = do
@@ -228,7 +238,7 @@ garbageCollect basedir mdpaths = do
   keep <- foldMap f mdpaths
 
   -- List all local files and remove unused files
-  let keepAnyway = ["ghcup-metadata.tmp", "ghcup-metadata", "sh"]
+  let keepAnyway = ["ghcup-metadata.tmp", "ghcup-metadata", "haskell", "sh"]
   files <- listDirectoryRecursive basedir
   for_ files $ \file ->
     unless (file `Set.member` keep || any (`isPrefixOf` file) keepAnyway) $ do
