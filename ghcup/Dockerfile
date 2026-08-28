@@ -9,7 +9,7 @@ HASKELL_DEPS="ghc libghc-aeson-dev libghc-lens-dev libghc-lens-aeson-dev \
               libghc-network-uri-dev libghc-split-dev libghc-typed-process-dev \
               libghc-yaml-dev"
 # Please use ldd to check the dependencies of compiled binary
-HASKELL_KEEP="libyaml-0-2"
+HASKELL_KEEP="libyaml-0-2 libnuma1"
 
 apt-get update
 apt-get install -y aria2 ca-certificates git curl $HASKELL_DEPS $HASKELL_KEEP
