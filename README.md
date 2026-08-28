@@ -376,6 +376,25 @@ brew-install.sh https://github.com/Homebrew/install/raw/HEAD/install.sh
 rustup-install.sh https://sh.rustup.rs/
 ```
 
+### mooncakes
+
+[![mooncakes](https://img.shields.io/docker/image-size/ustcmirror/mooncakes/latest)](https://hub.docker.com/r/ustcmirror/mooncakes "mooncakes")
+[![mooncakes](https://img.shields.io/docker/pulls/ustcmirror/mooncakes)](https://hub.docker.com/r/ustcmirror/mooncakes "mooncakes")
+
+Sync the MoonBit mooncakes.io registry Git index and package storage bucket.
+The synced data is stored under `/data/index` and `/data/download`.
+
+| Parameter                | Description                                                                 |
+| ------------------------ | --------------------------------------------------------------------------- |
+| `MOONCAKES_INDEX_URL`    | Registry index Git URL. Defaults to `https://mooncakes.io/git/index`.       |
+| `MOONCAKES_INDEX_DIR`    | Directory name for the bare Git index under `/data`. Defaults to `index`.   |
+| `MOONCAKES_DOWNLOAD_DIR` | Directory name for package storage under `/data`. Defaults to `download`.   |
+| `MOONCAKES_BUCKET`       | S3 bucket name for package storage. Defaults to `moonbitlang-mooncakes`.    |
+| `MOONCAKES_REGION`       | S3 bucket region. Defaults to `us-west-2`.                                  |
+| `MOONCAKES_RCLONE_EXTRA` | Extra options passed to `rclone sync`. Defaults to empty.                   |
+| `RCLONE_CHECKERS`        | Set the number of checkers. Defaults to `$(getconf _NPROCESSORS_ONLN)`.     |
+| `RCLONE_TRANSFERS`       | Set the number of file transfers. Defaults to `$(getconf _NPROCESSORS_ONLN)`. |
+
 ### nix-channels
 
 [![nix-channels](https://img.shields.io/docker/image-size/ustcmirror/nix-channels/latest)](https://hub.docker.com/r/ustcmirror/nix-channels "nix-channels")

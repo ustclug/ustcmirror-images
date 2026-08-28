@@ -1,0 +1,47 @@
+mooncakes sync image mirrors the MoonBit mooncakes.io registry.
+
+It syncs both parts of the registry:
+
+1. the Git index from https://mooncakes.io/git/index
+2. the package storage bucket from s3://moonbitlang-mooncakes
+
+The default output layout is:
+
+```
+/data/
+  index/      # bare Git repository for the registry index
+  download/   # package storage files
+```
+
+The index repository is updated with `git fetch`, repacked, and prepared for
+HTTP serving with `git update-server-info`. The package storage is synced with
+anonymous rclone S3 access.
+
+For a mirror served as `https://mirrors.example/mooncakes`, users can configure
+MoonBit with:
+
+```json
+{
+  "registry": "https://mirrors.example/mooncakes/download",
+  "index": "https://mirrors.example/mooncakes/index",
+  "symbols": "https://mirrors.example/mooncakes/download/symbols.zip"
+}
+```
+
+Then update the registry index and install a package:
+
+```sh
+moon update
+moon install moonbit-community/warren
+```
+
+Useful image options:
+
+- `MOONCAKES_INDEX_URL`: registry index Git URL. Defaults to `https://mooncakes.io/git/index`.
+- `MOONCAKES_INDEX_DIR`: directory name for the bare Git index under `/data`. Defaults to `index`.
+- `MOONCAKES_DOWNLOAD_DIR`: directory name for package storage under `/data`. Defaults to `download`.
+- `MOONCAKES_BUCKET`: S3 bucket name for package storage. Defaults to `moonbitlang-mooncakes`.
+- `MOONCAKES_REGION`: S3 bucket region. Defaults to `us-west-2`.
+- `MOONCAKES_RCLONE_EXTRA`: extra options passed to `rclone sync`. Defaults to empty.
+- `RCLONE_CHECKERS`: number of rclone checkers. Defaults to `$(getconf _NPROCESSORS_ONLN)`.
+- `RCLONE_TRANSFERS`: number of rclone transfers. Defaults to `$(getconf _NPROCESSORS_ONLN)`.
