@@ -53,6 +53,10 @@ main = do
   -- Delete unreferenced files (before replacing URLs)
   garbageCollect basedir mdpaths
 
+  -- Preserve the upstream metadata and signatures for GHCup's proper mirror
+  -- layout before modifying URLs for the legacy layout.
+  prepareMetadataGithubRawLayout basedir
+
   -- group channels and create symlinks
   let
     mdByChannel = groupBy sameChannel $ 
@@ -71,6 +75,7 @@ main = do
   -- Replace URLs in tmp metadata, and then copy these files
   mapM_ replaceUrls mdpaths
   enableMetadata basedir
+  enableMetadataGithubRawLayout basedir
 
   where
     onlySupported :: [Maybe Metadata] -> [Metadata]
@@ -195,6 +200,12 @@ mddir base = base </> "ghcup-metadata"
 mdtmpdir :: FilePath -> FilePath
 mdtmpdir base = base </> "ghcup-metadata.tmp"
 
+mdGithubRawDir :: FilePath -> FilePath
+mdGithubRawDir base = base </> "haskell" </> "ghcup-metadata"
+
+mdGithubRawTmpDir :: FilePath -> FilePath
+mdGithubRawTmpDir base = base </> "haskell" </> "ghcup-metadata.tmp"
+
 gitClone :: URL -> FilePath -> IO ()
 gitClone url path = do
   removePathForcibly path
@@ -216,6 +227,21 @@ enableMetadata basedir = do
   removePathForcibly (mdtmpdir basedir </> ".git")
   renamePath (mdtmpdir basedir) (mddir basedir)
 
+prepareMetadataGithubRawLayout :: FilePath -> IO ()
+prepareMetadataGithubRawLayout basedir = do
+  let tmpdir = mdGithubRawTmpDir basedir
+  removePathForcibly tmpdir
+  createDirectoryIfMissing True tmpdir
+  -- Reflinks avoid duplicating unchanged metadata blocks when supported.
+  runProcess_ (proc "cp" ["-a", "--reflink=auto", mdtmpdir basedir,
+                          tmpdir </> "master"])
+  removePathForcibly (tmpdir </> "master" </> ".git")
+
+enableMetadataGithubRawLayout :: FilePath -> IO ()
+enableMetadataGithubRawLayout basedir = do
+  removePathForcibly (mdGithubRawDir basedir)
+  renamePath (mdGithubRawTmpDir basedir) (mdGithubRawDir basedir)
+
 ------------------------------------------------------------------------
 garbageCollect :: FilePath -> [FilePath] -> IO ()
 garbageCollect basedir mdpaths = do
@@ -228,7 +254,7 @@ garbageCollect basedir mdpaths = do
   keep <- foldMap f mdpaths
 
   -- List all local files and remove unused files
-  let keepAnyway = ["ghcup-metadata.tmp", "ghcup-metadata", "sh"]
+  let keepAnyway = ["ghcup-metadata.tmp", "ghcup-metadata", "haskell", "sh"]
   files <- listDirectoryRecursive basedir
   for_ files $ \file ->
     unless (file `Set.member` keep || any (`isPrefixOf` file) keepAnyway) $ do
@@ -242,8 +268,10 @@ garbageCollect basedir mdpaths = do
         go prefix curpath = do
           files <- listDirectory curpath
           let f file = do
-                d <- doesDirectoryExist (curpath </> file)
-                if d
+                let path = curpath </> file
+                isLink <- pathIsSymbolicLink path
+                d <- doesDirectoryExist path
+                if d && not isLink
                   then go (prefix </> file) (curpath </> file)
                   else pure [prefix </> file]
           foldMap f files
