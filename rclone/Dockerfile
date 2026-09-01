@@ -16,4 +16,3 @@ RUN <<EOF
 EOF
 
 ADD sync.sh upstream.sh /
-cl
