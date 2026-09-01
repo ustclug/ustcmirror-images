@@ -2,7 +2,7 @@ FROM ustcmirror/base:alpine
 LABEL maintainer="Jian Zeng <anonymousknight96 AT gmail.com>"
 LABEL bind_support=true
 
-ARG RCLONE_VERSION=v1.50.2
+ARG RCLONE_VERSION=v1.75.0
 ENV RCLONE_DELETE_AFTER=true \
     RCLONE_DELETE_EXCLUDED=true
 
@@ -16,3 +16,4 @@ RUN <<EOF
 EOF
 
 ADD sync.sh upstream.sh /
+cl
