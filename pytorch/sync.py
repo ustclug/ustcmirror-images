@@ -153,6 +153,11 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
                 suburl = urljoin("https://download.pytorch.org", suburl)
             else:
                 suburl = urljoin(url, suburl)
+            if (
+                urlparse(suburl).hostname == "files.pythonhosted.org"
+                and pypi_urlbase != urlbase
+            ):
+                continue
             tasks.append(asyncio.create_task(recursive_download(client, suburl)))
             if suburl.endswith(".whl") and "data-core-metadata" in attr:
                 tasks.append(

@@ -417,7 +417,7 @@ Sync PyTorch packages from <https://download.pytorch.org/>.
 | `JOBS`             | Number of concurrent downloads. Defaults to `2`.                                         |
 | `TIMEOUT`          | HTTP timeout in seconds. Defaults to `30`.                                               |
 | `URLBASE`          | URL prefix used when rewriting HTML links. Defaults to `/pytorch/`.                      |
-| `PYPI_URLBASE`     | URL prefix replacing `files.pythonhosted.org` links. Defaults to `/pypi/web/`.           |
+| `PYPI_URLBASE`     | URL prefix replacing `files.pythonhosted.org` links. Defaults to `/pypi/web/`. Packages are not synced when this differs from `URLBASE`. |
 | `GET_ALL`          | Set to `1` to use `published_versions.json` instead of `releases.json`. Defaults to `0`. |
 | `CUSTOM_ENDPOINTS` | Comma-separated list of extra endpoints, e.g. `https://download.pytorch.org/whl/xpu`.    |
 | `NO_NIGHTLY`       | Set to `1` to skip nightly builds. Defaults to `1`.                                      |
