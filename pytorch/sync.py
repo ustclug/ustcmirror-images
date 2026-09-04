@@ -24,7 +24,7 @@ dry_run = os.environ.get("DRY_RUN", "0") == "1"
 jobs = int(os.environ.get("JOBS", "2"))
 timeout = int(os.environ.get("TIMEOUT", "30"))
 urlbase = os.environ.get("URLBASE", "/pytorch/")
-pypi_urlbase = os.environ.get("PYPI_URLBASE", "/pypi/web/")
+pypi_urlbase = os.environ.get("PYPI_URLBASE", "")
 # if true, use PUBLISHED_VERSION_URL to get the list of URLs
 get_all = os.environ.get("GET_ALL", "0") == "1"
 # allow custom endpoints, e.g., https://download.pytorch.org/whl/xpu (Intel GPU builds)
@@ -155,6 +155,7 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
                 suburl = urljoin(url, suburl)
             if (
                 urlparse(suburl).hostname == "files.pythonhosted.org"
+                and pypi_urlbase
                 and pypi_urlbase != urlbase
             ):
                 continue
