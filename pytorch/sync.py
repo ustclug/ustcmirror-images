@@ -24,6 +24,7 @@ dry_run = os.environ.get("DRY_RUN", "0") == "1"
 jobs = int(os.environ.get("JOBS", "2"))
 timeout = int(os.environ.get("TIMEOUT", "30"))
 urlbase = os.environ.get("URLBASE", "/pytorch/")
+pypi_urlbase = os.environ.get("PYPI_URLBASE", "/pypi/web/")
 # if true, use PUBLISHED_VERSION_URL to get the list of URLs
 get_all = os.environ.get("GET_ALL", "0") == "1"
 # allow custom endpoints, e.g., https://download.pytorch.org/whl/xpu (Intel GPU builds)
@@ -34,6 +35,8 @@ if not urlbase.endswith("/"):
     urlbase += "/"
 if not urlbase.startswith("/"):
     urlbase = "/" + urlbase
+if pypi_urlbase and not pypi_urlbase.endswith("/"):
+    pypi_urlbase += "/"
 sem = asyncio.Semaphore(jobs)
 unrewritten_urls: dict[str, str] = {}
 
@@ -51,6 +54,8 @@ def rewrite_links(index_resp: str) -> str:
             "pypi.nvidia.com",
         }:
             target = urlbase
+        elif parsed.hostname == "files.pythonhosted.org" and pypi_urlbase:
+            target = pypi_urlbase
         elif parsed.hostname:
             unrewritten_urls.setdefault(parsed.netloc, href)
 
