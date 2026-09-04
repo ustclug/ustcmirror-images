@@ -48,6 +48,7 @@ def rewrite_links(index_resp: str) -> str:
         elif parsed.hostname in {
             "download.pytorch.org",
             "download-r2.pytorch.org",
+            "pypi.nvidia.com",
         }:
             target = urlbase
         elif parsed.hostname:
