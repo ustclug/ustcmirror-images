@@ -34,8 +34,32 @@ if not urlbase.endswith("/"):
     urlbase += "/"
 if not urlbase.startswith("/"):
     urlbase = "/" + urlbase
-
 sem = asyncio.Semaphore(jobs)
+unrewritten_urls: dict[str, str] = {}
+
+
+def rewrite_links(index_resp: str) -> str:
+    def rewrite_href(match: re.Match) -> str:
+        href = match.group(1)
+        parsed = urlparse(href)
+        target = None
+        if href.startswith("/"):
+            target = urlbase
+        elif parsed.hostname in {
+            "download.pytorch.org",
+            "download-r2.pytorch.org",
+        }:
+            target = urlbase
+        elif parsed.hostname:
+            unrewritten_urls.setdefault(parsed.netloc, href)
+
+        if target is None:
+            return match.group(0)
+        if parsed.netloc:
+            href = href[len(parsed.scheme) + 3 + len(parsed.netloc) :]
+        return f'href="{target}{href.lstrip("/")}"'
+
+    return HREF_RE.sub(rewrite_href, index_resp)
 
 
 @contextmanager
@@ -106,6 +130,7 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
             logging.info(f"Getting {url}")
             contents = await get_with_progress(client, url)
             index_resp = contents.decode("utf-8")
+            rewritten_index_resp = rewrite_links(index_resp)
             if url.endswith("/"):
                 filename = "index.html"
             else:
@@ -132,16 +157,9 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
         if tasks:
             await asyncio.gather(*tasks)
         if not dry_run:
-            # Rewrite links so the index page points back to this mirror.
-            # Upstream now emits absolute URLs like
-            # "https://download-r2.pytorch.org/whl/..." instead of "/whl/...",
-            # so we have to handle both forms (relative + each absolute origin).
-            index_resp = index_resp.replace('href="/', f'href="{urlbase}')
-            index_resp = index_resp.replace('href="https://download.pytorch.org/', f'href="{urlbase}')
-            index_resp = index_resp.replace('href="https://download-r2.pytorch.org/', f'href="{urlbase}')
             os.makedirs(base / path, exist_ok=True)
             with overwrite(base / path / filename, "w") as f:
-                f.write(index_resp)
+                f.write(rewritten_index_resp)
     else:
         if (base / path).exists():
             return
@@ -164,7 +182,7 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
                         raise e
 
 
-async def main():
+async def main() -> int:
     client = httpx.AsyncClient(
         headers={
             "User-Agent": "pytorch-sync (+https://github.com/ustclug/ustcmirror-images)"
@@ -223,7 +241,14 @@ async def main():
                 add_endpoint(command)
 
     await asyncio.gather(*(recursive_download(client, url) for url in urls))
+    for domain, example_url in sorted(unrewritten_urls.items()):
+        logging.error(
+            "Links for domain %s were not rewritten (example: %s)",
+            domain,
+            example_url,
+        )
+    return int(bool(unrewritten_urls))
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    raise SystemExit(asyncio.run(main()))
