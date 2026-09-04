@@ -24,6 +24,7 @@ dry_run = os.environ.get("DRY_RUN", "0") == "1"
 jobs = int(os.environ.get("JOBS", "2"))
 timeout = int(os.environ.get("TIMEOUT", "30"))
 urlbase = os.environ.get("URLBASE", "/pytorch/")
+pypi_urlbase = os.environ.get("PYPI_URLBASE", "")
 # if true, use PUBLISHED_VERSION_URL to get the list of URLs
 get_all = os.environ.get("GET_ALL", "0") == "1"
 # allow custom endpoints, e.g., https://download.pytorch.org/whl/xpu (Intel GPU builds)
@@ -34,8 +35,37 @@ if not urlbase.endswith("/"):
     urlbase += "/"
 if not urlbase.startswith("/"):
     urlbase = "/" + urlbase
-
+if pypi_urlbase and not pypi_urlbase.endswith("/"):
+    pypi_urlbase += "/"
 sem = asyncio.Semaphore(jobs)
+unrewritten_urls: dict[str, str] = {}
+
+
+def rewrite_links(index_resp: str) -> str:
+    def rewrite_href(match: re.Match) -> str:
+        href = match.group(1)
+        parsed = urlparse(href)
+        target = None
+        if href.startswith("/"):
+            target = urlbase
+        elif parsed.hostname in {
+            "download.pytorch.org",
+            "download-r2.pytorch.org",
+            "pypi.nvidia.com",
+        }:
+            target = urlbase
+        elif parsed.hostname == "files.pythonhosted.org" and pypi_urlbase:
+            target = pypi_urlbase
+        elif parsed.hostname:
+            unrewritten_urls.setdefault(parsed.netloc, href)
+
+        if target is None:
+            return match.group(0)
+        if parsed.netloc:
+            href = href[len(parsed.scheme) + 3 + len(parsed.netloc) :]
+        return f'href="{target}{href.lstrip("/")}"'
+
+    return HREF_RE.sub(rewrite_href, index_resp)
 
 
 @contextmanager
@@ -106,6 +136,7 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
             logging.info(f"Getting {url}")
             contents = await get_with_progress(client, url)
             index_resp = contents.decode("utf-8")
+            rewritten_index_resp = rewrite_links(index_resp)
             if url.endswith("/"):
                 filename = "index.html"
             else:
@@ -122,6 +153,12 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
                 suburl = urljoin("https://download.pytorch.org", suburl)
             else:
                 suburl = urljoin(url, suburl)
+            if (
+                urlparse(suburl).hostname == "files.pythonhosted.org"
+                and pypi_urlbase
+                and pypi_urlbase != urlbase
+            ):
+                continue
             tasks.append(asyncio.create_task(recursive_download(client, suburl)))
             if suburl.endswith(".whl") and "data-core-metadata" in attr:
                 tasks.append(
@@ -132,16 +169,9 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
         if tasks:
             await asyncio.gather(*tasks)
         if not dry_run:
-            # Rewrite links so the index page points back to this mirror.
-            # Upstream now emits absolute URLs like
-            # "https://download-r2.pytorch.org/whl/..." instead of "/whl/...",
-            # so we have to handle both forms (relative + each absolute origin).
-            index_resp = index_resp.replace('href="/', f'href="{urlbase}')
-            index_resp = index_resp.replace('href="https://download.pytorch.org/', f'href="{urlbase}')
-            index_resp = index_resp.replace('href="https://download-r2.pytorch.org/', f'href="{urlbase}')
             os.makedirs(base / path, exist_ok=True)
             with overwrite(base / path / filename, "w") as f:
-                f.write(index_resp)
+                f.write(rewritten_index_resp)
     else:
         if (base / path).exists():
             return
@@ -164,7 +194,7 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
                         raise e
 
 
-async def main():
+async def main() -> int:
     client = httpx.AsyncClient(
         headers={
             "User-Agent": "pytorch-sync (+https://github.com/ustclug/ustcmirror-images)"
@@ -223,7 +253,14 @@ async def main():
                 add_endpoint(command)
 
     await asyncio.gather(*(recursive_download(client, url) for url in urls))
+    for domain, example_url in sorted(unrewritten_urls.items()):
+        logging.error(
+            "Links for domain %s were not rewritten (example: %s)",
+            domain,
+            example_url,
+        )
+    return int(bool(unrewritten_urls))
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    raise SystemExit(asyncio.run(main()))
