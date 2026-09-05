@@ -187,6 +187,7 @@ def main():
 
     failed = []
     cache_dir = tempfile.mkdtemp()
+    installroot = tempfile.mkdtemp()
 
     def combination_os_comp(arch: str):
         for os in os_list:
@@ -204,7 +205,7 @@ def main():
                     probe_url = url + ('' if url.endswith('/') else '/') + "repodata/repomd.xml"
                     r = requests.head(probe_url, timeout=(7,7))
                     if r.status_code < 400 or r.status_code == 403:
-                        yield (name, url, working_dir)
+                        yield (name, url, working_dir, os)
                     else:
                         print(probe_url, "->", r.status_code)
                 except:
@@ -212,7 +213,7 @@ def main():
 
     for arch in arch_list:
         # dest_dirs = []
-        for name, url, working_dir in combination_os_comp(arch):
+        for name, url, working_dir, os_version in combination_os_comp(arch):
             working_dir.mkdir(parents=True, exist_ok=True)
             conf = tempfile.NamedTemporaryFile("w", suffix=".conf")
             conf.write(f'''
@@ -240,7 +241,9 @@ enabled=1
             #     failed.append(('', arch))
             #     continue
 
-            cmd_args = ["dnf", "reposync", "-c", conf.name, "--delete", "-p", dst]
+            cmd_args = ["dnf", "--installroot", installroot,
+                        "--releasever", os_version, "reposync", "-c", conf.name,
+                        "--delete", "-p", dst]
             if args.pass_arch_to_reposync:
                 cmd_args += ["--arch", arch]
             print(f"Launching reposync with command: {cmd_args}", flush=True)
