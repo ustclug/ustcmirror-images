@@ -23,6 +23,7 @@ base = Path(os.environ.get("TO", "."))
 dry_run = os.environ.get("DRY_RUN", "0") == "1"
 jobs = int(os.environ.get("JOBS", "2"))
 timeout = int(os.environ.get("TIMEOUT", "30"))
+bind_address = os.environ.get("BIND_ADDRESS", "")
 urlbase = os.environ.get("URLBASE", "/pytorch/")
 pypi_urlbase = os.environ.get("PYPI_URLBASE", "")
 # if true, use PUBLISHED_VERSION_URL to get the list of URLs
@@ -208,6 +209,9 @@ async def main() -> int:
             "User-Agent": "pytorch-sync (+https://github.com/ustclug/ustcmirror-images)"
         },
         timeout=timeout,
+        transport=httpx.AsyncHTTPTransport(local_address=bind_address)
+        if bind_address
+        else None,
     )
     urls = set()
     

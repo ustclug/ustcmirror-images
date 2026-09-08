@@ -416,6 +416,7 @@ Sync PyTorch packages from <https://download.pytorch.org/>.
 | `DRY_RUN`          | Set to `1` to skip writing files. Defaults to `0`.                                       |
 | `JOBS`             | Number of concurrent downloads. Defaults to `2`.                                         |
 | `TIMEOUT`          | HTTP timeout in seconds. Defaults to `30`.                                               |
+| `BIND_ADDRESS`     | Local IPv4 or IPv6 address to bind outgoing requests to. Defaults to empty (automatic selection). |
 | `URLBASE`          | URL prefix used when rewriting HTML links. Defaults to `/pytorch/`.                      |
 | `PYPI_URLBASE`     | URL prefix replacing `files.pythonhosted.org` links. Defaults to empty, which keeps syncing PyPI packages. Packages are not synced when this is set and differs from `URLBASE`. |
 | `GET_ALL`          | Set to `1` to use `published_versions.json` instead of `releases.json`. Defaults to `0`. |
