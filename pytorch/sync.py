@@ -134,7 +134,15 @@ async def recursive_download(client: httpx.AsyncClient, url: str):
         # index.html (current) or torch_stable.html (old)
         async with sem:
             logging.info(f"Getting {url}")
-            contents = await get_with_progress(client, url)
+            try:
+                contents = await get_with_progress(client, url)
+            except httpx.HTTPStatusError as e:
+                # Upstream also lists unavailable package indexes, e.g.,
+                # /whl/rocm7.14/cuda-bindings/.
+                if e.response.status_code == 403:
+                    logging.warning(f"Forbidden: {url}, skipping.")
+                    return
+                raise
             index_resp = contents.decode("utf-8")
             rewritten_index_resp = rewrite_links(index_resp)
             if url.endswith("/"):
