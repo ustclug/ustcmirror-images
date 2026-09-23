@@ -126,6 +126,8 @@ Sync the crates.io git index and incrementally download `.crate` files. Aside fr
 | `CRATES_TIMEOUT`        | Timeout in seconds for each crate download request. Defaults to `60`                                               |
 | `CRATES_DRY_RUN`        | If set, only compute and print the pending index files and crate entries without downloading or updating state. Defaults to `false` |
 | `CRATES_USER_AGENT`     | User-Agent header used for `.crate` downloads. Defaults to `ustcmirror-crates-io/1 (+https://mirrors.ustc.edu.cn)` |
+| `CRATES_IGNORE_HTTP_CODES` | Space/comma-separated HTTP status codes treated as "crate gone from upstream" instead of a download failure (e.g. `403` when static.crates.io blocks your mirror). Defaults to empty |
+| `CRATES_IGNORE_MAX`     | Safety fuse: refuse to write sync state when more than this many crates are "gone" in one run. Defaults to `500` |
 
 The synced data is stored under `/data/index` (bind mounted crates.io-index repo), `/data/crates`, and `/data/state`. If a previous index commit is no longer available after force-push and git maintenance, the sync falls back to scanning changed index files by mtime.
 
