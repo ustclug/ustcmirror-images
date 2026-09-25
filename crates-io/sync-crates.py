@@ -32,6 +32,16 @@ upstream_base = os.environ.get(
 user_agent = os.environ.get(
     "CRATES_USER_AGENT", "ustcmirror-crates-io/1 (+https://mirrors.ustc.edu.cn)"
 )
+# HTTP status codes (e.g. "403,404") that mark a crate file as permanently
+# removed upstream instead of a sync failure. Mirrors such as crates.io
+# occasionally delete crate files, and without this opt-in the deleted entries
+# keep every run failing and prevent the incremental-sync state from being
+# written at all.
+ignore_http_codes = {
+    int(code)
+    for code in os.environ.get("CRATES_IGNORE_HTTP_CODES", "").replace(",", " ").split()
+}
+ignore_max = max(0, int(os.environ.get("CRATES_IGNORE_MAX", "500")))
 
 
 def git(args: list[str], repo: Path) -> str:
@@ -238,6 +248,14 @@ def fetch_one(
             #     raise RuntimeError(f"checksum mismatch for {name} {version}")
             os.replace(tmp_path, target)
             return "downloaded"
+        except urllib.error.HTTPError as exc:
+            if exc.code in ignore_http_codes:
+                tqdm.write(f"[WARN] gone (HTTP {exc.code}): {name} {version}")
+                tmp_path.unlink(missing_ok=True)
+                return "gone"
+            last_error = exc
+            if attempt == retries:
+                break
         except (urllib.error.URLError, OSError, RuntimeError) as exc:
             last_error = exc
             if attempt == retries:
@@ -250,12 +268,13 @@ def sync_crates(
     crates_dir: Path,
     base_url: str,
     items: list[tuple[str, str, str]],
-) -> tuple[int, int, int]:
+) -> tuple[int, int, int, int]:
     downloaded = 0
     present = 0
     failed = 0
+    gone = 0
     if not items:
-        return downloaded, present, failed
+        return downloaded, present, failed, gone
 
     with (
         ThreadPoolExecutor(max_workers=jobs) as executor,
@@ -263,16 +282,17 @@ def sync_crates(
             total=len(items), desc="crates", unit="crate", dynamic_ncols=True
         ) as progress,
     ):
-        pending = {
-            executor.submit(
-                fetch_one,
-                crates_dir,
-                base_url,
-                item,
-            ): item
-            for item in items
-        }
-        while pending:
+        queue = iter(items)
+        pending = {}
+        stopped = False
+        while pending or not stopped:
+            while not stopped and len(pending) < jobs:
+                try:
+                    item = next(queue)
+                except StopIteration:
+                    stopped = True
+                else:
+                    pending[executor.submit(fetch_one, crates_dir, base_url, item)] = item
             done, _ = wait(pending, return_when=FIRST_COMPLETED)
             for future in done:
                 item = pending.pop(future)
@@ -284,10 +304,21 @@ def sync_crates(
                 else:
                     if result == "downloaded":
                         downloaded += 1
+                    elif result == "gone":
+                        gone += 1
                     else:
                         present += 1
                 progress.update(1)
-    return downloaded, present, failed
+            if not stopped and gone > ignore_max:
+                # A flood of "gone" crates suggests the mirror is banned or
+                # upstream is broken rather than routine crate removals; stop
+                # scheduling new downloads and fail once in-flight ones finish.
+                tqdm.write(
+                    f"[FATAL] {gone} crates gone from upstream exceeds "
+                    f"CRATES_IGNORE_MAX={ignore_max}; stopping further downloads"
+                )
+                stopped = True
+    return downloaded, present, failed, gone
 
 
 def main() -> int:
@@ -353,14 +384,23 @@ def main() -> int:
         seen.add(item)
         items.append(item)
 
-    downloaded, present, failed = sync_crates(crates_dir, upstream_base, items)
+    downloaded, present, failed, gone = sync_crates(crates_dir, upstream_base, items)
+    # A flood of "gone" crates suggests the mirror is banned or upstream is
+    # broken rather than routine crate removals; refuse to write state then.
+    if gone > ignore_max:
+        print(
+            f"[FATAL] {gone} crates gone from upstream exceeds CRATES_IGNORE_MAX={ignore_max}; "
+            "refusing to write sync state",
+            file=sys.stderr,
+        )
+        return 1
     if failed == 0 and not dry_run:
         previous_file.write_text(upstream_head + "\n")
         previous_sync_file.write_text(str(time.time_ns()) + "\n")
     if dry_run:
         print("[INFO] dry run. No actual file is written.")
     print(
-        f"[INFO] crates sync complete: files={len(files)} entries={len(items)} downloaded={downloaded} present={present} failed={failed}"
+        f"[INFO] crates sync complete: files={len(files)} entries={len(items)} downloaded={downloaded} present={present} failed={failed} gone={gone}"
     )
     if failed != 0:
         print("[WARN] sync state is not written as there are failed crates.")
