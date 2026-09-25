@@ -3,10 +3,9 @@ FROM rust:1-trixie AS builder
 RUN apt update \
   && apt install -y --no-install-recommends git
 
-# Use fork version for now
-RUN git clone https://github.com/taoky/rustup-mirror app && \
+RUN git clone https://github.com/jiegec/rustup-mirror app && \
   cd app && \
-  git checkout d1ecb66b11e6d9d50d1079137189928dc16612af
+  git checkout v0.12.0
 
 WORKDIR /app
 
