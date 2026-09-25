@@ -282,16 +282,17 @@ def sync_crates(
             total=len(items), desc="crates", unit="crate", dynamic_ncols=True
         ) as progress,
     ):
-        pending = {
-            executor.submit(
-                fetch_one,
-                crates_dir,
-                base_url,
-                item,
-            ): item
-            for item in items
-        }
-        while pending:
+        queue = iter(items)
+        pending = {}
+        stopped = False
+        while pending or not stopped:
+            while not stopped and len(pending) < jobs:
+                try:
+                    item = next(queue)
+                except StopIteration:
+                    stopped = True
+                else:
+                    pending[executor.submit(fetch_one, crates_dir, base_url, item)] = item
             done, _ = wait(pending, return_when=FIRST_COMPLETED)
             for future in done:
                 item = pending.pop(future)
@@ -308,6 +309,15 @@ def sync_crates(
                     else:
                         present += 1
                 progress.update(1)
+            if not stopped and gone > ignore_max:
+                # A flood of "gone" crates suggests the mirror is banned or
+                # upstream is broken rather than routine crate removals; stop
+                # scheduling new downloads and fail once in-flight ones finish.
+                tqdm.write(
+                    f"[FATAL] {gone} crates gone from upstream exceeds "
+                    f"CRATES_IGNORE_MAX={ignore_max}; stopping further downloads"
+                )
+                stopped = True
     return downloaded, present, failed, gone
 
 
