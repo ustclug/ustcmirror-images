@@ -45,28 +45,7 @@ Apart from `TO` and `LOGDIR`, these environment variables are common to all imag
 [![aptsync](https://img.shields.io/docker/image-size/ustcmirror/aptsync/latest)](https://hub.docker.com/r/ustcmirror/aptsync "aptsync")
 [![aptsync](https://img.shields.io/docker/pulls/ustcmirror/aptsync)](https://hub.docker.com/r/ustcmirror/aptsync "aptsync")
 
-| Parameter            | Description                                                                                               |
-| -------------------- | --------------------------------------------------------------------------------------------------------- |
-| `APTSYNC_URL`        | Sets the url of upstream.                                                                                 |
-| `APTSYNC_NTHREADS`   | Defaults to `20`.                                                                                         |
-| `APTSYNC_UNLINK`     | Set this to `1` to remove unneeded files automatically. Defaults to `0`.                                  |
-| `APTSYNC_CREATE_DIR` | Set this to `true` to create same directory tree as upstream URL. Defaults to `true`.                     |
-| `APTSYNC_DISTS`      | Various distros can be specified in the format `<release> [...]\|<componenet> [...]\|<arch> [...][:...]`. |
-
-Notes: The following `mirror.list`:
-
-```debsources
-deb-i386 https://apt.dockerproject.org/repo debian-jessie main
-deb-amd64 https://apt.dockerproject.org/repo debian-jessie main
-deb-armhf https://apt.dockerproject.org/repo raspbian-jessie main testing
-```
-
-is equivalent to the following parameters:
-
-```ini
-APTSYNC_URL='https://apt.dockerproject.org/repo'
-APTSYNC_DISTS='debian-jessie|main|i386 amd64:raspbian-jessie|main testing|armhf'
-```
+This image is no longer maintained and removed from codebase. The container image on Docker Hub remains intact.
 
 ### apt-sync
 
