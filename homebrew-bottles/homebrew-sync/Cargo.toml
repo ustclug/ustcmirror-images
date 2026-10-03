@@ -1,0 +1,17 @@
+[package]
+name = "homebrew-sync"
+version = "0.1.0"
+edition = "2024"
+
+[profile.release]
+strip = "symbols"
+
+[dependencies]
+anyhow = "1"
+flate2 = "1"
+futures-util = "0.3"
+reqwest = { version = "0.13", default-features = false, features = ["rustls", "stream", "gzip", "system-proxy"] }
+serde_json = "1"
+sha2 = "0.10"
+tempfile = "3"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal", "time"] }

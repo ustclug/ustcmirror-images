@@ -1,11 +1,11 @@
 FROM rust:alpine AS builder
-WORKDIR /usr/src/bottles-json/
-COPY bottles-json .
-RUN apk add --no-cache musl-dev
-RUN cargo build --release
+WORKDIR /usr/src/homebrew-sync/
+COPY homebrew-sync .
+RUN apk add --no-cache musl-dev cmake make perl
+RUN cargo build --release --locked
 
-FROM ustcmirror/curl-helper
-LABEL maintainer="Yifan Gao docker@yfgao.com"
-RUN apk add --no-cache parallel bash sed gzip jq
+FROM ustcmirror/base:alpine
+LABEL bind_support=true
+RUN apk add --no-cache ca-certificates
 ADD sync.sh upstream.sh /
-COPY --from=builder /usr/src/bottles-json/target/release/bottles-json /usr/local/bin/
+COPY --from=builder /usr/src/homebrew-sync/target/release/homebrew-sync /usr/local/bin/
