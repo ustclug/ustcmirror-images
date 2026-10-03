@@ -36,16 +36,11 @@ async fn fetch_api(
 
 async fn sync_blobs(store: &Store, downloader: &Downloader, group: &[Blob]) -> Result<bool> {
     let first = &group[0];
-    let dir = if first.cask {
-        "api/cask-source/.by-hash"
-    } else {
-        ".by-hash"
-    };
-    let cache = store.path(&format!("{dir}/{}", first.digest));
+    let cache = store.path(&format!(".by-hash/{}", first.digest));
     let exists = fs::symlink_metadata(&cache).is_ok_and(|m| m.file_type().is_file());
     if !exists {
         let file = downloader
-            .fetch(store, &first.url, first.cask, Some(&first.digest))
+            .fetch(store, &first.url, false, Some(&first.digest))
             .await?;
         store.install(file, &cache)?;
     }
@@ -88,13 +83,10 @@ fn record(summary: &mut Summary, result: Result<bool>, label: &str) {
 pub async fn run(store: &Store, downloader: &Downloader, jobs: usize, base: &Url) -> Result<()> {
     let plan = prepare(store, downloader, base).await?;
     let mut keep: BTreeSet<String> = plan.api.keys().cloned().collect();
-    let mut groups: BTreeMap<(bool, String), Vec<Blob>> = BTreeMap::new();
+    let mut groups: BTreeMap<String, Vec<Blob>> = BTreeMap::new();
     for blob in plan.blobs.into_values() {
         keep.insert(blob.path.clone());
-        groups
-            .entry((blob.cask, blob.digest.clone()))
-            .or_default()
-            .push(blob);
+        groups.entry(blob.digest.clone()).or_default().push(blob);
     }
 
     for manifest in plan.manifests.values() {
@@ -161,11 +153,7 @@ async fn prepare(store: &Store, downloader: &Downloader, base: &Url) -> Result<m
         );
     }
 
-    let mut plan = metadata::plan(
-        &documents["api/formula.json"],
-        &documents["api/cask.json"],
-        base,
-    )?;
+    let mut plan = metadata::plan(&documents["api/formula.json"], &documents["api/cask.json"])?;
     for platform in &plan.platforms {
         let name = format!("internal/packages.{platform}.jws.json");
         documents.insert(

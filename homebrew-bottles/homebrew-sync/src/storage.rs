@@ -48,7 +48,6 @@ impl Store {
             "api",
             "api/formula",
             "api/cask",
-            "api/cask-source/.by-hash",
             "api/manifests",
             "api/internal",
         ] {
@@ -122,7 +121,6 @@ impl Store {
             ("", ".bottle"),
             ("api/formula", ".json"),
             ("api/cask", ".json"),
-            ("api/cask-source", ".rb"),
             ("api/manifests", ".json"),
             ("api/internal", ".jws.json"),
         ] {
@@ -156,20 +154,18 @@ impl Store {
             }
         }
 
-        for dir in [".by-hash", "api/cask-source/.by-hash"] {
-            for entry in fs::read_dir(self.path(dir))? {
-                tokio::task::yield_now().await;
-                let entry = entry?;
-                let name = entry.file_name();
-                let name = name.to_string_lossy();
-                let metadata = fs::symlink_metadata(entry.path())?;
-                if metadata.is_file()
-                    && metadata.nlink() == 1
-                    && (crate::metadata::digest(&name).is_ok() || name.ends_with(".tmp"))
-                {
-                    fs::remove_file(entry.path())?;
-                    deleted += 1;
-                }
+        for entry in fs::read_dir(self.path(".by-hash"))? {
+            tokio::task::yield_now().await;
+            let entry = entry?;
+            let name = entry.file_name();
+            let name = name.to_string_lossy();
+            let metadata = fs::symlink_metadata(entry.path())?;
+            if metadata.is_file()
+                && metadata.nlink() == 1
+                && (crate::metadata::digest(&name).is_ok() || name.ends_with(".tmp"))
+            {
+                fs::remove_file(entry.path())?;
+                deleted += 1;
             }
         }
         Ok(deleted)

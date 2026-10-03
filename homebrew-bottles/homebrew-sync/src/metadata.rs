@@ -19,7 +19,6 @@ pub struct Blob {
     pub url: Url,
     pub digest: String,
     pub path: String,
-    pub cask: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -50,7 +49,7 @@ impl Plan {
     fn add_blob(&mut self, blob: Blob) -> Result<()> {
         if let Some(old) = self.blobs.get(&blob.path) {
             ensure!(
-                old.digest == blob.digest && old.cask == blob.cask,
+                old.digest == blob.digest,
                 "conflicting target {}",
                 blob.path
             );
@@ -102,7 +101,6 @@ impl Plan {
                 url: url(field(info, "url")?)?,
                 digest: sha256,
                 path: format!("{name}-{package_version}.{platform}.bottle{rebuild_suffix}.tar.gz"),
-                cask: false,
             })?;
         }
 
@@ -121,33 +119,13 @@ impl Plan {
         Ok(())
     }
 
-    fn add_cask(&mut self, cask: &Value, api_base: &Url) -> Result<()> {
+    fn add_cask(&mut self, cask: &Value) -> Result<()> {
         let token = component(field(cask, "token")?)?;
-        self.add_document(format!("api/cask/{token}.json"), cask)?;
-
-        let source = field(cask, "ruby_source_path")?;
-        let filename = component(
-            source
-                .rsplit('/')
-                .next()
-                .context("missing source filename")?,
-        )?;
-        let mut source_url = api_base.join("cask-source/")?;
-        source_url
-            .path_segments_mut()
-            .map_err(|_| anyhow::anyhow!("invalid API base URL"))?
-            .pop_if_empty()
-            .push(filename);
-        self.add_blob(Blob {
-            url: source_url,
-            digest: digest(field(&cask["ruby_source_checksum"], "sha256")?)?,
-            path: format!("api/cask-source/{filename}"),
-            cask: true,
-        })
+        self.add_document(format!("api/cask/{token}.json"), cask)
     }
 }
 
-pub fn plan(formula: &[u8], cask: &[u8], api_base: &Url) -> Result<Plan> {
+pub fn plan(formula: &[u8], cask: &[u8]) -> Result<Plan> {
     let formula: Value = serde_json::from_slice(formula).context("formula.json")?;
     let cask: Value = serde_json::from_slice(cask).context("cask.json")?;
     let formula = formula
@@ -165,7 +143,7 @@ pub fn plan(formula: &[u8], cask: &[u8], api_base: &Url) -> Result<Plan> {
             .with_context(|| format!("formula {}", entry["name"]))?;
     }
     for entry in cask {
-        plan.add_cask(entry, api_base)
+        plan.add_cask(entry)
             .with_context(|| format!("cask {}", entry["token"]))?;
     }
     Ok(plan)
