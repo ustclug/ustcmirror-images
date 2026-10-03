@@ -156,19 +156,28 @@ fi
 
 download_manifest() {
 	local manifest_dir=${manifest_dir:="$TO/api/manifests"}
-	local url filename
+	local url filename f code
 	while read url filename; do
 		[[ -z "$url" || -z "$filename" ]] && continue
-		# Manifest tags are immutable for a given version+revision+rebuild,
-		# so an existing file is identical to the upstream content.
-		if [[ -f "$manifest_dir/$filename" ]]; then
-			continue
+		f="$manifest_dir/$filename"
+		local cond_args=()
+		# Homebrew may append new platform bottle entries (e.g. bottles for a
+		# newly released macOS) to an existing version tag, so a previously
+		# downloaded manifest can become outdated. Revalidate cached files
+		# with If-None-Match: ghcr.io's ETag is the content digest, so it can
+		# be recomputed from the local file. 304 = unchanged (empty response).
+		if [[ -f "$f" ]]; then
+			cond_args=(-H "If-None-Match: \"sha256:$(sha256sum "$f" | cut -d' ' -f1)\"")
 		fi
-		if $CURL_WRAP -m 600 -sSfRL -o "$manifest_dir/$filename.tmp" "$url"; then
-			mv "$manifest_dir/$filename.tmp" "$manifest_dir/$filename"
+		code=$($CURL_WRAP -m 600 -sSL -o "$f.tmp" -w '%{http_code}' "${cond_args[@]}" "$url")
+		code=${code:-000}
+		if [[ "$code" == "200" ]]; then
+			mv "$f.tmp" "$f"
+		elif [[ "$code" == "304" ]]; then
+			rm -f "$f.tmp"
 		else
-			echo "[WARN] download manifest failed $url"
-			rm -f "$manifest_dir/$filename.tmp"
+			echo "[WARN] download manifest failed (HTTP $code) $url"
+			rm -f "$f.tmp"
 		fi
 	done
 }
