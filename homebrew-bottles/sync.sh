@@ -148,7 +148,7 @@ clean_hash_file
 mkdir -p "$TO/api/manifests"
 
 MANIFESTS=$(mktemp)
-bottles-json --mode list-manifests > $MANIFESTS < $FORMULA_JSON
+bottles-json --mode list-manifests > $MANIFESTS < "$FORMULA_JSON"
 if [[ $? -ne 0 ]]; then
     echo "[FATAL] manifest list failed."
     exit 7
@@ -156,19 +156,34 @@ fi
 
 download_manifest() {
 	local manifest_dir=${manifest_dir:="$TO/api/manifests"}
-	local url filename
-	while read url filename; do
+	local url filename shas f content s covered
+	while read url filename shas; do
 		[[ -z "$url" || -z "$filename" ]] && continue
-		# Manifest tags are immutable for a given version+revision+rebuild,
-		# so an existing file is identical to the upstream content.
-		if [[ -f "$manifest_dir/$filename" ]]; then
-			continue
+		f="$manifest_dir/$filename"
+		covered=1
+		# Skip a cached manifest when it already contains every bottle
+		# digest that formula.json expects for this version (pure local
+		# check, no request). With an empty digest list (anomalous
+		# upstream metadata) there is nothing to verify, so keep the
+		# previous behavior of skipping the download; a manifest is only
+		# fetched when it is missing, or known to lack an expected digest.
+		if [[ ! -f "$f" ]]; then
+			covered=0
+		elif [[ -n "$shas" ]]; then
+			read -r -d '' content < "$f" || true
+			for s in ${shas//,/ }; do
+				if [[ "$content" != *"$s"* ]]; then
+					covered=0
+					break
+				fi
+			done
 		fi
-		if $CURL_WRAP -m 600 -sSfRL -o "$manifest_dir/$filename.tmp" "$url"; then
-			mv "$manifest_dir/$filename.tmp" "$manifest_dir/$filename"
+		[[ $covered -eq 1 ]] && continue
+		if $CURL_WRAP -m 600 -sSfRL -o "$f.tmp" "$url"; then
+			mv "$f.tmp" "$f"
 		else
 			echo "[WARN] download manifest failed $url"
-			rm -f "$manifest_dir/$filename.tmp"
+			rm -f "$f.tmp"
 		fi
 	done
 }

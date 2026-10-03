@@ -23,7 +23,7 @@ enum Mode {
     /// Output format: sha256 url cask_source_file.rb
     ListCaskSource,
     /// List all bottle manifests that need to check and download
-    /// Output format: url package_name_tag.json
+    /// Output format: url package_name_tag.json sha256[,sha256...]
     ListManifests,
 }
 
@@ -103,7 +103,24 @@ fn m(f: &Formula) -> Option<()> {
         let url = format!("{}/{}/manifests/{}", bs.root_url, image_name, tag);
         // Flatten image_name's "/" (from "@") back to "@" for a flat filename.
         let package_name = image_name.replace('/', "@");
-        println!("{} {}_{}.json", url, package_name, tag);
+        // Homebrew appends entries for new platforms (e.g. bottles for a
+        // newly released macOS) to existing version tags, so a previously
+        // downloaded manifest can become outdated. The bottle digests below
+        // also appear inside the manifest file itself, letting the sync
+        // script check locally whether a cached manifest already covers
+        // every expected bottle before downloading it again.
+        let shas = bs
+            .files
+            .as_object()
+            .map(|files| {
+                files
+                    .values()
+                    .filter_map(|v| serde_json::from_value::<BottleInfo>(v.clone()).ok())
+                    .map(|bi| bi.sha256)
+                    .collect::<Vec<String>>()
+            })
+            .unwrap_or_default();
+        println!("{} {}_{}.json {}", url, package_name, tag, shas.join(","));
     }
     Some(())
 }
