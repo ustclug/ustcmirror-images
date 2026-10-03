@@ -148,35 +148,58 @@ clean_hash_file
 mkdir -p "$TO/api/manifests"
 
 MANIFESTS=$(mktemp)
-bottles-json --mode list-manifests > $MANIFESTS < $FORMULA_JSON
+bottles-json --mode list-manifests > $MANIFESTS < "$FORMULA_JSON"
 if [[ $? -ne 0 ]]; then
     echo "[FATAL] manifest list failed."
     exit 7
 fi
 
+# Homebrew appends new platform bottle entries (e.g. bottles for a newly
+# released macOS) to existing version tags, so a cached manifest can become
+# outdated. formula.json carries the sha256 of every bottle of the current
+# version, and those digests also appear inside the manifest file itself.
+# Attach them to each line so download_manifest can tell locally whether
+# the cached manifest already covers every expected bottle, and only
+# download the ones that do not (no requests for unchanged manifests).
+MANIFEST_SHA=$(mktemp)
+jq -r '
+    .[] | select(.versions.bottle and .bottle.stable and .versions.stable) |
+    .name as $n |
+    ($n | gsub("\\+"; "x")) as $pkg |
+    (if .revision > 0 then "_" + (.revision | tostring) else "" end) as $rev |
+    (if .bottle.stable.rebuild > 0 then "-" + (.bottle.stable.rebuild | tostring) else "" end) as $rb |
+    "\($pkg)_\(.versions.stable)\($rev)\($rb).json \([(.bottle.stable.files // {})[] .sha256] | join(","))"
+' "$FORMULA_JSON" > "$MANIFEST_SHA"
+awk 'NR==FNR { sha[$1]=$2; next } { print $1, $2, sha[$2] }' "$MANIFEST_SHA" "$MANIFESTS" > "$MANIFESTS.new"
+mv "$MANIFESTS.new" "$MANIFESTS"
+
 download_manifest() {
 	local manifest_dir=${manifest_dir:="$TO/api/manifests"}
-	local url filename f code
-	while read url filename; do
+	local url filename shas f content s covered
+	while read url filename shas; do
 		[[ -z "$url" || -z "$filename" ]] && continue
 		f="$manifest_dir/$filename"
-		local cond_args=()
-		# Homebrew may append new platform bottle entries (e.g. bottles for a
-		# newly released macOS) to an existing version tag, so a previously
-		# downloaded manifest can become outdated. Revalidate cached files
-		# with If-None-Match: ghcr.io's ETag is the content digest, so it can
-		# be recomputed from the local file. 304 = unchanged (empty response).
-		if [[ -f "$f" ]]; then
-			cond_args=(-H "If-None-Match: \"sha256:$(sha256sum "$f" | cut -d' ' -f1)\"")
-		fi
-		code=$($CURL_WRAP -m 600 -sSL -o "$f.tmp" -w '%{http_code}' "${cond_args[@]}" "$url")
-		code=${code:-000}
-		if [[ "$code" == "200" ]]; then
-			mv "$f.tmp" "$f"
-		elif [[ "$code" == "304" ]]; then
-			rm -f "$f.tmp"
+		covered=1
+		# Skip only when the cached manifest already contains every bottle
+		# digest that formula.json expects for this version (pure local
+		# check, no request). An empty/missing digest list means "unknown",
+		# which falls through to a download.
+		if [[ -n "$shas" && -f "$f" ]]; then
+			read -r -d '' content < "$f" || true
+			for s in ${shas//,/ }; do
+				if [[ "$content" != *"$s"* ]]; then
+					covered=0
+					break
+				fi
+			done
 		else
-			echo "[WARN] download manifest failed (HTTP $code) $url"
+			covered=0
+		fi
+		[[ $covered -eq 1 ]] && continue
+		if $CURL_WRAP -m 600 -sSfRL -o "$f.tmp" "$url"; then
+			mv "$f.tmp" "$f"
+		else
+			echo "[WARN] download manifest failed $url"
 			rm -f "$f.tmp"
 		fi
 	done
