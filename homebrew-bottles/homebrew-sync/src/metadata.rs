@@ -63,6 +63,11 @@ impl Plan {
         let name = component(field(formula, "name")?)?;
         self.add_document(format!("api/formula/{name}.json"), formula)?;
 
+        // Keep disabled formula metadata, but do not mirror its bottles or manifests.
+        if formula["disabled"] == true {
+            return Ok(());
+        }
+
         let versions = &formula["versions"];
         let has_bottle = versions["bottle"]
             .as_bool()
