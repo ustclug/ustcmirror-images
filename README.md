@@ -256,6 +256,17 @@ To specified the repo list to sync, you can:
 - Read-only bind mount a YAML file into the container at `/repos.yaml`. See the [example](github-release/examples/repos.yaml).
 - Pass the YAML-format repo list string as `REPOS` env.
 
+Each repo entry can be a repository name or a mapping with per-repository options:
+
+```yaml
+- repo: owner/repo
+  versions: 5
+  prerelease: true
+  prerelease_limit: 2
+```
+
+`prerelease` defaults to `false`. When enabled, `prerelease_limit` limits the number of prereleases selected from the returned release list. Omit it or set it to `null` for no additional limit (the default), or set it to `0` to exclude prereleases. Positive integers allow at most that many prereleases; releases beyond this limit are skipped while selection continues for stable releases. `versions` still limits the total number of selected releases, including prereleases; it defaults to `1`, with `0` meaning unlimited. In this example, up to five releases are kept, at most two of which are prereleases.
+
 ### gitsync
 
 [![gitsync](https://img.shields.io/docker/image-size/ustcmirror/gitsync/latest)](https://hub.docker.com/r/ustcmirror/gitsync "gitsync")

@@ -254,6 +254,7 @@ def main():
         flat = cfg.get("flat", False)  # build a folder for each release
         tarball = cfg.get("tarball", False)  # download source tarball
         prerelease = cfg.get("prerelease", False)  # include pre-releases
+        prerelease_limit = cfg.get("prerelease_limit")  # None means no additional limit
         perpage = cfg.get("per_page", 0)  # number of releases per page
         exclude_regexes = cfg.get("exclude", [])  # list of file name regexes to exclude
         hidden = cfg.get("hidden", False)  # prepend a dot to the owner part of the local path
@@ -262,6 +263,9 @@ def main():
         assert type(tarball) is bool, "`tarball` must be a boolean"
         assert type(exclude_regexes) is list, "`exclude` must be a list of regex strings"
         assert type(versions) is int and versions >= 0, "`versions` must be a non-negative integer"
+        assert prerelease_limit is None or (
+            type(prerelease_limit) is int and prerelease_limit >= 0
+        ), "`prerelease_limit` must be a non-negative integer or null"
         assert type(hidden) is bool, "`hidden` must be a boolean"
 
         repo_dir = working_dir / repo_local_path(repo, hidden)
@@ -281,8 +285,15 @@ def main():
             break
 
         n_downloaded = 0
+        n_prereleases = 0
         for release in releases:
             if not release["draft"] and (prerelease or not release["prerelease"]):
+                if (
+                    release["prerelease"]
+                    and prerelease_limit is not None
+                    and n_prereleases >= prerelease_limit
+                ):
+                    continue
                 name = ensure_safe_name(release["name"] or release["tag_name"])
                 if len(name) == 0:
                     logger.error("Unnamed release")
@@ -294,6 +305,8 @@ def main():
                     # create a symbolic link to the latest release folder
                     link_latest(name, repo_dir)
                 n_downloaded += 1
+                if release["prerelease"]:
+                    n_prereleases += 1
                 if versions > 0 and n_downloaded >= versions:
                     break
         if n_downloaded == 0:

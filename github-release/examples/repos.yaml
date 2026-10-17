@@ -6,9 +6,13 @@
 - AdoptOpenJDK/openjdk13-binaries
 - pbatard/rufus
 - Homebrew/homebrew-portable-ruby
-- a/b
-- repo: a/b
+- a/b1
+- repo: a/b2
   tarball: true
-- repo: a/b
+- repo: a/b3
   version: -1
+- repo: a/b4
+  versions: 5 # Maximum total releases; 0 means unlimited
+  prerelease: true
+  prerelease_limit: 2 # Maximum prereleases within versions; omit or null for unlimited, 0 to exclude
 # See also https://github.com/tuna/tunasync-scripts/blob/master/github-release.py#L15
