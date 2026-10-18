@@ -6,7 +6,7 @@ import logging
 import os
 import re
 import tempfile
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Annotated
 
@@ -26,7 +26,7 @@ if BINDIP:
 
 import requests
 import yaml
-from pydantic import BaseModel, Field, RootModel, StrictBool, StrictStr, model_validator
+from pydantic import BaseModel, BeforeValidator, Field, RootModel, StrictBool, StrictStr, model_validator
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -48,6 +48,15 @@ UA = "ustcmirror-tuna-github-release-mirror/0.0 (+https://github.com/ustclug/ust
 NonNegativeInt = Annotated[int, Field(strict=True, ge=0)]
 
 
+def stringify_scalar(value) -> str:
+    if value is not None and not isinstance(value, (str, int, float, bool, date, datetime, bytes)):
+        raise ValueError("value must be a YAML scalar")
+    return str(value)
+
+
+StringifyScalar = Annotated[str, BeforeValidator(stringify_scalar)]
+
+
 class RepoConfig(BaseModel):
     repo: StrictStr
     versions: NonNegativeInt = 1  # keep # of latest releases
@@ -56,7 +65,7 @@ class RepoConfig(BaseModel):
     prerelease: StrictBool = False  # include pre-releases
     prerelease_limit: NonNegativeInt | None = None  # None means no additional limit
     per_page: NonNegativeInt = 0  # number of releases per page
-    exclude: list[StrictStr] = Field(default_factory=list)  # file name regexes to exclude
+    exclude: list[StringifyScalar] = Field(default_factory=list)  # file name regexes to exclude
     hidden: StrictBool = False  # prepend a dot to the owner part of the local path
 
     @model_validator(mode="before")
