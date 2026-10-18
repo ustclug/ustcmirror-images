@@ -6,8 +6,9 @@ import logging
 import os
 import re
 import tempfile
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
+from typing import Annotated
 
 # Set BindIP
 # https://stackoverflow.com/a/70772914
@@ -25,6 +26,7 @@ if BINDIP:
 
 import requests
 import yaml
+from pydantic import BaseModel, BeforeValidator, Field, RootModel, StrictBool, StrictStr, model_validator
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -43,7 +45,47 @@ FAST_SKIP = bool(os.getenv("FAST_SKIP", ""))
 UA = "ustcmirror-tuna-github-release-mirror/0.0 (+https://github.com/ustclug/ustcmirror-images)"
 
 
-def get_repos():
+NonNegativeInt = Annotated[int, Field(strict=True, ge=0)]
+
+
+def stringify_scalar(value) -> str:
+    if value is not None and not isinstance(value, (str, int, float, bool, date, datetime, bytes)):
+        raise ValueError("value must be a YAML scalar")
+    return str(value)
+
+
+StringifyScalar = Annotated[str, BeforeValidator(stringify_scalar)]
+
+
+class RepoConfig(BaseModel):
+    repo: StrictStr
+    versions: NonNegativeInt = 1  # keep # of latest releases
+    flat: StrictBool = False  # do not build a folder for each release
+    tarball: StrictBool = False  # download source tarball
+    prerelease: StrictBool = False  # include pre-releases
+    prerelease_limit: NonNegativeInt | None = None  # None means no additional limit
+    per_page: NonNegativeInt = 0  # number of releases per page
+    exclude: list[StringifyScalar] = Field(default_factory=list)  # file name regexes to exclude
+    hidden: StrictBool = False  # prepend a dot to the owner part of the local path
+
+    @model_validator(mode="before")
+    @classmethod
+    def expand_repo_name(cls, value):
+        if isinstance(value, str):
+            return {"repo": value}
+        return value
+
+
+class ReposConfig(RootModel[list[RepoConfig]]):
+    @model_validator(mode="before")
+    @classmethod
+    def unwrap_repos_key(cls, value):
+        if isinstance(value, dict) and "repos" in value:
+            return value["repos"]
+        return value
+
+
+def get_repos() -> list[RepoConfig]:
     try:
         with open("/repos.yaml") as f:
             content = f.read()
@@ -51,14 +93,7 @@ def get_repos():
         content = os.getenv("REPOS", None)
         if content is None:
             raise Exception("Loading /repos.yaml file and reading REPOS env both failed")
-    repos = yaml.safe_load(content)
-    if isinstance(repos, list):
-        return repos
-    else:
-        repos = repos["repos"]
-        if not isinstance(repos, list):
-            raise Exception("Can not inspect repo list from the given file/env")
-        return repos
+    return ReposConfig.model_validate(yaml.safe_load(content)).root
 
 
 REPOS = get_repos()
@@ -247,26 +282,15 @@ def main():
     total_size = 0
 
     for cfg in REPOS:
-        if isinstance(cfg, str):
-            cfg = {"repo": cfg}
-        repo = cfg["repo"]
-        versions = cfg.get("versions", 1)  # keep # of latest releases
-        flat = cfg.get("flat", False)  # build a folder for each release
-        tarball = cfg.get("tarball", False)  # download source tarball
-        prerelease = cfg.get("prerelease", False)  # include pre-releases
-        prerelease_limit = cfg.get("prerelease_limit")  # None means no additional limit
-        perpage = cfg.get("per_page", 0)  # number of releases per page
-        exclude_regexes = cfg.get("exclude", [])  # list of file name regexes to exclude
-        hidden = cfg.get("hidden", False)  # prepend a dot to the owner part of the local path
-
-        assert type(perpage) is int and perpage >= 0, "`per_page` must be a non-negative integer"
-        assert type(tarball) is bool, "`tarball` must be a boolean"
-        assert type(exclude_regexes) is list, "`exclude` must be a list of regex strings"
-        assert type(versions) is int and versions >= 0, "`versions` must be a non-negative integer"
-        assert prerelease_limit is None or (
-            type(prerelease_limit) is int and prerelease_limit >= 0
-        ), "`prerelease_limit` must be a non-negative integer or null"
-        assert type(hidden) is bool, "`hidden` must be a boolean"
+        repo = cfg.repo
+        versions = cfg.versions
+        flat = cfg.flat
+        tarball = cfg.tarball
+        prerelease = cfg.prerelease
+        prerelease_limit = cfg.prerelease_limit
+        perpage = cfg.per_page
+        exclude_regexes = cfg.exclude
+        hidden = cfg.hidden
 
         repo_dir = working_dir / repo_local_path(repo, hidden)
         logger.info(f"syncing {repo} to {repo_dir}")
