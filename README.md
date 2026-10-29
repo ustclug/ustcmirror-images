@@ -62,6 +62,21 @@ It is almost the same as aptsync. Except that `APTSYNC_DISTS` accepts 4 paramete
 
 Consider use `apt-sync` when the upstream replaces packages in-place, as `aptsync` will simply ignore if there're any changes in existed packages.
 
+For example, the following `sources.list` entry:
+
+```text
+deb [arch=amd64] https://example.com/debian bookworm main
+```
+
+translates to these environment variables:
+
+```sh
+export APTSYNC_URL='https://example.com/'
+export APTSYNC_DISTS='bookworm|main|amd64|debian'
+```
+
+The fourth field (`debian`) is appended to `APTSYNC_URL` and used as a directory relative to `$TO`, so this example syncs from `https://example.com/debian` into `$TO/debian` (`/data/debian` by default). Use a relative path without a leading `/`. Separate multiple entries with `:` or newlines.
+
 ### archvsync
 
 [![archvsync](https://img.shields.io/docker/image-size/ustcmirror/archvsync/latest)](https://hub.docker.com/r/ustcmirror/archvsync "archvsync")
